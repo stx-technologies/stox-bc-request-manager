@@ -10,7 +10,9 @@
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src",
     "jest:integration": "jest"
   },
-  "workspaces": ["common"],
+  "workspaces": [
+    "common"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -18,16 +20,14 @@
     "app-module-path": "^2.2.0",
     "axios": "^0.17.1",
     "commander": "^2.12.1",
-    "common": "file:../common",
     "lodash": "^4.17.4",
     "moment": "^2.19.1",
     "node-schedule": "^1.3.0",
     "pg": "^7.4.1",
     "pino": "^4.8.0",
     "sequelize": "^4.33.4",
-    "stox-common": "git+https://bitbucket.org/stx_site/stox-common.git#3799c369414606e3de463de7d50a107891390951"
+    "stox-common": "git+https://bitbucket.org/stx_site/stox-common.git#dev"
   },
-
   "devDependencies": {
     "eslint": "^4.9.0",
     "eslint-config-airbnb-base": "^12.1.0",

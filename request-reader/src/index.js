@@ -1,13 +1,16 @@
 require('app-module-path').addPath(__dirname) // eslint-disable-line import/no-unresolved
-const {createServer} = require('stox-common')
+const {createService, mq} = require('stox-common')
 const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
-const {initRoutes} = require('app/apiRouter')
+const api = require('api')
+const db = require('db')
 const {models} = require('common')
-const {port, databaseUrl} = require('app/config')
+const {databaseUrl, mqConnectionUrl} = require('config')
+const queues = require('queues/consumer')
 
-const server = createServer(port, (builder) => {
-  builder.initDb(databaseUrl, models)
-  builder.initRoutes(initRoutes)
+const service = createService('request-reader', (builder) => {
+  builder.db(databaseUrl, models, db)
+  builder.api(api)
+  builder.addQueues(mqConnectionUrl, {listeners: queues})
 })
 
-server.start().catch(logger.error)
+service.start().catch(logger.error)

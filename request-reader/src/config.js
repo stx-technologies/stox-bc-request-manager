@@ -4,5 +4,5 @@ module.exports = mapEnv({
   port: '',
   web3Url: '',
   databaseUrl: '',
-  backendBaseUrl: '',
+  mqConnectionUrl: '',
 })
