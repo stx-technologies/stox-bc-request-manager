@@ -1,4 +1,4 @@
-const {createService} = require('common')
+const {createService} = require('stox-bc-request-manager-common')
 const db = require('db')
 
 const service = createService(db)

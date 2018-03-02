@@ -1,5 +1,8 @@
-const requests = require('common/src/services/requests')
+const {createService} = require('stox-bc-request-manager-common')
 const {port} = require('config')
+const db = require('db')
+
+const requests = createService(db)
 
 module.exports = {
     port,

@@ -5,7 +5,7 @@ CREATE TABLE "requests"
 (
     "id" UUID PRIMARY KEY,
     "type" CHARACTER VARYING(256) NOT NULL,
-    "data" json,
+    "data" json NOT NULL,
     "error" json,
     "result" json,
     "createdAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
@@ -30,8 +30,8 @@ CREATE TABLE "transactions"
     "transactionHash" CHARACTER VARYING(66),
     "transactionData" bytea,
     "network" CHARACTER VARYING(256),
-    "fromAddress" CHARACTER(42) NOT NULL,
-    "toAddress" CHARACTER(42) NOT NULL,
+    "from" CHARACTER(42) NOT NULL,
+    "to" CHARACTER(42) NOT NULL,
     "currentBlockTime" timestamp with time zone,
     "blockNumber" BIGINT,
     "nounce" INTEGER,
@@ -52,3 +52,5 @@ CREATE INDEX transactions_type ON "transactions" USING btree ("type");
 CREATE INDEX transactions_completed_at ON "transactions" USING btree ("completedAt");
 CREATE INDEX transactions_sent_at ON "transactions" USING btree ("sentAt");
 CREATE INDEX transactions_nounce ON "transactions" USING btree ("nounce");
+CREATE INDEX transactions_from ON "transactions" USING btree ("from");
+CREATE INDEX transactions_to ON "transactions" USING btree ("to");

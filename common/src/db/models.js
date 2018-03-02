@@ -1,6 +1,6 @@
+const uuid = require('uuid4')
 const {DataTypes} = require('sequelize')
-
-const {STRING, DATE, JSON, UUID, INTEGER, BLOB, BIGINT, UUIDV4} = DataTypes
+const {STRING, DATE, JSON, UUID, INTEGER, BLOB, BIGINT} = DataTypes
 const ADDRESS = STRING(42)
 const TRANSACTION_HASH = STRING(66)
 
@@ -11,11 +11,11 @@ module.exports = (sequelize) => {
       id: {type: UUID, primaryKey: true},
       type: {
         type: STRING(256),
-        validate: {isIn: [['send_prize', 'withdraw', 'set_withdrawal_address', 'send_to_backup', 'create_wallet']]},
+        validate: {isIn: [['sendPrize', 'withdraw', 'setWithdrawalAddress', 'sendToBackup', 'createWallet']]},
         allowNull: false,
       },
       error: {type: JSON},
-      data: {type: JSON},
+      data: {type: JSON, allowNull: false},
       result: {type: JSON},
       createdAt: {type: DATE, allowNull: false},
       sentAt: {type: DATE},
@@ -35,7 +35,7 @@ module.exports = (sequelize) => {
   const Transaction = sequelize.define(
     'transactions',
     {
-      id: {type: UUID, primaryKey: true, defaultValue: UUIDV4},
+      id: {type: UUID, primaryKey: true, defaultValue: () => uuid()},
       requestId: {type: UUID, allowNull: false, references: {model: 'requests', key: 'id'}},
       type: {
         type: STRING(256),
@@ -48,8 +48,8 @@ module.exports = (sequelize) => {
       transactionHash: {type: TRANSACTION_HASH},
       transactionData: {type: BLOB}, // ?
       network: {type: STRING(256), allowNull: false},
-      fromAddress: {type: ADDRESS, allowNull: false},
-      toAddress: {type: ADDRESS},
+      from: {type: ADDRESS, allowNull: false},
+      to: {type: ADDRESS},
       currentBlockTime: {type: DATE},
       blockNumber: {type: BIGINT},
       nounce: {type: INTEGER}, // ?
@@ -67,6 +67,8 @@ module.exports = (sequelize) => {
         {fields: ['createdAt']},
         {fields: ['completedAt']},
         {fields: ['sentAt']},
+        {fields: ['from']},
+        {fields: ['to']},
       ],
     }
   )

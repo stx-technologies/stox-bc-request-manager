@@ -11,11 +11,11 @@ module.exports = (db) => {
       where: {id},
     })
 
-  const createRequest = ({id, type, requestData}) =>
+  const createRequest = ({id, type, data}) =>
     db.requests.create({
       id,
       type,
-      requestData,
+      data,
     })
 
   const getRequestById = id =>
@@ -34,6 +34,9 @@ module.exports = (db) => {
     return getRequestById(requestId)
   }
 
+  const getAllUnsentRequests = transaction =>
+    db.requests.findAll({where: {sentAt: null}}, {transaction}).then(values => values.map(({dataValues}) => dataValues))
+
   return {
     createRequest,
     countRequestByType,
@@ -41,5 +44,6 @@ module.exports = (db) => {
     getTransactionById,
     getRequestByTransactionId,
     createTransaction,
+    getAllUnsentRequests,
   }
 }

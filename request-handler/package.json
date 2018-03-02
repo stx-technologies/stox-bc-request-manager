@@ -1,5 +1,5 @@
 {
-  "name": "stox-bc-request-reader",
+  "name": "stox-bc-request-handler",
   "version": "1.0.0",
   "description": "",
   "private": true,
