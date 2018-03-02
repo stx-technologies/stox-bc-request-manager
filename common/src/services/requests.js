@@ -1,18 +1,18 @@
 module.exports = (db) => {
   const createTransaction = ({id, type, from}) =>
-    this.db.transactions.create({
+    db.transactions.create({
       id,
       type,
       from,
     })
 
   const getTransactionById = id =>
-    this.db.transactions.findOne({
+    db.transactions.findOne({
       where: {id},
     })
 
   const createRequest = ({id, type, requestData}) =>
-    this.db.requests.create({
+    db.requests.create({
       id,
       type,
       requestData,
@@ -30,8 +30,8 @@ module.exports = (db) => {
   })
 
   const getRequestByTransactionId = async (transactionId) => {
-    const transaction = await getTransactionById(transactionId)
-    return getRequestById(transaction.requestId)
+    const {requestId} = await getTransactionById(transactionId)
+    return getRequestById(requestId)
   }
 
   return {
