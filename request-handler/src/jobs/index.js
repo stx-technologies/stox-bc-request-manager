@@ -1,6 +1,5 @@
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {createService} = require('stox-bc-request-manager-common')
-const {Op} = require('sequelize')
 const db = require('db')
 const {mq} = require('stox-common')
 
@@ -34,14 +33,15 @@ module.exports = {
     job: async () => {
       const transaction = await db.sequelize.transaction()
       try {
-        const requests = await service.getAllUnsentRequests(transaction)
+        const requests = await service.getAllUnsentFromTable(db.requests, transaction)
         if (requests.length) {
           logger.debug('Found new requests: ', requests)
           const transactionsPromises = requests.map(requests => prepareTransactionPlugin[requests.type](requests))
           const transactionsToAdd = await Promise.all(transactionsPromises)
           await db.transactions.bulkCreate(transactionsToAdd, {transaction})
           const requestsIdsToUpdate = requests.map(({id}) => id)
-          await db.requests.update({sentAt: Date.now()}, {where: {id: {[Op.in]: requestsIdsToUpdate}}}, {transaction})
+
+          await service.updateSentRecords(db.requests, requestsIdsToUpdate, transaction)
         }
 
         await transaction.commit()
