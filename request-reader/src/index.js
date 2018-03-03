@@ -19,14 +19,14 @@ const types = ['sendPrize', 'withdraw', 'setWithdrawalAddress', 'sendToBackup', 
 service
   .start()
   .then(c => Object.assign(context,c))
-  // .then(() =>
-  //   setInterval(
-  //     () =>
-  //         context.mq.publish('request-reader/incomingRequests', {
-  //         id: uuid(),
-  //         type: types[Math.floor(Math.random()*5)],
-  //         data: {userWalletAddress: '123456789012345678901234567890123456789012'},
-  //       }),
-  //     1000
-  //   ))
+  .then(() =>
+    setInterval(
+      () =>
+          context.mq.publish('request-reader/incomingRequests', {
+          id: uuid(),
+          type: types[Math.floor(Math.random()*5)],
+          data: {userWalletAddress: '123456789012345678901234567890123456789012'},
+        }),
+      1000
+    ))
   .catch(logger.error)

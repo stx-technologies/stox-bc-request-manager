@@ -3,6 +3,6 @@ const context = require('context')
 const {handleQueueMessage} = require('utils')
 
 module.exports = handleQueueMessage((message) => {
-  const service = createService(context)
-  service.createRequest(message)
+  const {requests} = createService(context)
+  requests.createRequest(message)
 })
