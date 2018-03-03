@@ -1,14 +1,15 @@
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {createService} = require('stox-bc-request-manager-common')
-const db = require('db')
-
-const service = createService(db)
+const context = require('context')
 
 // just changes sentAt field for now(), need later integration with blockchain, parity node ect..
 module.exports = {
   walletsPool: {
     cron: '*/05 * * * * *',
     job: async () => {
+      const {db} = context
+      const service = createService(context)
+
       const transaction = await db.sequelize.transaction()
       try {
         const transactions = await service.getAllUnsentFromTable(db.transactions, transaction)

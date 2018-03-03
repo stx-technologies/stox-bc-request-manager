@@ -1,6 +1,6 @@
 const {Op} = require('sequelize')
 
-module.exports = (db) => {
+module.exports = ({db}) => {
   const createTransaction = ({id, type, from}) =>
     db.transactions.create({
       id,
