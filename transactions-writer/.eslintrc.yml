@@ -19,6 +19,7 @@ rules:
   import/prefer-default-export: off
   no-nested-ternary: off
   linebreak-style: off
+  global-require: off
 
 settings:
   import/resolver:

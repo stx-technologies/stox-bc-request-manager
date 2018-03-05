@@ -1,3 +1,3 @@
 module.exports = {
-    handleUnsentTransactions: require('./handleUnsentTransactions')
+  writePendingTransaction: require('./writePendingTransaction'),
 }

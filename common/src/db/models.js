@@ -3,17 +3,21 @@ const {DataTypes} = require('sequelize')
 const {STRING, DATE, JSON, UUID, INTEGER, BLOB, BIGINT} = DataTypes
 const ADDRESS = STRING(42)
 const TRANSACTION_HASH = STRING(66)
+const NETWORK = STRING(256)
+
+const indexes = specs => specs.map(spec => typeof spec === 'string' ? ({fields: [spec]}) : spec)
+const oneOf = values => ({
+  type: STRING(256),
+  validate: {isIn: [values]},
+  allowNull: false,
+})
 
 module.exports = (sequelize) => {
   const Request = sequelize.define(
     'requests',
     {
       id: {type: UUID, primaryKey: true},
-      type: {
-        type: STRING(256),
-        validate: {isIn: [['sendPrize', 'withdraw', 'setWithdrawalAddress', 'sendToBackup', 'createWallet']]},
-        allowNull: false,
-      },
+      type: oneOf(['sendPrize', 'withdraw', 'setWithdrawalAddress', 'sendToBackup', 'createWallet'])
       error: {type: JSON},
       data: {type: JSON, allowNull: false},
       result: {type: JSON},
@@ -22,13 +26,13 @@ module.exports = (sequelize) => {
       completedAt: {type: DATE},
     },
     {
-      indexes: [
-        {fields: ['id']},
-        {fields: ['type']},
-        {fields: ['createdAt']},
-        {fields: ['completedAt']},
-        {fields: ['sentAt']},
-      ],
+      indexes: indexes([
+        'id',
+        'type',
+        'createdAt',
+        'completedAt',
+        'sentAt'
+      ]),
     }
   )
 
@@ -37,22 +41,18 @@ module.exports = (sequelize) => {
     {
       id: {type: UUID, primaryKey: true, defaultValue: () => uuid()},
       requestId: {type: UUID, allowNull: false, references: {model: 'requests', key: 'id'}},
-      type: {
-        type: STRING(256),
-        validate: {isIn: [['send', 'deploy']]},
-        allowNull: false,
-      },
+      type: oneOf(['send', 'deploy']),
       subRequestIndex: {type: INTEGER, defaultValue: 0},
       subRequestData: {type: JSON},
       subRequestType: {type: STRING(256)},
       transactionHash: {type: TRANSACTION_HASH},
       transactionData: {type: BLOB}, // ?
-      network: {type: STRING(256), allowNull: false},
+      network: {type: NETWORK, allowNull: false},
       from: {type: ADDRESS, allowNull: false},
       to: {type: ADDRESS},
       currentBlockTime: {type: DATE},
       blockNumber: {type: BIGINT},
-      nounce: {type: INTEGER}, // ?
+      nounce: {type: BIGINT}, // ?
       gasPrice: {type: INTEGER}, // ?
       receipt: {type: STRING(256)}, // ?
       createdAt: {type: DATE, allowNull: false},
@@ -60,20 +60,38 @@ module.exports = (sequelize) => {
       completedAt: {type: DATE},
     },
     {
-      indexes: [
-        {fields: ['requestId']},
-        {fields: ['type']},
-        {fields: ['transactionHash']},
-        {fields: ['createdAt']},
-        {fields: ['completedAt']},
-        {fields: ['sentAt']},
-        {fields: ['from']},
-        {fields: ['to']},
-      ],
+      indexes: indexes([
+        'requestId',
+        'type',
+        'transactionHash',
+        'createdAt',
+        'completedAt',
+        'sentAt',
+        'from',
+        'to',
+      ]),
     }
   )
   Transaction.belongsTo(Request)
   Request.hasMany(Transaction)
+
+  const AccountNounce = sequelize.define(
+    'accountNounce',
+    {
+      account: {type: ADDRESS, primaryKey: true},
+      network: {type: NETWORK, primaryKey: true},
+      nounce: {type: BIGINT},
+      updatedAt: {type: DATE},
+    },
+    {
+      indexes: indexes([
+        'address',
+        'network',
+        'nounce',
+        'updatedAt'
+      ]),
+    }
+  )
 
   return sequelize
 }

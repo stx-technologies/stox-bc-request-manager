@@ -34,7 +34,7 @@ CREATE TABLE "transactions"
     "to" CHARACTER(42) NOT NULL,
     "currentBlockTime" timestamp with time zone,
     "blockNumber" BIGINT,
-    "nounce" INTEGER,
+    "nounce" BIGINT,
     "gasPrice" INTEGER,
     "receipt" CHARACTER VARYING(256),
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
@@ -54,3 +54,16 @@ CREATE INDEX transactions_sent_at ON "transactions" USING btree ("sentAt");
 CREATE INDEX transactions_nounce ON "transactions" USING btree ("nounce");
 CREATE INDEX transactions_from ON "transactions" USING btree ("from");
 CREATE INDEX transactions_to ON "transactions" USING btree ("to");
+
+CREATE TABLE "accountNounces"
+(
+    "account" CHARACTER(42) PRIMARY KEY,
+    "network" CHARACTER VARYING(256) PRIMARY KEY,
+    "nounce" BIGINT,
+    "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
+);
+
+CREATE INDEX transactions_account ON "transactions" USING btree ("account");
+CREATE INDEX transactions_network ON "transactions" USING btree ("network");
+CREATE INDEX transactions_nounce ON "transactions" USING btree ("nounce");
+CREATE INDEX transactions_updated_at ON "transactions" USING btree ("updatedAt");
