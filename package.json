@@ -1,0 +1,15 @@
+{
+  "name": "stox-bc-request-manager",
+  "version": "1.0.0",
+  "description": "global configuration scripts",
+  "scripts": {
+    "precommit": "eslint src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://razkronenberg@bitbucket.org/stx_site/stox-bc-request-manager.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/stx_site/stox-bc-request-manager#readme"
+}
