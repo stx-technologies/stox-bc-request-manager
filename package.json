@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "description": "global configuration scripts",
   "scripts": {
-    "precommit": "eslint src"
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
-    "url": "git+https://razkronenberg@bitbucket.org/stx_site/stox-bc-request-manager.git"
+    "url": "git+https://bitbucket.org/stx_site/stox-bc-request-manager.git"
+
   },
   "author": "",
   "license": "ISC",
