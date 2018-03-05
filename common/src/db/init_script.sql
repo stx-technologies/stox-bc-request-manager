@@ -1,5 +1,6 @@
---drop table "transactions"
---drop table "requests"
+drop table "transactions";
+drop table "requests";
+drop table "accountNounces";
 
 CREATE TABLE "requests"
 (
@@ -54,16 +55,14 @@ CREATE INDEX transactions_sent_at ON "transactions" USING btree ("sentAt");
 CREATE INDEX transactions_nounce ON "transactions" USING btree ("nounce");
 CREATE INDEX transactions_from ON "transactions" USING btree ("from");
 CREATE INDEX transactions_to ON "transactions" USING btree ("to");
+CREATE INDEX transactions_network ON "transactions" USING btree ("network");
+CREATE INDEX transactions_updated_at ON "transactions" USING btree ("updatedAt");
 
 CREATE TABLE "accountNounces"
 (
-    "account" CHARACTER(42) PRIMARY KEY,
-    "network" CHARACTER VARYING(256) PRIMARY KEY,
+    "account" CHARACTER(42),
+    "network" CHARACTER VARYING(256),
     "nounce" BIGINT,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
+    CONSTRAINT tokensBalances_pk PRIMARY KEY ("account", "network")
 );
-
-CREATE INDEX transactions_account ON "transactions" USING btree ("account");
-CREATE INDEX transactions_network ON "transactions" USING btree ("network");
-CREATE INDEX transactions_nounce ON "transactions" USING btree ("nounce");
-CREATE INDEX transactions_updated_at ON "transactions" USING btree ("updatedAt");

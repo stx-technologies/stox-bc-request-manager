@@ -1,29 +1,8 @@
-# README #
+create containers
+-----------------
 
-This README would normally document whatever steps are necessary to get your application up and running.
+`$ docker run --name stox-bc-rm-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=secret -e POSTGRES_DB=stoxbcrm -d -p 5434:5432 postgres`
 
-### What is this repository for? ###
+`$ docker run -p 61613:61613 -p 8161:8161 -d --name="activemq" rmohr/activemq`
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+use npm link to link common with all services.
