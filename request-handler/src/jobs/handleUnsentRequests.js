@@ -32,8 +32,9 @@ module.exports = {
     const transaction = await db.sequelize.transaction()
     try {
       const requests = await getAllUnsentFromTable(db.requests, transaction)
+
       if (requests.length) {
-        logger.debug('Found new requests: ', requests)
+        logger.info('Found new requests: ', requests)
 
         const transactionsPromises = requests.map(request => prepareTransactionPlugin[request.type](request, mq))
         const transactionsToAdd = await Promise.all(transactionsPromises)

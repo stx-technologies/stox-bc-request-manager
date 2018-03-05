@@ -2,7 +2,6 @@
   "name": "stox-bc-request-handler",
   "version": "1.0.0",
   "description": "",
-  "private": true,
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon -e js . | pino",
@@ -10,9 +9,6 @@
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src",
     "jest:integration": "jest"
   },
-  "workspaces": [
-    "common"
-  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -26,7 +22,7 @@
     "pg": "^7.4.1",
     "pino": "^4.8.0",
     "sequelize": "^4.33.4",
-    "stox-common": "git+https://bitbucket.org/stx_site/stox-common.git#service_returns_context"
+    "stox-common": "git+https://bitbucket.org/stx_site/stox-common.git#dev"
   },
   "devDependencies": {
     "eslint": "^4.9.0",

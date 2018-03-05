@@ -29,7 +29,7 @@ module.exports = {
         const [alreadySigned, nounce] = await isTransactionAlreadySigned(t, transaction)
 
         if (alreadySigned) { // d.ii-iv
-          logger.debug({t}, 'transaction already signed')
+          logger.info({t}, 'transaction already signed')
           return
         }
 
