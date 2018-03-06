@@ -2,10 +2,22 @@
   "name": "stox-bc-request-manager-common",
   "version": "1.0.0",
   "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src"
+  },
   "dependencies": {
     "@welldone-software/node-toolbelt": "^1.2.0",
     "lodash": "^4.17.5",
     "sequelize": "^4.35.2",
     "uuid4": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.9.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.7.0",
+    "prettier": "^1.7.4",
+    "prettier-eslint": "^8.2.1",
+    "prettier-eslint-cli": "^4.4.0"
   }
 }
