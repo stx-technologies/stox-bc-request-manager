@@ -1,7 +1,7 @@
 {
   "name": "stox-bc-request-manager",
   "version": "1.0.0",
-  "description": "global configuration scripts",
+  "description": "",
   "scripts": {
     "lint": "eslint ."
   },
