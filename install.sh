@@ -15,7 +15,6 @@ then
     rimraf package-lock.json
 fi
 npm install
-npm link
 cd ..
 
 for i in */
@@ -30,7 +29,6 @@ do
             rimraf package-lock.json
         fi
         npm install
-        npm link $common
         cd ..
     fi
 done
