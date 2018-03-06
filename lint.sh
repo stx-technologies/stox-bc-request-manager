@@ -6,8 +6,8 @@ echo linting packages
 
 for i in */
 do
-     cd "./$i"
+    cd "./$i"
     echo "linting $i"
-    eslint ./src
+    npm run lint
     cd ..
 done

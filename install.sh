@@ -2,8 +2,8 @@
 #
 # pwd
 
-echo installing global packages
-npm install eslint eslint-config-airbnb-base eslint-plugin-import rimraf -g
+echo installing packages
+npm install rimraf -g
 
 common="${PWD##*/}-common"
 
@@ -12,6 +12,7 @@ echo "installing common/"
 if [ "$1" != "clean" ]
 then
     rimraf node_modules/
+    rimraf package-lock.json
 fi
 npm install
 npm link
@@ -26,6 +27,7 @@ do
         if [ "$1" != "clean" ]
         then
             rimraf node_modules/
+            rimraf package-lock.json
         fi
         npm install
         npm link $common
