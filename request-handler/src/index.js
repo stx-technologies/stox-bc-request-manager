@@ -4,7 +4,10 @@ const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const context = require('context')
 const {models} = require('stox-bc-request-manager-common')
 const {databaseUrl, mqConnectionUrl} = require('config')
-const jobs = require('jobs')
+const requireAll = require('require-all')
+const path = require('path')
+
+const jobs = requireAll(path.resolve(__dirname, 'jobs'))
 
 const service = createService('request-reader', (builder) => {
   builder.db(databaseUrl, models)
