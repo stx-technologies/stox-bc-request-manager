@@ -1,6 +1,6 @@
 const context = require('context')
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
-const {utils: {getAllUnsentFromTable, nounceFromAccountNounces}} = require('stox-bc-request-manager-common')
+const {utils: {nounceFromAccountNounces}} = require('stox-bc-request-manager-common')
 
 
 const fetchNounceFromParityNode = async () => 3.14
@@ -21,10 +21,10 @@ module.exports = {
   cron: '*/05 * * * * *',
   job: async () => {
     const {db} = context
+    const transactions = await db.transactions.findAll({where: {sentAt: null}}) // d.i
     const transaction = await db.sequelize.transaction()
-    try {
-      const transactions = await getAllUnsentFromTable(db.transactions, transaction) // d.i
 
+    try {
       await Promise.all(transactions.map(async (t) => {
         const [alreadySigned, nounce] = await isTransactionAlreadySigned(t, transaction)
 
