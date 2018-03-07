@@ -1,46 +1,27 @@
-module.exports = ({db}) => {
-  const createTransaction = ({id, type, from}) =>
-    db.transactions.create({
-      id,
-      type,
-      from,
-    })
+const {db} = require('../context')
 
-  const getTransactionById = id =>
-    db.transactions.findOne({
-      where: {id},
-    })
+const createTransaction = ({id, type, from}) => db.transactions.create({id, type, from})
 
-  const createRequest = ({id, type, data}) =>
-    db.requests.create({
-      id,
-      type,
-      data,
-    })
+const getTransactionById = id => db.transactions.findOne({where: {id}})
 
-  const getRequestById = id =>
-    db.requests.findOne({
-      where: {id},
-    })
+const createRequest = ({id, type, data}) => db.requests.create({id, type, data})
 
-  const countRequestByType = async type => ({
-    count: await db.requests.count({
-      where: {type},
-    }),
-  })
+const getRequestById = id => db.requests.findOne({where: {id}})
 
-  const getRequestByTransactionId = async (transactionId) => {
-    const {requestId} = await getTransactionById(transactionId)
-    return getRequestById(requestId)
-  }
+const countRequestByType = async type => ({
+  count: await db.requests.count({where: {type}}),
+})
 
+const getRequestByTransactionId = async (transactionId) => {
+  const {requestId} = await getTransactionById(transactionId)
+  return getRequestById(requestId)
+}
 
-  return {
-    createRequest,
-    countRequestByType,
-    getRequestById,
-    getTransactionById,
-    getRequestByTransactionId,
-    createTransaction,
-  }
+module.exports = {
+  createRequest,
+  countRequestByType,
+  getRequestById,
+  getTransactionById,
+  getRequestByTransactionId,
+  createTransaction,
 }
