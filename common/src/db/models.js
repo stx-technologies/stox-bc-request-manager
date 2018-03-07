@@ -1,11 +1,12 @@
 const uuid = require('uuid4')
 const {DataTypes} = require('sequelize')
+
 const {STRING, DATE, JSON, UUID, INTEGER, BLOB, BIGINT} = DataTypes
 const ADDRESS = STRING(42)
 const TRANSACTION_HASH = STRING(66)
 const NETWORK = STRING(256)
 
-const indexes = specs => specs.map(spec => typeof spec === 'string' ? ({fields: [spec]}) : spec)
+const indexes = specs => specs.map(spec => (typeof spec === 'string' ? ({fields: [spec]}) : spec))
 const oneOf = values => ({
   type: STRING(256),
   validate: {isIn: [values]},
@@ -31,7 +32,7 @@ module.exports = (sequelize) => {
         'type',
         'createdAt',
         'completedAt',
-        'sentAt'
+        'sentAt',
       ]),
     }
   )
@@ -88,7 +89,7 @@ module.exports = (sequelize) => {
         'address',
         'network',
         'nounce',
-        'updatedAt'
+        'updatedAt',
       ]),
     }
   )
