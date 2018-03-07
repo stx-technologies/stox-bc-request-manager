@@ -1,5 +1,12 @@
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
-const {utils: {nounceFromAccountNounces}, context} = require('stox-bc-request-manager-common')
+const {
+  services: {
+    accounts: {nounceFromAccountNounces, findOrCreateAccountNounce},
+    requests,
+    transactions: {getUnsentTransactions},
+  },
+  context,
+} = require('stox-bc-request-manager-common')
 
 const fetchNounceFromParityNode = async () => 3.14
 
@@ -19,14 +26,15 @@ module.exports = {
   cron: '*/05 * * * * *',
   job: async () => {
     const {db} = context
-    const transactions = await db.transactions.findAll({where: {sentAt: null}}) // d.i
+    const transactions = await getUnsentTransactions() // d.i
     const transaction = await db.sequelize.transaction()
-
     try {
       await Promise.all(transactions.map(async (t) => {
+
         const [alreadySigned, nounce] = await isTransactionAlreadySigned(t, transaction)
 
-        if (alreadySigned) { // d.ii-iv
+        if (alreadySigned) {
+          // d.ii-iv
           logger.info({t}, 'transaction already signed')
           return
         }
@@ -35,7 +43,8 @@ module.exports = {
         const signedTransaction = await signTransactionInTransactionSigner(t) // d.vi
         const tranascationHash = await sendTransactionToBlockchain(signedTransaction) // f.i
 
-        await t.update({ // f.ii
+        await t.update({
+          // f.ii
           tranascationHash,
           gasPrice,
           nounce,
@@ -44,11 +53,12 @@ module.exports = {
 
         const {requestId, from, network} = t
 
-        const request = await db.requests.findOne({where: {id: requestId}})
+        const request = await requests.getRequestById(requestId)
         await request.update({sentAt: Date.now()}, {transaction}) // f.iii
 
-        const accountNounce = await db.accountNounces.findOrCreate({where: {account: from, network}})
-        await accountNounce.update({nounce}) // f.iv
+        // f.iv
+        const accountNounce = await findOrCreateAccountNounce(from, network, transaction)
+        await accountNounce.update({nounce}, {transaction})
       }))
 
       await transaction.commit()

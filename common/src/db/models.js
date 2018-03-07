@@ -77,7 +77,7 @@ module.exports = (sequelize) => {
   Request.hasMany(Transaction)
 
   const AccountNounce = sequelize.define(
-    'accountNounce',
+    'accountNounces',
     {
       account: {type: ADDRESS, primaryKey: true},
       network: {type: NETWORK, primaryKey: true},
