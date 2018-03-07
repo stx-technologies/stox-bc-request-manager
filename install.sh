@@ -3,7 +3,6 @@
 # pwd
 
 echo installing packages
-npm i
 npm install rimraf -g
 
 common="${PWD##*/}-common"
