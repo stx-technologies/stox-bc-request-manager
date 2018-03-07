@@ -1,6 +1,5 @@
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
-const {utils: {updateSentRecords}} = require('stox-bc-request-manager-common')
-const context = require('context')
+const {utils: {updateSentRecords}, context} = require('stox-bc-request-manager-common')
 
 const withdraw = async ({data: {userWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}, mq) => {
   // TODO: get clear api about walletABI input and output...
@@ -13,7 +12,7 @@ const withdraw = async ({data: {userWalletAddress, amount, tokenAddress, feeAmou
     from: address,
     to: userWalletAddress,
     network: 'Main',
-    transactionData: new Buffer(data),
+    transactionData: Buffer.from(data),
   }
 }
 

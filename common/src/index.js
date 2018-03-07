@@ -15,4 +15,5 @@ module.exports = {
   services,
   utils,
   initContext,
+  context,
 }

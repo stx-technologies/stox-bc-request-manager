@@ -1,7 +1,5 @@
-const context = require('context')
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
-const {utils: {nounceFromAccountNounces}} = require('stox-bc-request-manager-common')
-
+const {utils: {nounceFromAccountNounces}, context} = require('stox-bc-request-manager-common')
 
 const fetchNounceFromParityNode = async () => 3.14
 

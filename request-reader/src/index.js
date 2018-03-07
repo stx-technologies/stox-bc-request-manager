@@ -2,7 +2,6 @@ require('app-module-path').addPath(__dirname) // eslint-disable-line import/no-u
 const {createService} = require('stox-common')
 const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const api = require('api')
-const context = require('context')
 const {models, initContext} = require('stox-bc-request-manager-common')
 const config = require('config')
 const requireAll = require('require-all')
@@ -18,9 +17,5 @@ const builderFunc = (builder) => {
 }
 
 createService('request-reader', builderFunc)
-  .then((service) => {
-    Object.assign(context, service.context)
-    initContext({...service.context, config})
-    return service.start()
-  })
+  .then(context => initContext({...context, config}))
   .catch(logger.error)
