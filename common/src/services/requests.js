@@ -1,7 +1,7 @@
 const {db} = require('../context')
 const {getTransactionById} = require('./transactions')
 
-const createRequest = ({id, type, data}) => db.requests.create({id, type, data})
+const createRequest = ({id, type, data}) => db.requests.create({id, type, data, createdAt: new Date()})
 
 const getRequestById = id => db.requests.findOne({where: {id}})
 
