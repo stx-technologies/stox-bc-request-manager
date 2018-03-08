@@ -2,7 +2,7 @@ const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-so
 const {
   utils: {updateSentRecords},
   context: {mq, db},
-  services: {requests, transactions}
+  services: {requests, transactions},
 } = require('stox-bc-request-manager-common')
 const {network, handleUnsentRequestCron} = require('../config')
 

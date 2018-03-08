@@ -6,8 +6,11 @@ echo linting packages
 
 for i in */
 do
-    cd "./$i"
-    echo "linting $i"
-    npm run lint
-    cd ..
+    if [ "$i" != "node_modules/" ]
+    then
+        cd "./$i"
+        echo "linting $i"
+        npm run lint
+        cd ..
+    fi
 done

@@ -30,7 +30,6 @@ module.exports = {
     const transaction = await db.sequelize.transaction()
     try {
       await Promise.all(transactions.map(async (t) => {
-
         const [alreadySigned, nounce] = await isTransactionAlreadySigned(t, transaction)
 
         if (alreadySigned) {

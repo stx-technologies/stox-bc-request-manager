@@ -1,4 +1,3 @@
-const {db} = require('../context')
 const {Op} = require('sequelize')
 
 const updateSentRecords = (table, ids, transaction) =>

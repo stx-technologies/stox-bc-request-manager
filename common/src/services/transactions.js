@@ -4,7 +4,8 @@ const createTransaction = ({id, type, from}) => db.transactions.create({id, type
 
 const getTransactionById = id => db.transactions.findOne({where: {id}})
 
-const createTransactions = (transactionsToAdd, transaction) => db.transactions.bulkCreate(transactionsToAdd, {transaction})
+const createTransactions = (transactionsToAdd, transaction) =>
+  db.transactions.bulkCreate(transactionsToAdd, {transaction})
 
 const getUnsentTransactions = () => db.transactions.findAll({where: {sentAt: null}})
 
