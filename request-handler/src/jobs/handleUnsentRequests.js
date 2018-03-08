@@ -1,8 +1,12 @@
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
-const {utils: {updateSentRecords}, context, services: {requests, transactions}} = require('stox-bc-request-manager-common')
-const {network} = require('../config')
+const {
+  utils: {updateSentRecords},
+  context: {mq, db},
+  services: {requests, transactions}
+} = require('stox-bc-request-manager-common')
+const {network, handleUnsentRequestCron} = require('../config')
 
-const withdraw = async ({data: {userStoxWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}, mq) => {
+const withdraw = async ({data: {userStoxWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}) => {
   // TODO: get clear api about walletABI input and output...
   const {body: {data, address}} = await mq.rpc('wallets-sync/walletABI', {address: userStoxWalletAddress})
 
@@ -25,13 +29,12 @@ const prepareTransactionPlugin = {
 }
 
 module.exports = {
-  cron: '*/5 * * * * *',
+  cron: handleUnsentRequestCron,
   job: async () => {
-    const {db, mq} = context
     const requestsToAdd = await requests.getUnsentRequests()
     if (requestsToAdd.length) {
       logger.debug('Found new requests: ', requestsToAdd)
-      const transactionsPromises = requestsToAdd.map(request => prepareTransactionPlugin[request.type](request, mq))
+      const transactionsPromises = requestsToAdd.map(request => prepareTransactionPlugin[request.type](request))
       const transactionsToAdd = await Promise.all(transactionsPromises)
 
       const transaction = await db.sequelize.transaction()
