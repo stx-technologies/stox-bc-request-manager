@@ -1,5 +1,6 @@
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {utils: {updateSentRecords}, context, services: {requests, transactions}} = require('stox-bc-request-manager-common')
+const {network} = require('../config')
 
 const withdraw = async ({data: {userWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}, mq) => {
   // TODO: get clear api about walletABI input and output...
@@ -11,7 +12,7 @@ const withdraw = async ({data: {userWalletAddress, amount, tokenAddress, feeAmou
     type: 'send',
     from: address,
     to: userWalletAddress,
-    network: 'Main',
+    network,
     transactionData: Buffer.from(data),
   }
 }
@@ -25,7 +26,7 @@ const prepareTransactionPlugin = {
 }
 
 module.exports = {
-  cron: '*/05 * * * * *',
+  cron: '*/5 * * * * *',
   job: async () => {
     const {db, mq} = context
     const requestsToAdd = await requests.getUnsentRequests()
