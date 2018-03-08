@@ -1,4 +1,5 @@
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
+const {writePendingTransactionsCron} = require('../config')
 const {
   services: {
     accounts: {nounceFromAccountNounces, findOrCreateAccountNounce},
@@ -23,7 +24,7 @@ const signTransactionInTransactionSigner = async t => t
 const sendTransactionToBlockchain = async () => '123123123123123'
 
 module.exports = {
-  cron: '*/05 * * * * *',
+  cron: writePendingTransactionsCron,
   job: async () => {
     const {db} = context
     const transactions = await getUnsentTransactions() // d.i
