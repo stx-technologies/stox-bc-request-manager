@@ -2,16 +2,15 @@ const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-so
 const {utils: {updateSentRecords}, context, services: {requests, transactions}} = require('stox-bc-request-manager-common')
 const {network} = require('../config')
 
-const withdraw = async ({data: {userWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}, mq) => {
+const withdraw = async ({data: {userStoxWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}, mq) => {
   // TODO: get clear api about walletABI input and output...
-  const response = await mq.rpc('wallets-sync/walletABI', {address: userWalletAddress})
-  const {data, address} = response.body
+  const {body: {data, address}} = await mq.rpc('wallets-sync/walletABI', {address: userStoxWalletAddress})
 
   return {
     requestId: id,
     type: 'send',
     from: address,
-    to: userWalletAddress,
+    to: userStoxWalletAddress,
     network,
     transactionData: Buffer.from(data),
   }
