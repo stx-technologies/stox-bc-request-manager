@@ -9,9 +9,20 @@ const createTransactions = (transactionsToAdd, transaction) =>
 
 const getUnsentTransactions = () => db.transactions.findAll({where: {sentAt: null}})
 
+const getUnhandledSentTransactions = () =>
+  db.transactions.findAll({
+    where: {
+      sentAt: {
+        $ne: null,
+      },
+      completedAt: null,
+    },
+  })
+
 module.exports = {
   getTransactionById,
   createTransaction,
   createTransactions,
   getUnsentTransactions,
+  getUnhandledSentTransactions,
 }

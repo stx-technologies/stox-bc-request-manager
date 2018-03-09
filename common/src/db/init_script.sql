@@ -36,6 +36,7 @@ CREATE TABLE "transactions"
     "currentBlockTime" timestamp with time zone,
     "blockNumber" BIGINT,
     "nounce" BIGINT,
+    "error" json,
     "gasPrice" INTEGER,
     "receipt" CHARACTER VARYING(256),
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
@@ -64,5 +65,6 @@ CREATE TABLE "accountNounces"
     "network" CHARACTER VARYING(256),
     "nounce" BIGINT,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
+    "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
     CONSTRAINT tokensBalances_pk PRIMARY KEY ("account", "network")
 );

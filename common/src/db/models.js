@@ -58,6 +58,7 @@ module.exports = (sequelize) => {
       receipt: {type: STRING(256)}, // ?
       createdAt: {type: DATE, allowNull: false},
       sentAt: {type: DATE},
+      error: {type: JSON},
       completedAt: {type: DATE},
     },
     {
@@ -81,8 +82,8 @@ module.exports = (sequelize) => {
     {
       account: {type: ADDRESS, primaryKey: true},
       network: {type: NETWORK, primaryKey: true},
+      createdAt: {type: DATE, allowNull: false},
       nounce: {type: BIGINT},
-      updatedAt: {type: DATE},
     },
     {
       indexes: indexes([

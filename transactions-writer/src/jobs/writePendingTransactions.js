@@ -29,6 +29,7 @@ module.exports = {
     const {db} = context
     const transactions = await getUnsentTransactions() // d.i
     const transaction = await db.sequelize.transaction()
+
     try {
       await Promise.all(transactions.map(async (t) => {
         const [alreadySigned, nounce] = await isTransactionAlreadySigned(t, transaction)
@@ -38,18 +39,20 @@ module.exports = {
           logger.info({t}, 'transaction already signed')
           return
         }
-
         const gasPrice = await fetchGasPriceFromGasCalculator(t) // d.v
         const signedTransaction = await signTransactionInTransactionSigner(t) // d.vi
         const tranascationHash = await sendTransactionToBlockchain(signedTransaction) // f.i
 
-        await t.update({
-          // f.ii
-          tranascationHash,
-          gasPrice,
-          nounce,
-          sentAt: Date.now(),
-        })
+        await t.update(
+          {
+            // f.ii
+            tranascationHash,
+            gasPrice,
+            nounce,
+            sentAt: Date.now(),
+          },
+          {transaction}
+        )
 
         const {requestId, from, network} = t
 
