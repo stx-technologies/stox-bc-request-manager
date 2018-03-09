@@ -6,15 +6,14 @@ const {
 } = require('stox-bc-request-manager-common')
 const {network, handleUnsentRequestCron} = require('../config')
 
-const withdraw = async ({data: {userStoxWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}) => {
+const withdraw = async ({data: {userWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}) => {
   // TODO: get clear api about walletABI input and output...
-  const {body: {data, address}} = await mq.rpc('wallets-sync/walletABI', {address: userStoxWalletAddress})
-
+  const {body: {data, address}} = await mq.rpc('wallets-sync/walletABI', {address: userWalletAddress})
   return {
     requestId: id,
     type: 'send',
     from: address,
-    to: userStoxWalletAddress,
+    to: userWalletAddress,
     network,
     transactionData: Buffer.from(data),
   }

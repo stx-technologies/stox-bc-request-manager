@@ -1,5 +1,6 @@
 const {db} = require('../context')
 const {getTransactionById} = require('./transactions')
+const {Op} = require('sequelize')
 
 const createRequest = ({id, type, data}) => db.requests.create({id, type, data, createdAt: new Date()})
 
@@ -16,6 +17,12 @@ const getRequestByTransactionId = async (transactionId) => {
   return getRequestById(requestId)
 }
 
+const getCorrespandingRequests = async transations =>
+  db.requests.findAll({
+    where: {
+      id: {[Op.in]: transations.map(({requestId}) => requestId)},
+    },
+  })
 
 module.exports = {
   createRequest,
@@ -24,4 +31,5 @@ module.exports = {
   getTransactionById,
   getRequestByTransactionId,
   getUnsentRequests,
+  getCorrespandingRequests,
 }
