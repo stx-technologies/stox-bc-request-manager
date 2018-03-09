@@ -1,7 +1,8 @@
 const {configs: {mapEnv}} = require('@welldone-software/node-toolbelt')
 
 module.exports = mapEnv({
-  port: '',
   databaseUrl: '',
   mqConnectionUrl: '',
+  network: '',
+  handleUnsentRequestCron: '*/5 * * * * *',
 })

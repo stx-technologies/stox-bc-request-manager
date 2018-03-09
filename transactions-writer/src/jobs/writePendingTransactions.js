@@ -1,7 +1,13 @@
-const context = require('context')
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
-const {utils: {getAllUnsentFromTable, nounceFromAccountNounces}} = require('stox-bc-request-manager-common')
-
+const {writePendingTransactionsCron} = require('../config')
+const {
+  services: {
+    accounts: {nounceFromAccountNounces, findOrCreateAccountNounce},
+    requests,
+    transactions: {getUnsentTransactions},
+  },
+  context,
+} = require('stox-bc-request-manager-common')
 
 const fetchNounceFromParityNode = async () => 3.14
 
@@ -18,17 +24,17 @@ const signTransactionInTransactionSigner = async t => t
 const sendTransactionToBlockchain = async () => '123123123123123'
 
 module.exports = {
-  cron: '*/05 * * * * *',
+  cron: writePendingTransactionsCron,
   job: async () => {
     const {db} = context
+    const transactions = await getUnsentTransactions() // d.i
     const transaction = await db.sequelize.transaction()
     try {
-      const transactions = await getAllUnsentFromTable(db.transactions, transaction) // d.i
-
       await Promise.all(transactions.map(async (t) => {
         const [alreadySigned, nounce] = await isTransactionAlreadySigned(t, transaction)
 
-        if (alreadySigned) { // d.ii-iv
+        if (alreadySigned) {
+          // d.ii-iv
           logger.info({t}, 'transaction already signed')
           return
         }
@@ -37,7 +43,8 @@ module.exports = {
         const signedTransaction = await signTransactionInTransactionSigner(t) // d.vi
         const tranascationHash = await sendTransactionToBlockchain(signedTransaction) // f.i
 
-        await t.update({ // f.ii
+        await t.update({
+          // f.ii
           tranascationHash,
           gasPrice,
           nounce,
@@ -46,11 +53,12 @@ module.exports = {
 
         const {requestId, from, network} = t
 
-        const request = await db.requests.findOne({where: {id: requestId}})
+        const request = await requests.getRequestById(requestId)
         await request.update({sentAt: Date.now()}, {transaction}) // f.iii
 
-        const accountNounce = await db.accountNounces.findOrCreate({where: {account: from, network}})
-        await accountNounce.update({nounce}) // f.iv
+        // f.iv
+        const accountNounce = await findOrCreateAccountNounce(from, network, transaction)
+        await accountNounce.update({nounce}, {transaction})
       }))
 
       await transaction.commit()

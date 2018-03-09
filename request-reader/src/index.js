@@ -2,18 +2,20 @@ require('app-module-path').addPath(__dirname) // eslint-disable-line import/no-u
 const {createService} = require('stox-common')
 const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const api = require('api')
-const context = require('context')
-const {models} = require('stox-bc-request-manager-common')
-const {databaseUrl, mqConnectionUrl} = require('config')
-const listeners = require('queues/listeners')
+const {models, initContext} = require('stox-bc-request-manager-common')
+const config = require('config')
+const requireAll = require('require-all')
+const path = require('path')
 
-const service = createService('request-reader', (builder) => {
+const listeners = requireAll(path.resolve(__dirname, 'queues/listeners'))
+const {databaseUrl, mqConnectionUrl} = config
+
+const builderFunc = (builder) => {
   builder.db(databaseUrl, models)
-  builder.api(api)
+  builder.addApi(api)
   builder.addQueues(mqConnectionUrl, {listeners})
-})
+}
 
-service
-  .start()
-  .then(c => Object.assign(context, c))
+createService('request-reader', builderFunc)
+  .then(context => initContext({...context, config}))
   .catch(logger.error)

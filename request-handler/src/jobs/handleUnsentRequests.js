@@ -1,19 +1,22 @@
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
-const {utils: {updateSentRecords, getAllUnsentFromTable}} = require('stox-bc-request-manager-common')
-const context = require('context')
+const {
+  utils: {updateSentRecords},
+  context: {mq, db},
+  services: {requests, transactions},
+} = require('stox-bc-request-manager-common')
+const {network, handleUnsentRequestCron} = require('../config')
 
-const withdraw = async ({data: {userWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}, mq) => {
+const withdraw = async ({data: {userStoxWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}) => {
   // TODO: get clear api about walletABI input and output...
-  const response = await mq.rpc('wallets-sync/walletABI', {address: userWalletAddress})
-  const {data, address} = response.body
+  const {body: {data, address}} = await mq.rpc('wallets-sync/walletABI', {address: userStoxWalletAddress})
 
   return {
     requestId: id,
     type: 'send',
     from: address,
-    to: userWalletAddress,
-    network: 'Main',
-    transactionData: new Buffer(data),
+    to: userStoxWalletAddress,
+    network,
+    transactionData: Buffer.from(data),
   }
 }
 
@@ -26,29 +29,26 @@ const prepareTransactionPlugin = {
 }
 
 module.exports = {
-  cron: '*/05 * * * * *',
+  cron: handleUnsentRequestCron,
   job: async () => {
-    const {db, mq} = context
-    const transaction = await db.sequelize.transaction()
-    try {
-      const requests = await getAllUnsentFromTable(db.requests, transaction)
+    const requestsToAdd = await requests.getUnsentRequests()
+    if (requestsToAdd.length) {
+      logger.debug('Found new requests: ', requestsToAdd)
+      const transactionsPromises = requestsToAdd.map(request => prepareTransactionPlugin[request.type](request))
+      const transactionsToAdd = await Promise.all(transactionsPromises)
 
-      if (requests.length) {
-        logger.info('Found new requests: ', requests)
+      const transaction = await db.sequelize.transaction()
+      try {
+        await transactions.createTransactions(transactionsToAdd, transaction)
 
-        const transactionsPromises = requests.map(request => prepareTransactionPlugin[request.type](request, mq))
-        const transactionsToAdd = await Promise.all(transactionsPromises)
-
-        await db.transactions.bulkCreate(transactionsToAdd, {transaction})
-        const requestsIdsToUpdate = requests.map(({id}) => id)
-
+        const requestsIdsToUpdate = requestsToAdd.map(({id}) => id)
         await updateSentRecords(db.requests, requestsIdsToUpdate, transaction)
-      }
 
-      await transaction.commit()
-    } catch (e) {
-      transaction.rollback()
-      throw new UnexpectedError(e)
+        await transaction.commit()
+      } catch (e) {
+        transaction.rollback()
+        throw new UnexpectedError(e)
+      }
     }
   },
 }
