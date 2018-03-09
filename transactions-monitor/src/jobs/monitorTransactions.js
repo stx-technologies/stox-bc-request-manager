@@ -1,13 +1,16 @@
-const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
+const {exceptions: {UnexpectedError}} = require('@welldone-software/node-toolbelt')
 const {monitorTransactionsCron} = require('../config')
 const {context, services: {transactions, requests}} = require('stox-bc-request-manager-common')
 
 // TODO FOR DANNY HELMAN
+// eslint-disable-next-line no-unused-vars
 const validateParityNode = async transaction => true
 
+// eslint-disable-next-line no-unused-vars
 const validateConfirmations = async transaction => true
 
 // TODO by Danny hellman: fill Receipt, Blocknumber, BlockTime
+// eslint-disable-next-line no-unused-vars
 const updateTransaction = (bcTransaction, transaction) =>
   bcTransaction.update(
     {

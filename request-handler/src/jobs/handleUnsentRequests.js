@@ -6,6 +6,7 @@ const {
 } = require('stox-bc-request-manager-common')
 const {network, handleUnsentRequestCron} = require('../config')
 
+// eslint-disable-next-line no-unused-vars
 const withdraw = async ({data: {userWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}) => {
   // TODO: get clear api about walletABI input and output...
   const {body: {data, address}} = await mq.rpc('wallets-sync/walletABI', {address: userWalletAddress})

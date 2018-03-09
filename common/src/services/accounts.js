@@ -7,7 +7,7 @@ const nounceFromAccountNounces = async (account, network, transaction) => {
 }
 
 const findOrCreateAccountNounce = (account, network, transaction) =>
-  new Promise((resolve, reject) =>
+  new Promise(resolve =>
     db.accountNounces.findOrCreate({where: {account, network}, transaction}).spread(res => resolve(res)))
 
 module.exports = {
