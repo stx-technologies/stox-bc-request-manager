@@ -1,7 +1,7 @@
 {
   "name": "stox-bc-request-manager-common",
   "version": "1.0.0",
-  "description": "Common database services and utils for Request manager",
+  "description": "common database and services package for request manager",
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint -c ../.eslintrc.yml .",

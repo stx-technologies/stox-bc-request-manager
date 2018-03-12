@@ -6,7 +6,7 @@ const ADDRESS = STRING(42)
 const TRANSACTION_HASH = STRING(66)
 const NETWORK = STRING(256)
 
-const indexes = specs => specs.map(spec => (typeof spec === 'string' ? ({fields: [spec]}) : spec))
+const indexes = specs => specs.map(spec => (typeof spec === 'string' ? {fields: [spec]} : spec))
 const oneOf = values => ({
   type: STRING(256),
   validate: {isIn: [values]},
@@ -27,13 +27,7 @@ module.exports = (sequelize) => {
       completedAt: {type: DATE},
     },
     {
-      indexes: indexes([
-        'id',
-        'type',
-        'createdAt',
-        'completedAt',
-        'sentAt',
-      ]),
+      indexes: indexes(['id', 'type', 'createdAt', 'completedAt', 'sentAt']),
     }
   )
 
@@ -62,16 +56,7 @@ module.exports = (sequelize) => {
       completedAt: {type: DATE},
     },
     {
-      indexes: indexes([
-        'requestId',
-        'type',
-        'transactionHash',
-        'createdAt',
-        'completedAt',
-        'sentAt',
-        'from',
-        'to',
-      ]),
+      indexes: indexes(['requestId', 'type', 'transactionHash', 'createdAt', 'completedAt', 'sentAt', 'from', 'to']),
     }
   )
   Transaction.belongsTo(Request)
@@ -86,12 +71,7 @@ module.exports = (sequelize) => {
       nounce: {type: BIGINT},
     },
     {
-      indexes: indexes([
-        'address',
-        'network',
-        'nounce',
-        'updatedAt',
-      ]),
+      indexes: indexes(['address', 'network', 'nounce', 'updatedAt']),
     }
   )
 
