@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon -e js . | pino",
     "serve": "node .",
-    "lint": "eslint .",
+    "lint": "eslint -c ../.eslintrc.yml .",
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src",
     "jest:integration": "jest"
   },
