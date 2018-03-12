@@ -1,7 +1,7 @@
 {
-  "name": "stox-bc-transactions-monitor",
+  "name": "ransactions-monitor",
   "version": "1.0.0",
-  "description": "",
+  "description": "Reads all sent transactions requests from the database and checks the parity node",
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon -e js . | pino",

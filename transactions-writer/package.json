@@ -1,7 +1,7 @@
 {
-  "name": "stox-bc-transactions-writer",
+  "name": "transactions-writer",
   "version": "1.0.0",
-  "description": "",
+  "description": "reads pending transactions, calculates Gas and signer, send to parity node",
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon -e js . | pino",

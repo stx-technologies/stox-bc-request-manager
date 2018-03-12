@@ -1,7 +1,7 @@
 {
-  "name": "stox-bc-request-reader",
+  "name": "request-reader",
   "version": "1.0.0",
-  "description": "",
+  "description": "Reads incoming requests from a dedicated queue and writes them to the Requests table",
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon -e js . | pino",
