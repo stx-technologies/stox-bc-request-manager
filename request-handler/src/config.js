@@ -4,5 +4,5 @@ module.exports = mapEnv({
   databaseUrl: '',
   mqConnectionUrl: '',
   network: '',
-  handleUnsentRequestCron: '*/5 * * * * *',
+  handlePendingRequestCron: '*/5 * * * * *',
 })

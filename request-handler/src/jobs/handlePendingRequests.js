@@ -4,15 +4,15 @@ const {
   context: {mq, db},
   services: {requests, transactions},
 } = require('stox-bc-request-manager-common')
-const {network, handleUnsentRequestCron} = require('../config')
+const {network, handlePendingRequestCron} = require('../config')
 const plugins = require('../plugins')
 
 module.exports = {
-  cron: handleUnsentRequestCron,
+  cron: handlePendingRequestCron,
   job: async () => {
-    const requestsToAdd = await requests.getUnsentRequests()
+    const requestsToAdd = await requests.getPendingRequests()
 
-    logger.info({count: requestsToAdd.length}, 'UNSENT_REQUESTS_COUNT')
+    logger.info({count: requestsToAdd.length}, 'PENDING_REQUESTS_COUNT')
 
     if (requestsToAdd.length) {
       logger.debug('Found new requests: ', requestsToAdd)
