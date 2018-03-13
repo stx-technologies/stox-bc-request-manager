@@ -6,7 +6,7 @@ ENV NODE_ENV=production
 
 RUN mkdir /root/.ssh/
 
-ADD id_rsa /root/.ssh/id_rsa
+ADD ~/.ssh/id_rsa /root/.ssh/id_rsa
 
 #RUN chmod 400 /root/.ssh/id_rsa
 #RUN chown -R root:root /root/.ssh
