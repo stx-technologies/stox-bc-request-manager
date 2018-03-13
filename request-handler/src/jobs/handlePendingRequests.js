@@ -1,30 +1,29 @@
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {
   utils: {updateSentRecords},
-  context: {mq, db},
+  context: {db},
   services: {requests, transactions},
 } = require('stox-bc-request-manager-common')
-const {network, handlePendingRequestCron} = require('../config')
+const {handlePendingRequestCron} = require('../config')
 const plugins = require('../plugins')
 
 module.exports = {
   cron: handlePendingRequestCron,
   job: async () => {
-    const requestsToAdd = await requests.getPendingRequests()
+    const pendingRequests = await requests.getPendingRequests()
 
-    logger.info({count: requestsToAdd.length}, 'PENDING_REQUESTS_COUNT')
+    logger.info({count: pendingRequests.length}, 'PENDING_REQUESTS_COUNT')
 
-    if (requestsToAdd.length) {
-      logger.debug('Found new requests: ', requestsToAdd)
-      const transactionsPromises = requestsToAdd.map(request => plugins[request.type](request))
-      const transactionsToAdd = await Promise.all(transactionsPromises)
+    if (pendingRequests.length) {
+      const transactionsPromises = pendingRequests.map(request => plugins[request.type](request))
+      const requestTransactions = await Promise.all(transactionsPromises)
 
       const transaction = await db.sequelize.transaction()
       try {
-        await transactions.createTransactions(transactionsToAdd, transaction)
+        await transactions.createTransactions(requestTransactions, transaction)
 
-        const requestsIdsToUpdate = requestsToAdd.map(({id}) => id)
-        await updateSentRecords(db.requests, requestsIdsToUpdate, transaction)
+        const pendingRequestsIds = pendingRequests.map(({id}) => id)
+        await updateSentRecords(db.requests, pendingRequestsIds, transaction)
 
         await transaction.commit()
       } catch (e) {

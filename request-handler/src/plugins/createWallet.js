@@ -1,3 +1,6 @@
+const {context: {mq}} = require('stox-bc-request-manager-common')
+const {network} = require('../config')
+
 // eslint-disable-next-line no-unused-vars
 const createWallet = async ({data: {userWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}) => {
   // TODO: get clear api about walletABI input and output...

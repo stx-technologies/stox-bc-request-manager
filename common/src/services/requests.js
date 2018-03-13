@@ -10,7 +10,7 @@ const countRequestByType = async type => ({
   count: await db.requests.count({where: {type}}),
 })
 
-const getUnsentRequests = () => db.requests.findAll({where: {sentAt: null}})
+const getPendingRequests = () => db.requests.findAll({where: {sentAt: null}})
 
 const getRequestByTransactionId = async (transactionId) => {
   const {requestId} = await getTransactionById(transactionId)
@@ -30,6 +30,6 @@ module.exports = {
   getRequestById,
   getTransactionById,
   getRequestByTransactionId,
-  getUnsentRequests,
+  getPendingRequests,
   getCorrespandingRequests,
 }
