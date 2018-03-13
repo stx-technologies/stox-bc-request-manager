@@ -6,7 +6,7 @@ CREATE TABLE "requests"
 (
     "id" UUID PRIMARY KEY,
     "type" CHARACTER VARYING(256) NOT NULL,
-    "data" json NOT NULL,
+    "data" json,
     "error" json,
     "result" json,
     "createdAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,

@@ -20,7 +20,7 @@ module.exports = (sequelize) => {
       id: {type: UUID, primaryKey: true},
       type: oneOf(['sendPrize', 'withdraw', 'setWithdrawalAddress', 'sendToBackup', 'createWallet']),
       error: {type: JSON},
-      data: {type: JSON, allowNull: false},
+      data: {type: JSON},
       result: {type: JSON},
       createdAt: {type: DATE, allowNull: false},
       sentAt: {type: DATE},

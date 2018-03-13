@@ -11,7 +11,6 @@ const {databaseUrl, mqConnectionUrl} = config
 
 const builderFunc = (builder) => {
   builder.db(databaseUrl, models)
-
   builder.addQueues(mqConnectionUrl, {listeners})
 }
 
