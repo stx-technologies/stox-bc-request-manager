@@ -13,6 +13,5 @@ module.exports = {
       network,
       transactionData: Buffer.from(data),
     }
-  }
+  },
 }
-

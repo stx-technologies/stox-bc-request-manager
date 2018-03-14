@@ -10,6 +10,7 @@ const countRequestByType = async (type, onlyPending) => ({
   count: await db.requests.count({where: {type, ...onlyPending ? {sentAt: null} : {}} }),
 })
 
+// todo: add 'error: null' to query to filter all requests with error
 const getPendingRequests = () => db.requests.findAll({where: {sentAt: null}})
 
 const getRequestByTransactionId = async (transactionId) => {

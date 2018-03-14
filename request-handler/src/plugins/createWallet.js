@@ -17,27 +17,15 @@ module.exports = {
         network,
         transactionData,
       },
-      {
-        requestId: request.id,
-        type: 'send',
-        from: 'no address',
-        to: 'no address',
-        network,
-        transactionData,
-      },
     ]
 
     try {
       await transactions.createTransactions(pendingTransactions, request.id)
 
-      logger.info(
-        {
-          request,
-        },
-        'REQUEST_HANDLED'
-      )
+      logger.info({request}, 'CREATE_WALLET')
     } catch (e) {
-      logger.error(e, 'REQUEST_UNHANDLED')
+      logger.error(e, 'CREATE_WALLET_ERROR')
+      // todo: update request with error
     }
 
     return true

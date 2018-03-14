@@ -9,7 +9,8 @@ const createTransactions = async (transactions, requestId) => {
   const transaction = await db.sequelize.transaction()
 
   try {
-    await db.transactions.bulkCreate(transactions)
+    await db.transactions.bulkCreate(transactions, {transaction})
+    // todo: add 'sentAt is null' to where and test
     await db.requests.update({sentAt: Date.now()}, {where: {id: requestId}}, {transaction})
     await transaction.commit()
   } catch (e) {
