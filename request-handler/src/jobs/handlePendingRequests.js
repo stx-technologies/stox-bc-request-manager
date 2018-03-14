@@ -17,6 +17,9 @@ module.exports = {
       'PENDING_REQUESTS_COUNT'
     )
 
-    await Promise.all(pendingRequests.map(handleRequest))
+    for (const request of pendingRequests) {
+      await handleRequest(request)
+    }
+
   },
 }
