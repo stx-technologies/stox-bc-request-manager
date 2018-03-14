@@ -15,24 +15,22 @@ module.exports = {
     logger.info({count: pendingRequests.length}, 'PENDING_REQUESTS_COUNT')
 
     if (pendingRequests.length) {
-      pendingRequests.forEach(async (request) => {
-        const plugin = plugins[request.type]
-        const requestTransactions = plugin.prepareTransactions(request)
+      for (const request of pendingRequests) { // forEach doesn't work with async
+        const prepareTransactions = plugins[request.type].prepareTransactions
+        const requestTransactions = await prepareTransactions(request)
         const transaction = await db.sequelize.transaction()
 
         try {
           await transactions.createTransactions(requestTransactions, transaction)
 
-          // const pendingRequestsIds = pendingRequests.map(({id}) => id)
-          request.update({sentAt: new Date()})
-          // await updateSentRecords(db.requests, pendingRequestsIds, transaction)
+          await db.requests.update({sentAt: Date.now()}, {where: {id: request.id}}, {transaction})
 
           await transaction.commit()
         } catch (e) {
           transaction.rollback()
           throw new UnexpectedError(e)
         }
-      })
+      }
     }
   },
 }
