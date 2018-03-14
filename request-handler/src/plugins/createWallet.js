@@ -1,4 +1,4 @@
-const {oggers: {logger}} = require('@welldone-software/node-toolbelt')
+const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {services: {transactions}} = require('stox-bc-request-manager-common')
 const {network, walletsApiBaseUrl} = require('../config')
 const {http} = require('stox-common')
