@@ -26,6 +26,8 @@ module.exports = {
           await db.requests.update({sentAt: Date.now()}, {where: {id: request.id}}, {transaction})
 
           await transaction.commit()
+
+          logger.info({request: request.id}, 'REQUEST_SUCCESSFULLY_UPDATED')
         } catch (e) {
           transaction.rollback()
           throw new UnexpectedError(e)
