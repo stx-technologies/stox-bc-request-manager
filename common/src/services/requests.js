@@ -6,8 +6,8 @@ const createRequest = ({id, type, data}) => db.requests.create({id, type, data, 
 
 const getRequestById = id => db.requests.findOne({where: {id}})
 
-const countRequestByType = async type => ({
-  count: await db.requests.count({where: {type}}),
+const countRequestByType = async (type, onlyPending) => ({
+  count: await db.requests.count({where: {type, ...onlyPending ? {sentAt: null} : {}} }),
 })
 
 const getPendingRequests = () => db.requests.findAll({where: {sentAt: null}})
