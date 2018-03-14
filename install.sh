@@ -15,7 +15,7 @@ do
         then
             rimraf node_modules/
         fi
-        npm install
+#        npm install
         cd ..
     fi
 done
