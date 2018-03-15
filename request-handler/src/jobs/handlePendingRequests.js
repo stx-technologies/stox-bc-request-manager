@@ -4,6 +4,15 @@ const {handlePendingRequestCron, limitPendingRequest} = require('../config')
 const {take} = require('lodash')
 const plugins = require('../plugins')
 
+// fix double update on multiple servers
+const handleMultipleInstances = async (id) => {
+  const {sentAt} = await requests.getRequestById(id)
+  if (sentAt){
+    logger.error({}, 'REQUEST_ALREADY_SENT')
+  }
+  return sentAt
+}
+
 module.exports = {
   cron: handlePendingRequestCron,
   job: async () => {
@@ -18,12 +27,12 @@ module.exports = {
     )
 
     for (const request of pendingRequests) {
-      const {id, type, sentAt} = request
+      const {id, type} = request
       const pendingTransactions = await plugins[type].prepareTransactions(request)
       const transaction = await db.sequelize.transaction()
 
-      //not sure if (!sentAt) needed cause pendingRequests its requests that not sent yet
-      if (!sentAt) {
+      const alreadyInProcess = await handleMultipleInstances(id)
+      if (!alreadyInProcess) {
         try {
           await transactions.createTransactions(pendingTransactions, transaction)
           await requests.updateRequest({sentAt: Date.now()}, id, transaction)
@@ -36,8 +45,6 @@ module.exports = {
 
           await requests.updateRequest({error: JSON.stringify(e.message)}, id)
         }
-      } else {
-        logger.error({}, 'REQUEST_ALREADY_SENT')
       }
 
     }
