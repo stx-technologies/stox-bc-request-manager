@@ -4,16 +4,20 @@ const {http} = require('stox-common')
 const clientHttp = http(walletsApiBaseUrl)
 
 module.exports = {
-  prepareTransactions: async ({id, data: {userWithdrawalAddress}}) => {
-    const {transactionData, walletOperatorAccountAddress} = await clientHttp.get('/abi/transferToBackup')
+  prepareTransactions: async ({id, data: {userWithdrawalAddress, walletAddress, tokenAddress, amount}}) => {
+    const {encodedAbi, fromAccount} = await clientHttp.get('/abi/transferToBackup', {
+      walletAddress,
+      tokenAddress,
+      amount,
+    })
     return [
       {
         requestId: id,
         type: 'send',
-        from: walletOperatorAccountAddress,
+        from: fromAccount,
         to: userWithdrawalAddress,
         network,
-        transactionData,
+        transactionData: encodedAbi,
       },
     ]
   },
