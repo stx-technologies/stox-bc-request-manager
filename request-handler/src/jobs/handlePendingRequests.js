@@ -1,12 +1,16 @@
 const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
-const {context: {db}, services: {requests, transactions}, utils: {loggerFormatText}} = require('stox-bc-request-manager-common')
+const {
+  context: {db},
+  services: {requests, transactions},
+  utils: {loggerFormatText},
+} = require('stox-bc-request-manager-common')
 const {handlePendingRequestCron, limitPendingRequest} = require('../config')
 const plugins = require('../plugins')
 
 // fix double update on multiple servers
 const handleMultipleInstances = async (id) => {
   const {sentAt} = await requests.getRequestById(id)
-  if (sentAt){
+  if (sentAt) {
     logger.error({}, 'REQUEST_ALREADY_SENT')
   }
   return sentAt
@@ -45,8 +49,6 @@ module.exports = {
           await requests.updateRequest({error: JSON.stringify(e.message)}, id)
         }
       }
-
     }
-
   },
 }
