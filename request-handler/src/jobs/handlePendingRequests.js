@@ -22,7 +22,8 @@ module.exports = {
       const pendingTransactions = await plugins[type].prepareTransactions(request)
       const transaction = await db.sequelize.transaction()
 
-      if (!sentAt) { //not sure if this needed cause pendingRequests its requests that not sent yet
+      //not sure if (!sentAt) needed cause pendingRequests its requests that not sent yet
+      if (!sentAt) {
         try {
           await transactions.createTransactions(pendingTransactions, transaction)
           await requests.updateRequest({sentAt: Date.now()}, id, transaction)
@@ -33,7 +34,7 @@ module.exports = {
           transaction.rollback()
           logger.error(e, `${loggerFormatText(type)}_ERROR`)
 
-          await requests.updateRequest({error: JSON.stringify(e)}, id)
+          await requests.updateRequest({error: JSON.stringify(e.message)}, id)
         }
       } else {
         logger.error({}, 'REQUEST_ALREADY_SENT')

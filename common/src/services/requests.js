@@ -10,11 +10,10 @@ const updateRequest = (propsToUpdate, id, transaction) =>
 const getRequestById = id => db.requests.findOne({where: {id}})
 
 const countRequestByType = async (type, onlyPending) => ({
-  count: await db.requests.count({where: {type, ...onlyPending ? {sentAt: null} : {}} }),
+  count: await db.requests.count({where: {type, ...onlyPending ? {sentAt: null, error: null} : {}} }),
 })
 
-// todo: add 'error: null' to query to filter all requests with error
-const getPendingRequests = () => db.requests.findAll({where: {sentAt: null}})
+const getPendingRequests = () => db.requests.findAll({where: {sentAt: null, error: null}})
 
 const getRequestByTransactionId = async (transactionId) => {
   const {requestId} = await getTransactionById(transactionId)
