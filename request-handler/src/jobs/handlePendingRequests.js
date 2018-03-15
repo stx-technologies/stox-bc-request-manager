@@ -1,7 +1,6 @@
 const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {context: {db}, services: {requests, transactions}, utils: {loggerFormatText}} = require('stox-bc-request-manager-common')
 const {handlePendingRequestCron, limitPendingRequest} = require('../config')
-const {take} = require('lodash')
 const plugins = require('../plugins')
 
 // fix double update on multiple servers
@@ -16,7 +15,7 @@ const handleMultipleInstances = async (id) => {
 module.exports = {
   cron: handlePendingRequestCron,
   job: async () => {
-    const pendingRequests = take(await requests.getPendingRequests(), limitPendingRequest)
+    const pendingRequests = await requests.getPendingRequests(limitPendingRequest)
 
     logger.info(
       {
