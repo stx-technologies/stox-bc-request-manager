@@ -1,34 +1,53 @@
-const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
+const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {
-  utils: {updateSentRecords},
   context: {db},
   services: {requests, transactions},
+  utils: {loggerFormatText},
 } = require('stox-bc-request-manager-common')
-const {handlePendingRequestCron} = require('../config')
+const {handlePendingRequestCron, limitPendingRequest} = require('../config')
 const plugins = require('../plugins')
+
+// fix double update on multiple servers
+const handleMultipleInstances = async (id) => {
+  const {sentAt} = await requests.getRequestById(id)
+  if (sentAt) {
+    logger.error({}, 'REQUEST_ALREADY_SENT')
+  }
+  return sentAt
+}
 
 module.exports = {
   cron: handlePendingRequestCron,
   job: async () => {
-    const pendingRequests = await requests.getPendingRequests()
+    const pendingRequests = await requests.getPendingRequests(limitPendingRequest)
 
-    logger.info({count: pendingRequests.length}, 'PENDING_REQUESTS_COUNT')
+    logger.info(
+      {
+        name: 'handlePendingRequests',
+        count: pendingRequests.length,
+      },
+      'PENDING_REQUESTS'
+    )
 
-    if (pendingRequests.length) {
-      const transactionsPromises = pendingRequests.map(request => plugins[request.type](request))
-      const requestTransactions = await Promise.all(transactionsPromises)
-
+    for (const request of pendingRequests) {
+      const {id, type} = request
+      const pendingTransactions = await plugins[type].prepareTransactions(request)
       const transaction = await db.sequelize.transaction()
-      try {
-        await transactions.createTransactions(requestTransactions, transaction)
 
-        const pendingRequestsIds = pendingRequests.map(({id}) => id)
-        await updateSentRecords(db.requests, pendingRequestsIds, transaction)
+      const alreadyInProcess = await handleMultipleInstances(id)
+      if (!alreadyInProcess) {
+        try {
+          await transactions.createTransactions(pendingTransactions, transaction)
+          await requests.updateRequest({sentAt: Date.now()}, id, transaction)
+          await transaction.commit()
 
-        await transaction.commit()
-      } catch (e) {
-        transaction.rollback()
-        throw new UnexpectedError(e)
+          logger.info({request}, loggerFormatText(type))
+        } catch (e) {
+          transaction.rollback()
+          logger.error(e, `${loggerFormatText(type)}_ERROR`)
+
+          await requests.updateRequest({error: JSON.stringify(e.message)}, id)
+        }
       }
     }
   },

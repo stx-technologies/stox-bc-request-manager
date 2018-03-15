@@ -1,20 +1,19 @@
-const {context: {mq}} = require('stox-bc-request-manager-common')
-const {network} = require('../config')
+const {network, walletsApiBaseUrl, walletCreationAccountAddress} = require('../config')
+const {http} = require('stox-common')
 
-// eslint-disable-next-line no-unused-vars
-const createWallet = async ({data: {userWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}) => {
-  // TODO: get clear api about walletABI input and output...
-  const {body: {data, address}} = await mq.rpc('walletABI', {address: userWalletAddress})
-  return {
-    requestId: id,
-    type: 'send',
-    from: address,
-    to: userWalletAddress,
-    network,
-    transactionData: Buffer.from(data),
-  }
-}
+const clientHttp = http(walletsApiBaseUrl)
 
 module.exports = {
-  createWallet
+  prepareTransactions: async ({id}) => {
+    const transactionData = await clientHttp.get('/abi/createWallet')
+    return [
+      {
+        requestId: id,
+        type: 'send',
+        from: walletCreationAccountAddress,
+        network,
+        transactionData,
+      },
+    ]
+  },
 }
