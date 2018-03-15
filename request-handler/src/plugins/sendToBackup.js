@@ -1,17 +1,19 @@
-const {context: {mq}} = require('stox-bc-request-manager-common')
-const {network} = require('../config')
+const {network, walletsApiBaseUrl} = require('../config')
+const {http} = require('stox-common')
+
+const clientHttp = http(walletsApiBaseUrl)
 
 module.exports = {
-  prepareTransactions: async ({data: {userWalletAddress, amount, tokenAddress, feeAmount, feeTokenAddress}, id}) => {
-    // TODO: get clear api about walletABI input and output...
-    const {body: {data, address}} = await mq.rpc('walletABI', {address: userWalletAddress})
+  prepareTransactions: async ({id, data: {userStoxWalletAddress, userWithdrawalAddress}}) => {
+    const transactionData = await clientHttp.get('/abi/transferToBackup')
+
     return {
       requestId: id,
       type: 'send',
-      from: address,
-      to: userWalletAddress,
+      from: userWithdrawalAddress,
+      to: userStoxWalletAddress,
       network,
-      transactionData: Buffer.from(data),
+      transactionData,
     }
   },
 }
