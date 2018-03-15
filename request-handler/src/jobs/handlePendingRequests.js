@@ -1,13 +1,13 @@
 const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {context: {db}, services: {requests, transactions}, utils: {loggerFormatText}} = require('stox-bc-request-manager-common')
-const {handlePendingRequestCron} = require('../config')
+const {handlePendingRequestCron, limitPendingRequest} = require('../config')
+const {take} = require('lodash')
 const plugins = require('../plugins')
 
 module.exports = {
   cron: handlePendingRequestCron,
   job: async () => {
-    // todo: take only slice, limit to 10 or some other config value
-    const pendingRequests = await requests.getPendingRequests()
+    const pendingRequests = take(await requests.getPendingRequests(), limitPendingRequest)
 
     logger.info(
       {
