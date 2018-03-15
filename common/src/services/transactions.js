@@ -5,19 +5,8 @@ const createTransaction = ({id, type, from}) => db.transactions.create({id, type
 
 const getTransactionById = id => db.transactions.findOne({where: {id}})
 
-const createTransactions = async (transactions, requestId) => {
-  const transaction = await db.sequelize.transaction()
-
-  try {
-    await db.transactions.bulkCreate(transactions, {transaction})
-    // todo: add 'sentAt is null' to where and test
-    await db.requests.update({sentAt: Date.now()}, {where: {id: requestId}}, {transaction})
-    await transaction.commit()
-  } catch (e) {
-    transaction.rollback()
-    throw new UnexpectedError(e)
-  }
-}
+const createTransactions = (transactions, sequelizeTransaction) =>
+  db.transactions.bulkCreate(transactions, {transaction: sequelizeTransaction})
 
 const getUnsentTransactions = () => db.transactions.findAll({where: {sentAt: null}})
 

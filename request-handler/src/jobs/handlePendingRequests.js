@@ -1,9 +1,7 @@
 const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
-const {services: {requests}} = require('stox-bc-request-manager-common')
+const {context: {db}, services: {requests, transactions}, utils: {loggerFormatText}} = require('stox-bc-request-manager-common')
 const {handlePendingRequestCron} = require('../config')
 const plugins = require('../plugins')
-
-const handleRequest = async request => plugins[request.type].prepareTransactions(request)
 
 module.exports = {
   cron: handlePendingRequestCron,
@@ -20,7 +18,28 @@ module.exports = {
     )
 
     for (const request of pendingRequests) {
-      await handleRequest(request)
+      const {id, type, sentAt} = request
+      const pendingTransactions = await plugins[type].prepareTransactions(request)
+      const transaction = await db.sequelize.transaction()
+
+      if (!sentAt) { //not sure if this needed cause pendingRequests its requests that not sent yet
+        try {
+          await transactions.createTransactions(pendingTransactions, transaction)
+          await requests.updateRequest({sentAt: Date.now()}, id, transaction)
+          await transaction.commit()
+
+          logger.info({request}, loggerFormatText(type))
+        } catch (e) {
+          transaction.rollback()
+          logger.error(e, `${loggerFormatText(type)}_ERROR`)
+
+          await requests.updateRequest({error: JSON.stringify(e)}, id)
+        }
+      } else {
+        logger.error({}, 'REQUEST_ALREADY_SENT')
+      }
+
     }
+
   },
 }

@@ -4,6 +4,9 @@ const {Op} = require('sequelize')
 
 const createRequest = ({id, type, data}) => db.requests.create({id, type, data, createdAt: new Date()})
 
+const updateRequest = (propsToUpdate, id, transaction) =>
+  db.requests.update(propsToUpdate, {where: {id}}, {...transaction ? {transaction} : {}})
+
 const getRequestById = id => db.requests.findOne({where: {id}})
 
 const countRequestByType = async (type, onlyPending) => ({
@@ -27,6 +30,7 @@ const getCorrespandingRequests = async transations =>
 
 module.exports = {
   createRequest,
+  updateRequest,
   countRequestByType,
   getRequestById,
   getTransactionById,
