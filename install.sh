@@ -14,7 +14,7 @@ do
         if [ "$1" = "clean" ]
         then
             rimraf node_modules/
-            rimraf package-lock.json
+#            rimraf package-lock.json
         fi
         npm install
         cd ..
