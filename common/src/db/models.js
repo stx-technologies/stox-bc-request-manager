@@ -43,8 +43,8 @@ module.exports = (sequelize) => {
       subRequestType: {type: STRING(256)},
       transactionHash: {type: TRANSACTION_HASH},
       transactionData: {type: BLOB}, // ?
-      network: {type: NETWORK},
-      from: {type: ADDRESS},
+      network: {type: NETWORK, allowNull: false},
+      from: {type: ADDRESS, allowNull: false},
       to: {type: ADDRESS},
       currentBlockTime: {type: DATE},
       blockNumber: {type: BIGINT},

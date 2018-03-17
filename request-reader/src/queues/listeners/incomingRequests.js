@@ -11,7 +11,7 @@ module.exports = async (error, {body: message}) => {
     await requests.createRequest(message)
     logger.info(message, 'MESSAGE_RECIEVED')
   } catch (e) {
-    await requests.createOrUpdateErrorRequest(message, e.message)
-    logger.error(e.message, 'MESSAGE_FAILED')
+    await requests.createOrUpdateErrorRequest(message)
+    logger.error(e, 'MESSAGE_FAILED')
   }
 }

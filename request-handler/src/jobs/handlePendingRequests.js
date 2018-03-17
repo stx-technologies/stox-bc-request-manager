@@ -31,7 +31,6 @@ module.exports = {
 
     for (const request of pendingRequests) {
       const {id, type} = request
-      // todo: how to handle api error ?
       const pendingTransactions = await plugins[type].prepareTransactions(request)
       const alreadyInProcess = await handleMultipleInstances(id)
 
@@ -47,7 +46,8 @@ module.exports = {
         } catch (e) {
           transaction.rollback()
           logger.error(e, `${loggerFormatText(type)}_ERROR`)
-          await requests.createOrUpdateErrorRequest(request, e.message)
+
+          await requests.createOrUpdateErrorRequest(request)
         }
       }
     }
