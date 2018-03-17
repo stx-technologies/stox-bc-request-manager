@@ -25,10 +25,9 @@ const runConcurrently = () => {
 
       return startCommand
     })
-    .map(d => `\"${d}\"`)
-    .join(' ')
+    .join(' && ')
 
-  exec(`concurrently --kill-others -r ${dirs}`).stdout.on('data', data => console.log(data.toString()))
+  exec(dirs).stdout.on('data', data => console.log(data.toString()))
 }
 
 runConcurrently()

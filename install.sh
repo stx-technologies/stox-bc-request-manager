@@ -3,7 +3,7 @@
 # pwd
 
 echo installing packages
-npm install rimraf concurrently -g
+npm install rimraf -g
 
 for i in */
 do
