@@ -32,10 +32,11 @@ module.exports = {
     for (const request of pendingRequests) {
       const {id, type} = request
       const pendingTransactions = await plugins[type].prepareTransactions(request)
-      const transaction = await db.sequelize.transaction()
-
       const alreadyInProcess = await handleMultipleInstances(id)
+
       if (!alreadyInProcess) {
+        const transaction = await db.sequelize.transaction()
+
         try {
           await transactions.createTransactions(pendingTransactions, transaction)
           await requests.updateRequest({sentAt: Date.now()}, id, transaction)
