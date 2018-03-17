@@ -1,24 +1,25 @@
 const fs = require('fs')
 const path = require('path')
-const { exec } = require('child_process')
+const {exec} = require('child_process')
 
 const runConcurrently = () => {
   const type = process.argv[2]
-  const dirs = fs.readdirSync(__dirname)
-    .map(d =>path.join(__dirname,d))
+  const dirs = fs
+    .readdirSync(__dirname)
+    .map(d => path.join(__dirname, d))
     .filter(d => fs.lstatSync(d).isDirectory())
     .map(d => path.basename(d))
-    .filter(d => !d.startsWith('.') && !['common','node_modules'].includes(d))
-    .map(d => {
-      const startCommand = `npm start --prefix ${d}`
-      const envPath = path.join(__dirname,d,`.env.${type}`)
-      if(type) {
-        if(!fs.existsSync(envPath)) {
-          console.log(`No .env.${type} on service ${d}, using default .env`)
+    .filter(d => !d.startsWith('.') && !['common', 'node_modules'].includes(d))
+    .map((directory) => {
+      const startCommand = `npm start --prefix ${directory}`
+      const envPath = path.join(__dirname, directory, `.env.${type}`)
+      if (type) {
+        if (!fs.existsSync(envPath)) {
+          console.log(`No .env.${type} on service ${directory}, using default .env`)
           return startCommand
         }
 
-        const envs = fs.readFileSync(envPath,"utf8").split('\n')
+        const envs = fs.readFileSync(envPath, 'utf8').split('\n')
         return [...envs, startCommand].join(' ')
       }
 
@@ -26,9 +27,8 @@ const runConcurrently = () => {
     })
     .map(d => `\"${d}\"`)
     .join(' ')
-  exec(`concurrently --kill-others ${dirs}`).stdout.on('data',
-    data => console.log(data.toString())
-  )
+
+  exec(`concurrently --kill-others -r ${dirs}`).stdout.on('data', data => console.log(data.toString()))
 }
 
 runConcurrently()

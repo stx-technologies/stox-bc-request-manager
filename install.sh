@@ -3,8 +3,7 @@
 # pwd
 
 echo installing packages
-npm install rimraf -g
-npm install concurrently -g
+npm install rimraf concurrently -g
 
 for i in */
 do
@@ -15,7 +14,6 @@ do
         if [ "$1" = "clean" ]
         then
             rimraf node_modules/
-#            rimraf package-lock.json
         fi
         npm install
         cd ..
