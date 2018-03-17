@@ -9,6 +9,7 @@ CREATE TABLE "requests"
     "data" json,
     "error" json,
     "result" json,
+    "errorAt" timestamp with time zone,
     "createdAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     "sentAt" timestamp with time zone,
@@ -41,6 +42,7 @@ CREATE TABLE "transactions"
     "receipt" CHARACTER VARYING(256),
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
     "sentAt" timestamp with time zone,
+    "errorAt" timestamp with time zone,
     "completedAt" timestamp with time zone,
         "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
 
@@ -66,5 +68,6 @@ CREATE TABLE "accountNounces"
     "nounce" BIGINT,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
+        "errorAt" timestamp with time zone,
     CONSTRAINT tokensBalances_pk PRIMARY KEY ("account", "network")
 );

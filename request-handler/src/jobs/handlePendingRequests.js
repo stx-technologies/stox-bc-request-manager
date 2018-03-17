@@ -47,8 +47,7 @@ module.exports = {
         } catch (e) {
           transaction.rollback()
           logger.error(e, `${loggerFormatText(type)}_ERROR`)
-
-          await requests.updateRequest({error: JSON.stringify(e.message)}, id)
+          await requests.createOrUpdateErrorRequest(request, e.message)
         }
       }
     }

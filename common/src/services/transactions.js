@@ -10,6 +10,8 @@ const createTransactions = (transactions, sequelizeTransaction) =>
 
 const getUnsentTransactions = () => db.transactions.findAll({where: {sentAt: null}})
 
+const deleteTransactionsByRequestId = (requestId, transaction) => db.transactions.destroy({where: {requestId}}, {transaction})
+
 const getUnhandledSentTransactions = () =>
   db.transactions.findAll({
     where: {
@@ -26,4 +28,5 @@ module.exports = {
   createTransactions,
   getUnsentTransactions,
   getUnhandledSentTransactions,
+  deleteTransactionsByRequestId,
 }
