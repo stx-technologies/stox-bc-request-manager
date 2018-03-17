@@ -44,7 +44,7 @@ module.exports = (sequelize) => {
       transactionHash: {type: TRANSACTION_HASH},
       transactionData: {type: BLOB}, // ?
       network: {type: NETWORK, allowNull: false},
-      from: {type: ADDRESS, allowNull: false},
+      from: {type: ADDRESS},
       to: {type: ADDRESS},
       currentBlockTime: {type: DATE},
       blockNumber: {type: BIGINT},
