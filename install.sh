@@ -4,6 +4,7 @@
 
 echo installing packages
 npm install rimraf -g
+npm install concurrently -g
 
 for i in */
 do

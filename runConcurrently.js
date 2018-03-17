@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const shelljs = require('shelljs')
+const { exec } = require('child_process')
 
 const runConcurrently = () => {
   const type = process.argv[2]
@@ -26,9 +26,9 @@ const runConcurrently = () => {
     })
     .map(d => `\"${d}\"`)
     .join(' ')
-  console.log(dirs)
-  shelljs.exec(`concurrently --kill-others ${dirs}`)
-
-  console.log(dirs)
+  exec(`concurrently --kill-others ${dirs}`).stdout.on('data',
+    data => console.log(data.toString())
+  )
 }
+
 runConcurrently()
