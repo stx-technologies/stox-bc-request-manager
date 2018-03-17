@@ -2,6 +2,6 @@ const {configs: {mapEnv}} = require('@welldone-software/node-toolbelt')
 
 module.exports = mapEnv({
   databaseUrl: '',
-  writePendingTransactionsCron: '*/5 * * * * *',
+  writePendingTransactionsCron: '',
   mqConnectionUrl: '',
 })

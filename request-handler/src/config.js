@@ -5,7 +5,7 @@ module.exports = mapEnv({
   mqConnectionUrl: '',
   walletsApiBaseUrl: '',
   network: '',
-  handlePendingRequestCron: '*/5 * * * * *',
+  handlePendingRequestCron: '',
   walletOperatorAccountAddress: '',
   walletCreationAccountAddress: '',
   prizeDistributionAccountAddress: '',
