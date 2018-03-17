@@ -1,4 +1,4 @@
-const {services} = require('stox-bc-request-manager-common')
+const {services: {requests}} = require('stox-bc-request-manager-common')
 const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 
 module.exports = async (error, {body: message}) => {
@@ -8,9 +8,10 @@ module.exports = async (error, {body: message}) => {
   }
 
   try {
-    await services.requests.createRequest(message)
+    await requests.createRequest(message)
     logger.info(message, 'MESSAGE_RECIEVED')
   } catch (e) {
+    await requests.createOrUpdateErrorRequest(message)
     logger.error(e, 'MESSAGE_FAILED')
   }
 }

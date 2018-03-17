@@ -25,6 +25,7 @@ module.exports = (sequelize) => {
       createdAt: {type: DATE, allowNull: false},
       sentAt: {type: DATE},
       completedAt: {type: DATE},
+      errorAt: {type: DATE},
     },
     {
       indexes: indexes(['id', 'type', 'createdAt', 'completedAt', 'sentAt']),
@@ -42,7 +43,7 @@ module.exports = (sequelize) => {
       subRequestType: {type: STRING(256)},
       transactionHash: {type: TRANSACTION_HASH},
       transactionData: {type: BLOB}, // ?
-      network: {type: NETWORK},
+      network: {type: NETWORK, allowNull: false},
       from: {type: ADDRESS},
       to: {type: ADDRESS},
       currentBlockTime: {type: DATE},
@@ -53,6 +54,7 @@ module.exports = (sequelize) => {
       createdAt: {type: DATE, allowNull: false},
       sentAt: {type: DATE},
       error: {type: JSON},
+      errorAt: {type: DATE},
       completedAt: {type: DATE},
     },
     {
