@@ -37,7 +37,6 @@ const getCorrespandingRequests = async transations =>
     },
   })
 
-const deleteById = (id, transaction) => db.requests.destroy({where:{id}},{transaction})
 
 module.exports = {
   createRequest,
@@ -49,5 +48,4 @@ module.exports = {
   getPendingRequests,
   getCorrespandingRequests,
   createOrUpdateErrorRequest,
-  deleteById,
 }
