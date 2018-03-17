@@ -4,8 +4,7 @@ const {exec} = require('child_process')
 
 const runConcurrently = () => {
   const type = process.argv[2]
-  const dirs = fs
-    .readdirSync(__dirname)
+  const commands = fs.readdirSync(__dirname)
     .map(d => path.join(__dirname, d))
     .filter(d => fs.lstatSync(d).isDirectory())
     .map(d => path.basename(d))
@@ -25,9 +24,12 @@ const runConcurrently = () => {
 
       return startCommand
     })
-    .join(' && ')
 
-  exec(dirs).stdout.on('data', data => console.log(data.toString()))
+  commands.forEach((command) => {
+    const process = exec(command)
+    process.stdout.on('data', console.log)
+    process.stderr.on('data', console.error)
+  })
 }
 
 runConcurrently()
