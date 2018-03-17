@@ -25,8 +25,6 @@ const countRequestByType = async (type, onlyPending) => ({
 
 const getPendingRequests = limit => db.requests.findAll({where: {sentAt: null, error: null}, limit})
 
-const getErrorRequests = (limit, props) => db.requests.findAll({where: {...props, error: {$ne: null}}, limit})
-
 const getRequestByTransactionId = async (transactionId) => {
   const {requestId} = await getTransactionById(transactionId)
   return getRequestById(requestId)
@@ -51,6 +49,5 @@ module.exports = {
   getPendingRequests,
   getCorrespandingRequests,
   createOrUpdateErrorRequest,
-  getErrorRequests,
   deleteById,
 }
