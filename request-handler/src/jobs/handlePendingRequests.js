@@ -31,6 +31,7 @@ module.exports = {
 
     for (const request of pendingRequests) {
       const {id, type} = request
+      // todo: how to handle api error ?
       const pendingTransactions = await plugins[type].prepareTransactions(request)
       const alreadyInProcess = await handleMultipleInstances(id)
 
