@@ -48,8 +48,8 @@ module.exports = {
         transaction.rollback()
         logger.error(e, `${loggerFormatText(type)}_ERROR`)
 
-        const {dataValues} = await requests.createOrUpdateErrorRequest(request, e.message)
-        mq.publish('completed-requests', dataValues)
+        await requests.updateErrorRequest(id, e.message)
+        mq.publish('completed-requests', request.dataValues)
       }
     })
   },

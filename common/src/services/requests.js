@@ -9,15 +9,7 @@ const updateRequest = (propsToUpdate, id, transaction) =>
 
 const createRequest = ({id, type, data}) => db.requests.create({id, type, data, createdAt: new Date()})
 
-const createOrUpdateErrorRequest = async ({id, type, data}, error) => {
-  const request = await getRequestById(id)
-  const errorData = {error, errorAt: new Date()}
-  if (request) {
-    await updateRequest(errorData, id)
-    return request
-  }
-  return db.requests.create({...errorData, id, type, data, createdAt: new Date()})
-}
+const updateErrorRequest = async (id, error) => updateRequest({error, errorAt: new Date()}, id)
 
 const countRequestByType = async (type, onlyPending) => ({
   count: await db.requests.count({where: {type, ...(onlyPending ? {sentAt: null, error: null} : {})}}),
@@ -46,5 +38,5 @@ module.exports = {
   getRequestByTransactionId,
   getPendingRequests,
   getCorrespandingRequests,
-  createOrUpdateErrorRequest,
+  updateErrorRequest,
 }
