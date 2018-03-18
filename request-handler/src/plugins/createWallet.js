@@ -11,7 +11,6 @@ module.exports = {
         requestId: id,
         type: 'send',
         from: walletCreationAccountAddress,
-        to: '',
         network,
         transactionData,
       },
