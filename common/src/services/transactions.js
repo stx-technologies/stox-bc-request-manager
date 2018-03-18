@@ -1,4 +1,3 @@
-const {exceptions: {UnexpectedError}} = require('@welldone-software/node-toolbelt')
 const {db} = require('../context')
 
 const createTransaction = ({id, type, from}) => db.transactions.create({id, type, from})
