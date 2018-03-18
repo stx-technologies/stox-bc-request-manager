@@ -1,6 +1,6 @@
 const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {
-  context: {db},
+  context: {db, mq},
   services: {requests, transactions},
   utils: {loggerFormatText},
 } = require('stox-bc-request-manager-common')
@@ -29,27 +29,28 @@ module.exports = {
       'PENDING_REQUESTS'
     )
 
-    for (const request of pendingRequests) {
+    pendingRequests.forEach(async (request) => {
+      const transaction = await db.sequelize.transaction()
       const {id, type} = request
-      const pendingTransactions = await plugins[type].prepareTransactions(request)
-      const alreadyInProcess = await handleMultipleInstances(id)
+      try {
+        const pendingTransactions = await plugins[type].prepareTransactions(request)
+        const alreadyInProcess = await handleMultipleInstances(id)
 
-      if (!alreadyInProcess) {
-        const transaction = await db.sequelize.transaction()
-
-        try {
+        if (!alreadyInProcess) {
           await transactions.createTransactions(pendingTransactions, transaction)
           await requests.updateRequest({sentAt: Date.now()}, id, transaction)
-          await transaction.commit()
-
-          logger.info({request}, loggerFormatText(type))
-        } catch (e) {
-          transaction.rollback()
-          logger.error(e, `${loggerFormatText(type)}_ERROR`)
-
-          await requests.createOrUpdateErrorRequest(request)
         }
+
+        await transaction.commit()
+
+        logger.info({request}, loggerFormatText(type))
+      } catch (e) {
+        transaction.rollback()
+        logger.error(e, `${loggerFormatText(type)}_ERROR`)
+
+        const {dataValues} = await requests.createOrUpdateErrorRequest(request, e.message)
+        mq.publish('completed-requests', dataValues)
       }
-    }
+    })
   },
 }
