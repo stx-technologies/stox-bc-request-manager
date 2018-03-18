@@ -11,8 +11,7 @@ module.exports = async (error, {body: message}) => {
     await requests.createRequest(message)
     logger.info(message, 'MESSAGE_RECIEVED')
   } catch (e) {
-    const request = await requests.createOrUpdateErrorRequest(message, e.message)
-    mq.publish('completed-requests', request.dataValues)
+    mq.publish('error-requests', {...message, error: e})
     logger.error(e, 'MESSAGE_FAILED')
   }
 }
