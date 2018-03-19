@@ -1,9 +1,8 @@
 const {keys} = require('config')
 const EthereumTx = require('ethereumjs-tx')
-const {context} = require('stox-bc-request-manager-common')
+const {context: {logger}} = require('stox-bc-request-manager-common')
 
 const signTransaction = (from, unsignedTransaction, transactionId) => {
-  const {logger} = context
   const privateKey = Buffer.from(JSON.parse(keys)[from], 'hex')
   const transaction = new EthereumTx(unsignedTransaction)
   transaction.sign(privateKey)

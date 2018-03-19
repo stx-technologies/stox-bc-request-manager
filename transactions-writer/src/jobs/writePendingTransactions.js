@@ -10,8 +10,7 @@ const {
     requests,
     transactions: {getPendingTransactions},
   },
-  context: {db, blockchain},
-  context,
+  context: {db, blockchain, logger},
 } = require('stox-bc-request-manager-common')
 
 const {web3} = blockchain
@@ -30,14 +29,14 @@ const fetchGasPriceFromGasCalculator = async () => '5000000000' // 5 Gwei
 
 const signTransactionInTransactionSigner = async (from, unsignedTransaction, transactionId) => {
   const signedTransaction = await clientHttp.post('/transactions/sign', {from, unsignedTransaction, transactionId})
-  context.logger.info({from, unsignedTransaction, signedTransaction, transactionId}, 'TRANSACTION_SIGNED')
+  logger.info({from, unsignedTransaction, signedTransaction, transactionId}, 'TRANSACTION_SIGNED')
   return signedTransaction
 }
 
 const sendTransactionToBlockchain = async signedTransaction => new Promise(((resolve) => {
   web3.eth.sendSignedTransaction(signedTransaction)
     .once('transactionHash', (hash) => {
-      context.logger.info({hash})
+      logger.info({hash})
       resolve(hash)
     })
     .on('error', (error) => {
@@ -74,7 +73,6 @@ module.exports = {
   job: async () => {
     const pendingTransactions = await getPendingTransactions() // d.i
     const dbTransaction = await db.sequelize.transaction()
-    const {logger} = context
     const promises = pendingTransactions.map(async (transaction) => {
       const [isNonceSynced, nodeNonce, dbNonce] = await isEtherNodeNonceSynced(transaction, dbTransaction)
 
