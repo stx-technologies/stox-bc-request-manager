@@ -1,4 +1,4 @@
-const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
+const {exceptions: {UnexpectedError}} = require('@welldone-software/node-toolbelt')
 const {writePendingTransactionsCron, transactionsSignerBaseUrl} = require('../config')
 const {http,
   utils: {promise: {promiseSerial}},
@@ -10,7 +10,7 @@ const {
     requests,
     transactions: {getPendingTransactions},
   },
-  context: {db, blockchain},
+  context: {db, blockchain, logger},
 } = require('stox-bc-request-manager-common')
 
 const {web3} = blockchain
@@ -73,7 +73,6 @@ module.exports = {
   job: async () => {
     const pendingTransactions = await getPendingTransactions() // d.i
     const dbTransaction = await db.sequelize.transaction()
-
     const promises = pendingTransactions.map(async (transaction) => {
       const [isNonceSynced, nodeNonce, dbNonce] = await isEtherNodeNonceSynced(transaction, dbTransaction)
 

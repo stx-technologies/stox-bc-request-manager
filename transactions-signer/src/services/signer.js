@@ -1,6 +1,6 @@
 const {keys} = require('config')
 const EthereumTx = require('ethereumjs-tx')
-const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
+const {context: {logger}} = require('stox-bc-request-manager-common')
 
 const signTransaction = (from, unsignedTransaction, transactionId) => {
   const privateKey = Buffer.from(JSON.parse(keys)[from], 'hex')
@@ -14,4 +14,3 @@ const signTransaction = (from, unsignedTransaction, transactionId) => {
 module.exports = {
   signTransaction,
 }
-

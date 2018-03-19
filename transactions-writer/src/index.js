@@ -9,6 +9,7 @@ const path = require('path')
 const jobs = requireAll(path.resolve(__dirname, 'jobs'))
 const {databaseUrl, web3Url} = config
 
+// TODO: add option to work without contract dir
 const builderFunc = (builder) => {
   builder.db(databaseUrl, models)
   builder.blockchain(web3Url)

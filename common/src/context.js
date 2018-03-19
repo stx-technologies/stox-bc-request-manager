@@ -3,6 +3,7 @@ const context = {
   db: {},
   blockchain: {},
   config: {},
+  logger: {},
 }
 
 module.exports = context

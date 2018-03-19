@@ -1,6 +1,5 @@
-const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {
-  context: {db, mq},
+  context: {db, mq, logger},
   services: {requests, transactions},
   utils: {loggerFormatText},
 } = require('stox-bc-request-manager-common')
@@ -21,13 +20,7 @@ module.exports = {
   job: async () => {
     const pendingRequests = await requests.getPendingRequests(limitPendingRequest)
 
-    logger.info(
-      {
-        name: 'handlePendingRequests',
-        count: pendingRequests.length,
-      },
-      'PENDING_REQUESTS'
-    )
+    logger.info({count: pendingRequests.length}, 'PENDING_REQUESTS')
 
     pendingRequests.forEach(async (request) => {
       const transaction = await db.sequelize.transaction()
