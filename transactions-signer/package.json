@@ -1,7 +1,7 @@
 {
   "name": "transactions-signer",
   "version": "1.0.0",
-  "description": "",
+  "description": "Signs blockchain transactions with the appropriate private key",
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon -e js . | pino",
