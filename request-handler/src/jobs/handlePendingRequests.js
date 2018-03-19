@@ -1,6 +1,6 @@
-const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {
   context: {db, mq},
+  context,
   services: {requests, transactions},
   utils: {loggerFormatText},
 } = require('stox-bc-request-manager-common')
@@ -11,7 +11,7 @@ const plugins = require('../plugins')
 const handleMultipleInstances = async (id) => {
   const {sentAt} = await requests.getRequestById(id)
   if (sentAt) {
-    logger.error({}, 'REQUEST_ALREADY_SENT')
+    context.logger.error({}, 'REQUEST_ALREADY_SENT')
   }
   return sentAt
 }
@@ -20,10 +20,9 @@ module.exports = {
   cron: handlePendingRequestCron,
   job: async () => {
     const pendingRequests = await requests.getPendingRequests(limitPendingRequest)
-
+    const {logger} = context
     logger.info(
       {
-        name: 'handlePendingRequests',
         count: pendingRequests.length,
       },
       'PENDING_REQUESTS'
