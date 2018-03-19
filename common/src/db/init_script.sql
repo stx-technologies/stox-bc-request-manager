@@ -1,6 +1,6 @@
 drop table "transactions";
 drop table "requests";
-drop table "accountNounces";
+drop table "accountNonces";
 
 CREATE TABLE "requests"
 (
@@ -36,7 +36,7 @@ CREATE TABLE "transactions"
     "to" CHARACTER(42),
     "currentBlockTime" timestamp with time zone,
     "blockNumber" BIGINT,
-    "nounce" BIGINT,
+    "nonce" BIGINT,
     "error" json,
     "gasPrice" INTEGER,
     "receipt" CHARACTER VARYING(256),
@@ -55,17 +55,17 @@ CREATE INDEX transactions_request_id ON "transactions" USING btree ("requestId")
 CREATE INDEX transactions_type ON "transactions" USING btree ("type");
 CREATE INDEX transactions_completed_at ON "transactions" USING btree ("completedAt");
 CREATE INDEX transactions_sent_at ON "transactions" USING btree ("sentAt");
-CREATE INDEX transactions_nounce ON "transactions" USING btree ("nounce");
+CREATE INDEX transactions_nonce ON "transactions" USING btree ("nonce");
 CREATE INDEX transactions_from ON "transactions" USING btree ("from");
 CREATE INDEX transactions_to ON "transactions" USING btree ("to");
 CREATE INDEX transactions_network ON "transactions" USING btree ("network");
 CREATE INDEX transactions_updated_at ON "transactions" USING btree ("updatedAt");
 
-CREATE TABLE "accountNounces"
+CREATE TABLE "accountNonces"
 (
     "account" CHARACTER(42),
     "network" CHARACTER VARYING(256),
-    "nounce" BIGINT,
+    "nonce" BIGINT,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
         "errorAt" timestamp with time zone,

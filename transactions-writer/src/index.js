@@ -7,13 +7,14 @@ const requireAll = require('require-all')
 const path = require('path')
 
 const jobs = requireAll(path.resolve(__dirname, 'jobs'))
-const {databaseUrl} = config
+const {databaseUrl, web3Url} = config
 
 const builderFunc = (builder) => {
   builder.db(databaseUrl, models)
+  builder.blockchain(web3Url)
   builder.addJobs(jobs)
 }
 
-createService('request-reader', builderFunc)
+createService('transactions-writer', builderFunc)
   .then(context => initContext({...context, config}))
   .catch(logger.error)

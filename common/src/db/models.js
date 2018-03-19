@@ -48,7 +48,7 @@ module.exports = (sequelize) => {
       to: {type: ADDRESS},
       currentBlockTime: {type: DATE},
       blockNumber: {type: BIGINT},
-      nounce: {type: BIGINT}, // ?
+      nonce: {type: BIGINT}, // ?
       gasPrice: {type: INTEGER}, // ?
       receipt: {type: STRING(256)}, // ?
       createdAt: {type: DATE, allowNull: false},
@@ -65,15 +65,15 @@ module.exports = (sequelize) => {
   Request.hasMany(Transaction)
 
   sequelize.define(
-    'accountNounces',
+    'accountNonces',
     {
       account: {type: ADDRESS, primaryKey: true},
       network: {type: NETWORK, primaryKey: true},
       createdAt: {type: DATE, allowNull: false},
-      nounce: {type: BIGINT},
+      nonce: {type: BIGINT},
     },
     {
-      indexes: indexes(['address', 'network', 'nounce', 'updatedAt']),
+      indexes: indexes(['address', 'network', 'nonce', 'updatedAt']),
     }
   )
 

@@ -1,16 +1,16 @@
 const {db} = require('../context')
 
-const nounceFromAccountNounces = async (account, network, transaction) => {
-  const accountNounce = await db.accountNounces.findOne({where: {account, network}}, {transaction})
+const fetchNextAccountNonce = async (account, network, transaction) => {
+  const accountNonce = await db.accountNonces.findOne({where: {account, network}}, {transaction})
 
-  return accountNounce ? accountNounce.nounce : 0
+  return accountNonce ? accountNonce.nonce : 0
 }
 
-const findOrCreateAccountNounce = (account, network, transaction) =>
+const findOrCreateAccountNonce = (account, network, transaction) =>
   new Promise(resolve =>
-    db.accountNounces.findOrCreate({where: {account, network}, transaction}).spread(res => resolve(res)))
+    db.accountNonces.findOrCreate({where: {account, network}, transaction}).spread(res => resolve(res)))
 
 module.exports = {
-  nounceFromAccountNounces,
-  findOrCreateAccountNounce,
+  fetchNextAccountNonce,
+  findOrCreateAccountNonce,
 }

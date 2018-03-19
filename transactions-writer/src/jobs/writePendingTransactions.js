@@ -1,84 +1,113 @@
 const {exceptions: {UnexpectedError}, loggers: {logger}} = require('@welldone-software/node-toolbelt')
-const {writePendingTransactionsCron} = require('../config')
+const {writePendingTransactionsCron, transactionsSignerBaseUrl} = require('../config')
+const {http,
+  utils: {promise: {promiseSerial}},
+} = require('stox-common')
+
 const {
   services: {
-    accounts: {nounceFromAccountNounces, findOrCreateAccountNounce},
+    accounts: {fetchNextAccountNonce, findOrCreateAccountNonce},
     requests,
     transactions: {getPendingTransactions},
   },
-  context,
+  context: {db, blockchain},
 } = require('stox-bc-request-manager-common')
 
-const fetchNounceFromParityNode = async () => 3.14
+const {web3} = blockchain
+const clientHttp = http(transactionsSignerBaseUrl)
 
-const isTransactionAlreadySigned = async ({from, network}, dbTransaction) => {
-  const nounceFromParity = await fetchNounceFromParityNode()
-  const nounceFromAccountNounce = await nounceFromAccountNounces(from, network, dbTransaction)
-  return [nounceFromAccountNounce >= nounceFromParity, nounceFromParity + 1]
+const fetchNonceFromEtherNode = async fromAccount =>
+  web3.eth.getTransactionCount(fromAccount)
+
+const isEtherNodeNonceSynced = async ({from, network}, dbTransaction) => {
+  const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
+  const nonceFromAccountNonce = await fetchNextAccountNonce(from, network, dbTransaction)
+  return [nonceFromAccountNonce >= nonceFromEtherNode, nonceFromEtherNode, nonceFromAccountNonce]
 }
 
-const fetchGasPriceFromGasCalculator = async () => 3.14
+const fetchGasPriceFromGasCalculator = async () => '5000000000' // 5 Gwei
 
-const signTransactionInTransactionSigner = async trans => trans
+const signTransactionInTransactionSigner = async (from, unsignedTransaction, transactionId) => {
+  const signedTransaction = await clientHttp.post('/transactions/sign', {from, unsignedTransaction, transactionId})
+  logger.info({from, unsignedTransaction, signedTransaction, transactionId}, 'TRANSACTION_SIGNED')
+  return signedTransaction
+}
 
-const sendTransactionToBlockchain = async () => '123123123123123'
+const sendTransactionToBlockchain = async signedTransaction => new Promise(((resolve) => {
+  web3.eth.sendSignedTransaction(signedTransaction)
+    .once('transactionHash', (hash) => {
+      logger.info({hash})
+      resolve(hash)
+    })
+    .on('error', (error) => {
+      throw new UnexpectedError(error)
+    })
+}))
 
-const updateTransaction = async (trans, nounce, transaction) => {
-  const gasPrice = await fetchGasPriceFromGasCalculator(trans) // d.v
-  const signedTransaction = await signTransactionInTransactionSigner(trans) // d.vi
-
-  const transactionHash = await sendTransactionToBlockchain(signedTransaction) // f.i
-
-  await trans.update(
+const updateTransaction = async (transaction, unsignedTransaction, transactionHash, dbTransaction) => {
+  await transaction.update(
     {
       // f.ii
       transactionHash,
-      gasPrice,
-      nounce,
+      gasPrice: unsignedTransaction.gasPrice,
+      nonce: unsignedTransaction.nonce,
       sentAt: Date.now(),
     },
-    {transaction}
+    {transaction: dbTransaction}
   )
 }
 
-const updateRequest = async ({requestId}, transaction) => {
+const updateRequest = async ({requestId}, dbTransaction) => {
   const request = await requests.getRequestById(requestId)
-  await request.update({sentAt: Date.now()}, {transaction}) // f.iii
+  await request.update({sentAt: Date.now()}, {transaction: dbTransaction}) // f.iii
 }
 
-const updateAccountNounce = async ({from, network}, nounce, transaction) => {
+const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
   // f.iv
-  const accountNounce = await findOrCreateAccountNounce(from, network, transaction)
-  await accountNounce.update({nounce}, {transaction})
+  const accountNonce = await findOrCreateAccountNonce(from, network, dbTransaction)
+  await accountNonce.update({nonce}, {transaction: dbTransaction})
 }
 
 module.exports = {
   cron: writePendingTransactionsCron,
   job: async () => {
-    const {db} = context
     const pendingTransactions = await getPendingTransactions() // d.i
-    const transaction = await db.sequelize.transaction()
+    const dbTransaction = await db.sequelize.transaction()
+
+    const promises = pendingTransactions.map(async (transaction) => {
+      const [isNonceSynced, nodeNonce, dbNonce] = await isEtherNodeNonceSynced(transaction, dbTransaction)
+
+      if (isNonceSynced) {
+        // d.ii-iv
+        logger.warn({transaction, nodeNonce, dbNonce}, 'NONCE_NOT_SYNCED')
+        return
+      }
+
+      const unsignedTransaction = {
+        nonce: nodeNonce,
+        to: transaction.to,
+        data: transaction.transactionData,
+        gasPrice: await fetchGasPriceFromGasCalculator(),
+        chainId: 1,
+      }
+      unsignedTransaction.gasLimit = await web3.eth.estimateGas(transaction.from, unsignedTransaction)
+
+      const signedTransaction =
+        await signTransactionInTransactionSigner(transaction.from, unsignedTransaction, transaction.id)
+      const transactionHash = await sendTransactionToBlockchain(signedTransaction)
+
+      await updateTransaction(transaction, unsignedTransaction, transactionHash, dbTransaction)
+      await updateRequest(transaction, dbTransaction)
+      await updateAccountNonce(transaction, nodeNonce, dbTransaction)
+
+      logger.info({transaction}, 'SUCCESSFULLY_UPDATED_TRANSACTION')
+    })
 
     try {
-      await Promise.all(pendingTransactions.map(async (trans) => {
-        const [alreadySigned, nounce] = await isTransactionAlreadySigned(trans, transaction)
-
-        if (alreadySigned) {
-          // d.ii-iv
-          logger.info({transaction: trans}, 'transaction already signed')
-          return
-        }
-
-        await updateTransaction(trans, nounce, transaction)
-        await updateRequest(trans, transaction)
-        await updateAccountNounce(trans, nounce, transaction)
-
-        logger.info({transaction: trans}, 'SUCCESSFULLY_UPDATED_TRANSACTION')
-      }))
-
-      await transaction.commit()
+      await promiseSerial(promises)
+      await dbTransaction.commit()
     } catch (e) {
-      transaction.rollback()
+      dbTransaction.rollback()
       throw new UnexpectedError(e)
     }
   },
