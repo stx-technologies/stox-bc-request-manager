@@ -10,7 +10,8 @@ const {
     requests,
     transactions: {getPendingTransactions},
   },
-  context: {db, blockchain, logger},
+  context,
+  context: {db, blockchain},
 } = require('stox-bc-request-manager-common')
 
 const {web3} = blockchain
@@ -29,14 +30,14 @@ const fetchGasPriceFromGasCalculator = async () => '5000000000' // 5 Gwei
 
 const signTransactionInTransactionSigner = async (from, unsignedTransaction, transactionId) => {
   const signedTransaction = await clientHttp.post('/transactions/sign', {from, unsignedTransaction, transactionId})
-  logger.info({from, unsignedTransaction, signedTransaction, transactionId}, 'TRANSACTION_SIGNED')
+  context.logger.info({from, unsignedTransaction, signedTransaction, transactionId}, 'TRANSACTION_SIGNED')
   return signedTransaction
 }
 
 const sendTransactionToBlockchain = async signedTransaction => new Promise(((resolve) => {
   web3.eth.sendSignedTransaction(signedTransaction)
     .once('transactionHash', (hash) => {
-      logger.info({hash})
+      context.logger.info({hash})
       resolve(hash)
     })
     .on('error', (error) => {
@@ -78,7 +79,7 @@ module.exports = {
 
       if (isNonceSynced) {
         // d.ii-iv
-        logger.warn({transaction, nodeNonce, dbNonce}, 'NONCE_NOT_SYNCED')
+        context.logger.warn({transaction, nodeNonce, dbNonce}, 'NONCE_NOT_SYNCED')
         return
       }
 
@@ -99,7 +100,7 @@ module.exports = {
       await updateRequest(transaction, dbTransaction)
       await updateAccountNonce(transaction, nodeNonce, dbTransaction)
 
-      logger.info({transaction}, 'SUCCESSFULLY_UPDATED_TRANSACTION')
+      context.logger.info({transaction}, 'SUCCESSFULLY_UPDATED_TRANSACTION')
     })
 
     try {

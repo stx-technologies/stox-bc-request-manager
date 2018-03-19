@@ -6,7 +6,10 @@ const path = require('path')
 const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {createServiceFromFileStructure} = require('stox-common')
 
-const services = requireAll(path.resolve(__dirname, 'services'))
+const services = requireAll({
+  dirname: path.resolve(__dirname, 'services'),
+  filter: /(.*)\.js$/,
+})
 
 const initContext = (ctx) => {
   Object.keys(ctx).forEach((prop) => {

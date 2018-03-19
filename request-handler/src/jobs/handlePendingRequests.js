@@ -1,5 +1,6 @@
 const {
-  context: {db, mq, logger},
+  context,
+  context: {db, mq},
   services: {requests, transactions},
   utils: {loggerFormatText},
 } = require('stox-bc-request-manager-common')
@@ -10,7 +11,7 @@ const plugins = require('../plugins')
 const handleMultipleInstances = async (id) => {
   const {sentAt} = await requests.getRequestById(id)
   if (sentAt) {
-    logger.error({}, 'REQUEST_ALREADY_SENT')
+    context.logger.error({}, 'REQUEST_ALREADY_SENT')
   }
   return sentAt
 }
@@ -20,7 +21,7 @@ module.exports = {
   job: async () => {
     const pendingRequests = await requests.getPendingRequests(limitPendingRequest)
 
-    logger.info({count: pendingRequests.length}, 'PENDING_REQUESTS')
+    context.logger.info({count: pendingRequests.length}, 'PENDING_REQUESTS')
 
     pendingRequests.forEach(async (request) => {
       const transaction = await db.sequelize.transaction()
@@ -36,10 +37,10 @@ module.exports = {
 
         await transaction.commit()
 
-        logger.info({request}, loggerFormatText(type))
+        context.logger.info({request}, loggerFormatText(type))
       } catch (e) {
         transaction.rollback()
-        logger.error(e, `${loggerFormatText(type)}_ERROR`)
+        context.logger.error(e, `${loggerFormatText(type)}_ERROR`)
 
         await requests.updateErrorRequest(id, e.message)
         mq.publish('completed-requests', request.dataValues)
