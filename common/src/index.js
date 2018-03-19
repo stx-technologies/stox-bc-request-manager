@@ -7,7 +7,13 @@ const path = require('path')
 const services = requireAll(path.resolve(__dirname, 'services'))
 
 const initContext = (ctx) => {
-  Object.keys(ctx).forEach(prop => Object.assign(context[prop], ctx[prop]))
+  Object.keys(ctx).forEach((prop) => {
+    if (prop in context) {
+      Object.assign(context[prop], ctx[prop])
+    } else {
+      context[prop] = ctx[prop]
+    }
+  })
 }
 
 module.exports = {
