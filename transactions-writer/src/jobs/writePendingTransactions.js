@@ -23,7 +23,7 @@ const signTransactionInTransactionSigner = async trans => trans
 
 const sendTransactionToBlockchain = async () => '123123123123123'
 
-const updateTransaction = async (trans ,nounce, transaction) => {
+const updateTransaction = async (trans, nounce, transaction) => {
   const gasPrice = await fetchGasPriceFromGasCalculator(trans) // d.v
   const signedTransaction = await signTransactionInTransactionSigner(trans) // d.vi
 
@@ -41,12 +41,12 @@ const updateTransaction = async (trans ,nounce, transaction) => {
   )
 }
 
-const updateRequest = async ({requestId} ,transaction) => {
+const updateRequest = async ({requestId}, transaction) => {
   const request = await requests.getRequestById(requestId)
   await request.update({sentAt: Date.now()}, {transaction}) // f.iii
 }
 
-const updateAccountNounce = async ({from, network}, nounce ,transaction) => {
+const updateAccountNounce = async ({from, network}, nounce, transaction) => {
   // f.iv
   const accountNounce = await findOrCreateAccountNounce(from, network, transaction)
   await accountNounce.update({nounce}, {transaction})
@@ -69,9 +69,9 @@ module.exports = {
           return
         }
 
-        await updateTransaction(trans ,nounce, transaction)
+        await updateTransaction(trans, nounce, transaction)
         await updateRequest(trans, transaction)
-        await updateAccountNounce(trans ,nounce, transaction)
+        await updateAccountNounce(trans, nounce, transaction)
 
         logger.info({transaction: trans}, 'SUCCESSFULLY_UPDATED_TRANSACTION')
       }))
