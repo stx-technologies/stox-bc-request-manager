@@ -1,8 +1,8 @@
 FROM node:8.9.1
 
 ENV PORT=3771
-ENV DATABASE_URL='postgres://postgres:secret@localhost:5434/stoxbcrm'
-ENV MQ_CONNECTION_URL='localhost:61613'
+#ENV DATABASE_URL='postgres://postgres:secret@localhost:5434/stoxbcrm'
+#ENV MQ_CONNECTION_URL='localhost:61613'
 ENV NODE_ENV=production
 
 EXPOSE $PORT

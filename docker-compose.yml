@@ -1,0 +1,54 @@
+version: '3.3'
+services:
+
+    request-reader:
+        build:
+            context: .
+            args:
+              DIR: request-reader
+        container_name: request-reader
+        depends_on:
+            - db
+            - activemq
+        environment:
+            - PORT=3004
+            - DATABASE_URL=postgres://postgres:secret@db/stoxbc
+            - NETWORK=MAIN
+            - MQ_CONNECTION_URL=stomp://activemq:61613
+        env_file:
+            - ./request-reader/envs/dev.env
+        image: request-reader
+        networks:
+            - network
+        ports:
+            - 3004:3004
+        tty: true
+        restart: always
+#        volumes:
+#            - ./request-reader:/request-reader
+#            - ./common:/common
+
+    db:
+        image: postgres:10.3
+        container_name: db
+        networks:
+            - network
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_PASSWORD: secret
+            POSTGRES_USER: postgres
+            POSTGRES_DB: stoxbc
+
+    activemq:
+        image: rmohr/activemq:5.14.5
+        container_name: activemq
+        networks:
+            - network
+        ports:
+            - 61613:61613
+            - 8161:8161
+
+networks:
+    network:
+        driver: bridge
