@@ -4,4 +4,5 @@ module.exports = mapEnv({
   databaseUrl: '',
   monitorTransactionsCron: '',
   mqConnectionUrl: '',
+  requiredConfirmations: 0,
 })

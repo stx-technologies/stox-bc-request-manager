@@ -1,6 +1,10 @@
 const {exceptions: {UnexpectedError}} = require('@welldone-software/node-toolbelt')
 const {monitorTransactionsCron} = require('../config')
-const {context, services: {transactions, requests}} = require('stox-bc-request-manager-common')
+const {
+  context,
+  services: {transactions, requests},
+  utils: {getCompletedTransaction},
+} = require('stox-bc-request-manager-common')
 
 // TODO FOR DANNY HELMAN
 // eslint-disable-next-line no-unused-vars

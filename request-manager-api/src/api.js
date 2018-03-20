@@ -1,5 +1,8 @@
 const {port} = require('config')
-const {services: {requests}} = require('stox-bc-request-manager-common')
+const {
+  services: {requests},
+  utils: {getCompletedTransaction},
+} = require('stox-bc-request-manager-common')
 
 module.exports = {
   port,
@@ -11,5 +14,7 @@ module.exports = {
     router.get('/requests/transactions/:id', _(({params: {id}}) => requests.getRequestByTransactionId(id)))
     router.get('/requests/:type/count', _(({params: {type}}) => requests.countRequestByType(type)))
     router.get('/requests/:type/count/pending', _(({params: {type}}) => requests.countRequestByType(type, true)))
+    router.get('/blockchain/transactions/:transactionHash', _(({params: {transactionHash}}) =>
+      getCompletedTransaction(transactionHash)))
   },
 }

@@ -1,5 +1,5 @@
 {
-  "name": "ransactions-monitor",
+  "name": "transactions-monitor",
   "version": "1.0.0",
   "description": "Reads all sent transactions requests from the database and checks the parity node",
   "main": "src/index.js",
