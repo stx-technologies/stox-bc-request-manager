@@ -4,27 +4,17 @@ const context = require('./context')
 const requireAll = require('require-all')
 const path = require('path')
 const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
-const {createServiceFromFileStructure} = require('stox-common')
+const {createServiceFromFileStructure, initContext} = require('stox-common')
 
 const services = requireAll({
   dirname: path.resolve(__dirname, 'services'),
   filter: /(.*)\.js$/,
 })
 
-const initContext = (ctx) => {
-  Object.keys(ctx).forEach((prop) => {
-    if (prop in context) {
-      Object.assign(context[prop], ctx[prop])
-    } else {
-      context[prop] = ctx[prop]
-    }
-  })
-}
-
 const start = async (dirname, config) => {
   try {
     const ctx = await createServiceFromFileStructure(dirname)
-    initContext({...ctx, config})
+    initContext({...ctx, config}, context)
     context.logger = ctx.logger
   } catch (e) {
     logger.error(e)
