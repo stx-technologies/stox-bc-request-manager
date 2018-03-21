@@ -18,7 +18,7 @@
     "lodash": "^4.17.5",
     "require-all": "^2.2.0",
     "stox-bc-request-manager-common": "file:../common",
-    "stox-common": "git+https://bitbucket.org/stx_site/stox-common.git#dev"
+    "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev"
   },
   "devDependencies": {
     "eslint": "^4.9.0",

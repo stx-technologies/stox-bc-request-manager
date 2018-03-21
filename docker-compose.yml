@@ -11,44 +11,37 @@ services:
             - db
             - activemq
         environment:
-            - PORT=3004
-            - DATABASE_URL=postgres://postgres:secret@db/stoxbc
-            - NETWORK=MAIN
-            - MQ_CONNECTION_URL=stomp://activemq:61613
-        env_file:
-            - ./request-reader/envs/dev.env
+            PORT: 3003
+            DATABASE_URL: postgres://postgres:secret@db/stoxbcrm
+            NETWORK: MAIN
+            MQ_CONNECTION_URL: stomp://activemq:61613
         image: request-reader
         networks:
-            - network
-        ports:
-            - 3004:3004
+            - subsystems
         tty: true
         restart: always
-#        volumes:
-#            - ./request-reader:/request-reader
-#            - ./common:/common
 
     db:
         image: postgres:10.3
         container_name: db
         networks:
-            - network
+            - subsystems
         ports:
-            - 5432:5432
+            - 5434:5432
         environment:
             POSTGRES_PASSWORD: secret
             POSTGRES_USER: postgres
-            POSTGRES_DB: stoxbc
+            POSTGRES_DB: stoxbcrm
 
     activemq:
         image: rmohr/activemq:5.14.5
         container_name: activemq
         networks:
-            - network
+            - subsystems
         ports:
             - 61613:61613
             - 8161:8161
 
 networks:
-    network:
+    subsystems:
         driver: bridge

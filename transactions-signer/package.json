@@ -18,7 +18,7 @@
     "ethereumjs-tx": "^1.3.4",
     "require-all": "^2.2.0",
     "stox-bc-request-manager-common": "file:../common",
-    "stox-common": "git+https://bitbucket.org/stx_site/stox-common.git#dev",
+    "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev",
     "web3": "^1.0.0-beta.30"
   },
   "devDependencies": {

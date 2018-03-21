@@ -16,7 +16,7 @@ do
                     npm uninstall stox-common
             ;;
         install)    echo "installing $i"
-                    npm install stox-common@git+https://bitbucket.org/stx_site/stox-common.git#dev --save
+                    npm install stox-common@git@bitbucket.org:stx_site/stox-common.git#dev --save
             ;;
         link)       echo "linking $i"
                     npm link stox-common
