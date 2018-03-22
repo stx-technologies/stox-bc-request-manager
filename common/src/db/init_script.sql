@@ -1,6 +1,6 @@
-drop table "transactions";
-drop table "requests";
-drop table "accountNonces";
+--drop table "transactions";
+--drop table "requests";
+--drop table "accountNonces";
 
 CREATE EXTENSION IF NOT EXISTS CITEXT;
 

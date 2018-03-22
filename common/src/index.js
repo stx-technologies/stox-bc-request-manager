@@ -11,14 +11,18 @@ const services = requireAll({
   filter: /(.*)\.js$/,
 })
 
+
+//PATCH because even though dependency, it cannot connect, TODO: retry mechanism at common
 const start = async (dirname, config) => {
-  try {
-    const ctx = await createServiceFromFileStructure(dirname)
-    initContext({...ctx, config}, context)
-    context.logger = ctx.logger
-  } catch (e) {
-    logger.error(e)
-  }
+  setTimeout(async () => {
+    try {
+      const ctx = await createServiceFromFileStructure(dirname)
+      initContext({...ctx, config}, context)
+      context.logger = ctx.logger
+    } catch (e) {
+      logger.error(e)
+    }
+  }, 5000)
 }
 
 module.exports = {

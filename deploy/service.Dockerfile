@@ -5,7 +5,7 @@ ENV NODE_ENV=production
 ARG DIR
 ENV DIR $DIR
 
-COPY ./id_rsa_bitbucket /root/.ssh/id_rsa
+COPY ./deploy/id_rsa_bitbucket /root/.ssh/id_rsa
 RUN chmod 400 /root/.ssh/id_rsa
 RUN chown -R root:root /root/.ssh
 RUN touch /root/.ssh/known_hosts
