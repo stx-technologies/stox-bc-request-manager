@@ -5,7 +5,8 @@ services:
         build:
             context: .
             args:
-              DIR: request-reader
+              DIR: ../request-reader
+            dockerfile: service.Dockerfile
         container_name: request-reader
         depends_on:
             - db
@@ -22,7 +23,7 @@ services:
         restart: always
 
     db:
-        image: postgres:10.3
+        image: stox-regitry/stoxdb:10.3
         container_name: db
         networks:
             - subsystems
