@@ -5,7 +5,10 @@ const {
   utils: {loggerFormatText},
 } = require('stox-bc-request-manager-common')
 const {handlePendingRequestCron, limitPendingRequest} = require('../config')
-const plugins = require('../plugins')
+const requireAll = require('require-all')
+const path = require('path')
+
+const plugins = requireAll(path.resolve(__dirname, '../plugins'))
 
 // fix double update on multiple servers
 const handleMultipleInstances = async (id) => {
