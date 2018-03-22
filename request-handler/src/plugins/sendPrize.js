@@ -1,5 +1,6 @@
 const {network, walletsApiBaseUrl, prizeDistributionAccountAddress} = require('../config')
 const {http} = require('stox-common')
+const {oneline} = require('../utils')
 
 const clientHttp = http(walletsApiBaseUrl)
 
