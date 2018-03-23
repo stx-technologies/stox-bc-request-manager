@@ -12,10 +12,13 @@ services:
             - activemq
             - db
         environment:
-            DATABASE_URL: postgres://postgres:secret@db/stoxbcrm
-            MQ_CONNECTION_URL: stomp://activemq:61613
-            PORT: 3003
-            NETWORK: MAIN
+            NETWORK: $NETWORK
+            DATABASE_URL: $DATABASE_URL
+            MQ_CONNECTION_URL: $MQ_CONNECTION_URL
+
+        env_file:
+            - ../request-reader/.env${ENVIRONMENT}
+
         image: request-reader
         networks:
             - subsystems
@@ -33,11 +36,14 @@ services:
             - activemq
             - db
         environment:
-            DATABASE_URL: postgres://postgres:secret@db/stoxbcrm
-            MQ_CONNECTION_URL: stomp://activemq:61613
-            PORT: 3003
-            NETWORK: MAIN
-        image: request-reader
+            NETWORK: $NETWORK
+            DATABASE_URL: $DATABASE_URL
+            MQ_CONNECTION_URL: $MQ_CONNECTION_URL
+
+        env_file:
+            - ../request-handler/.env${ENVIRONMENT}
+
+        image: request-handler
         networks:
             - subsystems
         tty: true
