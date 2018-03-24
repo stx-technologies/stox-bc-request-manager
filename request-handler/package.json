@@ -8,7 +8,8 @@
     "serve": "node .",
     "lint": "eslint -c ../.eslintrc.yml .",
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src",
-    "jest:integration": "jest"
+    "jest:integration": "jest",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -18,13 +19,18 @@
     "promise-serial": "^0.1.5",
     "require-all": "^2.2.0",
     "stox-bc-request-manager-common": "file:../common",
-    "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev"
+    "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev",
+    "uuid4": "^1.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
   },
   "devDependencies": {
     "eslint": "^4.9.0",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.7.0",
-    "jest": "^22.1.1",
+    "jest": "^22.4.3",
+    "jest-cli": "^22.4.3",
     "nodemon": "^1.12.1",
     "prettier": "^1.7.4",
     "prettier-eslint": "^8.2.1",
