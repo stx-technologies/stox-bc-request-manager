@@ -1,5 +1,6 @@
 extends:
   airbnb-base
+  ./.eslintrc.test.yml
 
 env:
   node: true

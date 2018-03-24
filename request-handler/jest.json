@@ -1,0 +1,17 @@
+{
+  "roots": [
+    "<rootDir>/src"
+  ],
+  "moduleFileExtensions": ["js"],
+  "moduleDirectories": ["node_modules"],
+  "modulePaths": [
+    "<rootDir>/src"
+  ],
+  "moduleNameMapper": {
+    "stox-common$":
+      "<rootDir>/../jestHelpers/mocks/stox-common.js"
+  },
+  "setupTestFrameworkScriptFile": "<rootDir>/../jestHelpers/jestSetup.js",
+  "cacheDirectory": "<rootDir>/../jestHelpers/cache",
+  "collectCoverage": false
+}

@@ -1,0 +1,21 @@
+globals:
+  jest: true
+  it: true
+  xit: true
+  expect: true
+  jestExpect: true
+  done: true
+  describe: true
+  beforeEach: true
+  React: true
+  Component: true
+  PureComponent: true
+  shallow: true
+  render: true
+  mount: true
+  sinon: true
+  localStorage: true
+  fetch: true
+  Promise: true
+  sleep: true
+  browser: true
