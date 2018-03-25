@@ -10,15 +10,6 @@ const path = require('path')
 
 const plugins = requireAll(path.resolve(__dirname, '../plugins'))
 
-// fix double update on multiple servers
-const handleMultipleInstances = async (id) => {
-  const {sentAt} = await requests.getRequestById(id)
-  if (sentAt) {
-    context.logger.error({}, 'REQUEST_ALREADY_SENT')
-  }
-  return sentAt
-}
-
 module.exports = {
   cron: handlePendingRequestCron,
   job: async () => {
@@ -31,12 +22,8 @@ module.exports = {
       const {id, type} = request
       try {
         const pendingTransactions = await plugins[type].prepareTransactions(request)
-        const alreadyInProcess = await handleMultipleInstances(id)
-
-        if (!alreadyInProcess) {
-          await transactions.createTransactions(pendingTransactions, transaction)
-          await requests.updateRequest({sentAt: Date.now()}, id, transaction)
-        }
+        await transactions.createTransactions(pendingTransactions, transaction)
+        await requests.updateRequest({sentAt: Date.now()}, id, transaction)
 
         await transaction.commit()
 
@@ -45,8 +32,8 @@ module.exports = {
         transaction.rollback()
         context.logger.error(e, `${loggerFormatText(type)}_ERROR`)
 
-        await requests.updateErrorRequest(id, e.message)
-        mq.publish('completed-requests', request.dataValues)
+        await requests.updateErrorRequest(id, e)
+        await mq.publish('error-requests', request.dataValues)
       }
     })
   },
