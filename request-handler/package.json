@@ -23,7 +23,10 @@
     "uuid4": "^1.0.0"
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "modulePaths": [
+      "<rootDir>/src/"
+    ]
   },
   "devDependencies": {
     "eslint": "^4.9.0",

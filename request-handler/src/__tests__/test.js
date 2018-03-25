@@ -1,14 +1,16 @@
-const {join, resolve} = require('path')
-require('app-module-path').addPath(join(__dirname, '../src'))
+const {resolve} = require('path')
 const {initContext, context, createService, models} = require('stox-bc-request-manager-common')
 const uuid = require('uuid4')
-const config = require('../src/config')
+const config = require('../config')
 const requireAll = require('require-all')
 
-const {handlePendingRequests} = requireAll(resolve(__dirname, '../src/jobs'))
+const {handlePendingRequests} = requireAll(resolve(__dirname, '../jobs'))
 
 const types = ['sendPrize', 'withdraw', 'setWithdrawalAddress', 'sendToBackup', 'createWallet']
-const {databaseUrl, mqConnectionUrl} = config
+const {databaseUrl, mqConnectionUrl, network} = config
+
+jest.mock('plugins')
+const plugins = require('plugins')
 
 describe('request-handler', () => {
   const requestToAdd = {
@@ -18,7 +20,7 @@ describe('request-handler', () => {
   }
 
   beforeEach(() => {
-    jest.resetModules();
+    jest.resetModules()
   })
 
   beforeAll(async () => {
@@ -38,20 +40,13 @@ describe('request-handler', () => {
   })
 
   it('run test', async () => {
-    // jest.doMock('plugins', () => {
-    //   return {
-    //     sendPrize: async (request) => {
-    //       const {id, tokenAddress} = request
-    //       return [
-    //         {
-    //           requestId: id,
-    //           type: 'send',
-    //           to: tokenAddress,
-    //         },
-    //       ]
-    //     },
-    //   }
-    // })
+    plugins.sendPrize.prepareTransactions = jest.fn().mockImplementationOnce(async ({id, tokenAddress}) => [
+      {
+        requestId: id,
+        type: 'send',
+        network,
+      },
+    ])
     await context.db.requests.create(requestToAdd)
     await handlePendingRequests.job()
     const {dataValues: request} = await context.db.requests.findOne({where: {id: requestToAdd.id}})
