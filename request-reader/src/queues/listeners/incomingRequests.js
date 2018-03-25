@@ -4,7 +4,7 @@ module.exports = async ({body: message}) => {
   try {
     await requests.createRequest(message)
   } catch (e) {
-    mq.publish('error-requests', {...message, error: e})
+    await mq.publish('error-requests', {...message, error: e})
     throw e
   }
 }

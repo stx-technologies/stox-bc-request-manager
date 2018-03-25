@@ -5,6 +5,7 @@ const {
   services: {transactions, requests},
   utils: {getCompletedTransaction},
 } = require('stox-bc-request-manager-common')
+const {kebabCase} = require('lodash')
 
 // TODO FOR DANNY HELMAN
 // eslint-disable-next-line no-unused-vars
@@ -61,6 +62,6 @@ module.exports = {
       throw new UnexpectedError(e)
     }
 
-    correspondingRequests.forEach(request => mq.publish(request.type, request))
+    correspondingRequests.forEach(request => mq.publish(kebabCase(request.type), request))
   },
 }
