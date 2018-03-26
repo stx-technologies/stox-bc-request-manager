@@ -60,6 +60,7 @@ CREATE INDEX transactions_from ON "transactions" USING btree ("from");
 CREATE INDEX transactions_to ON "transactions" USING btree ("to");
 CREATE INDEX transactions_network ON "transactions" USING btree ("network");
 CREATE INDEX transactions_updated_at ON "transactions" USING btree ("updatedAt");
+CREATE INDEX transactions_transaction_hash ON "transactions" USING btree ("transactionHash");
 
 CREATE TABLE "accountNonces"
 (

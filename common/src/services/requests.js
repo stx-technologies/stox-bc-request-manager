@@ -10,6 +10,11 @@ const getRequestById = async (id, full) => {
   return request.dataValues
 }
 
+const getRequestByTransactionHash = async (transactionHash) => {
+  const {requestId} = await db.transations.findOne({where: {transactionHash}})
+  return getRequestById(requestId)
+}
+
 const updateRequest = (propsToUpdate, id, transaction) =>
   db.requests.update(propsToUpdate, {where: {id}}, {...(transaction ? {transaction} : {})})
 
@@ -40,6 +45,7 @@ module.exports = {
   updateRequest,
   countRequestByType,
   getRequestById,
+  getRequestByTransactionHash,
   getTransactionById,
   getRequestByTransactionId,
   getPendingRequests,
