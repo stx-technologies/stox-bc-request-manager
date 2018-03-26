@@ -6,7 +6,7 @@ const clientHttp = http(walletsApiBaseUrl)
 
 module.exports = {
   prepareTransactions: async ({id, data: {userStoxWalletAddress, amount, tokenAddress}}) => {
-    const transactionData = await clientHttp.get(oneline`/abi/sendPrize?
+    const {encodedAbi, fromAccount} = await clientHttp.get(oneline`/abi/sendPrize?
       prizeReceiverAddress=${userStoxWalletAddress}&
       tokenAddress=${tokenAddress}&
       amount=${amount}&
@@ -15,10 +15,10 @@ module.exports = {
       {
         requestId: id,
         type: 'send',
-        from: prizeDistributionAccountAddress,
+        from: fromAccount,
         to: userStoxWalletAddress,
         network,
-        transactionData,
+        transactionData: encodedAbi,
       },
     ]
   },
