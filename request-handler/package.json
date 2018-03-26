@@ -9,7 +9,7 @@
     "lint": "eslint -c ../.eslintrc.yml .",
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src",
     "jest:integration": "jest",
-    "test": "jest"
+    "test": "jest --config ./jest.json"
   },
   "author": "",
   "license": "ISC",

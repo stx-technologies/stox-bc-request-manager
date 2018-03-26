@@ -1,7 +1,6 @@
 const {prepareTransactions} = require ('./sendPrize')
 
 describe('sendPrize', () => {
-
   it('sendPrize prepareTransactions', async () => {
 
     const result = await prepareTransactions({id: 1, tokenAddress:11})
