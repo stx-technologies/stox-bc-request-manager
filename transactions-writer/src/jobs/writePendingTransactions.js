@@ -88,7 +88,7 @@ module.exports = {
         to: transaction.to,
         data: transaction.transactionData,
         gasPrice: await fetchGasPriceFromGasCalculator(),
-        chainId: 1,
+        chainId: await web3.eth.net.getId(),
       }
       unsignedTransaction.gasLimit = await web3.eth.estimateGas(transaction.from, unsignedTransaction)
 
