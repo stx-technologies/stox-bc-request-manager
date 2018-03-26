@@ -28,12 +28,12 @@ module.exports = {
         await transaction.commit()
 
         context.logger.info({request}, loggerFormatText(type))
-      } catch (e) {
+      } catch (error) {
         transaction.rollback()
-        context.logger.error(e, `${loggerFormatText(type)}_ERROR`)
+        context.logger.error(error, `${loggerFormatText(type)}_ERROR`)
 
-        await requests.updateErrorRequest(id, e)
-        await mq.publish('error-requests', request.dataValues)
+        await requests.updateErrorRequest(id, error)
+        await mq.publish('error-requests', {...request.dataValues, error})
       }
     })
   },
