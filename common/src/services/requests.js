@@ -2,7 +2,13 @@ const {db} = require('../context')
 const {getTransactionById} = require('./transactions')
 const {Op} = require('sequelize')
 
-const getRequestById = id => db.requests.findOne({where: {id}})
+const getRequestById = async (id, full) => {
+  const request = await db.requests.findOne({where: {id}})
+  if (full) {
+    request.dataValues.transations = await request.getTransactions()
+  }
+  return request.dataValues
+}
 
 const updateRequest = (propsToUpdate, id, transaction) =>
   db.requests.update(propsToUpdate, {where: {id}}, {...(transaction ? {transaction} : {})})
