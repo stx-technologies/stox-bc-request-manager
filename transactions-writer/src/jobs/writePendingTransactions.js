@@ -37,7 +37,7 @@ const signTransactionInTransactionSigner = async (from, unsignedTransaction, tra
 const sendTransactionToBlockchain = async signedTransaction => new Promise(((resolve) => {
   web3.eth.sendSignedTransaction(signedTransaction)
     .once('transactionHash', (hash) => {
-      context.logger.info({hash})
+      context.logger.info({hash}, 'TRANSACTION_SENT')
       resolve(hash)
     })
     .on('error', (error) => {
