@@ -5,5 +5,5 @@ module.exports = mapEnv({
   writePendingTransactionsCron: '',
   mqConnectionUrl: '',
   web3Url: '',
-  transactionsSignerBaseUrl: 'localhost:8090/api/v1',
+  transactionsSignerBaseUrl: '',
 })
