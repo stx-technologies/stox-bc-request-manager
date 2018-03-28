@@ -5,7 +5,7 @@ const clientHttp = http(walletsApiBaseUrl)
 
 module.exports = {
   prepareTransactions: async ({id, data: {userWithdrawalAddress, walletAddress, tokenAddress, amount}}) => {
-    const {encodedAbi, fromAccount} = await clientHttp.get('/abi/transferToBackup',{
+    const {encodedAbi, fromAccount} = await clientHttp.get('/abi/transferToBackup', {
       walletAddress,
       tokenAddress,
       amount,
