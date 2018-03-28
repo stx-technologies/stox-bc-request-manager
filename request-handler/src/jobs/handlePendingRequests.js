@@ -5,16 +5,10 @@ const {
   utils: {loggerFormatText},
 } = require('stox-bc-request-manager-common')
 const {handlePendingRequestCron, limitPendingRequest} = require('../config')
-const plugins = require('../plugins')
+const requireAll = require('require-all')
+const path = require('path')
 
-// fix double update on multiple servers
-const handleMultipleInstances = async (id) => {
-  const {sentAt} = await requests.getRequestById(id)
-  if (sentAt) {
-    context.logger.error({}, 'REQUEST_ALREADY_SENT')
-  }
-  return sentAt
-}
+const plugins = requireAll(path.resolve(__dirname, '../plugins'))
 
 module.exports = {
   cron: handlePendingRequestCron,
@@ -28,22 +22,18 @@ module.exports = {
       const {id, type} = request
       try {
         const pendingTransactions = await plugins[type].prepareTransactions(request)
-        const alreadyInProcess = await handleMultipleInstances(id)
-
-        if (!alreadyInProcess) {
-          await transactions.createTransactions(pendingTransactions, transaction)
-          await requests.updateRequest({sentAt: Date.now()}, id, transaction)
-        }
+        await transactions.createTransactions(pendingTransactions, transaction)
+        await requests.updateRequest({sentAt: Date.now()}, id, transaction)
 
         await transaction.commit()
 
         context.logger.info({request}, loggerFormatText(type))
-      } catch (e) {
+      } catch (error) {
         transaction.rollback()
-        context.logger.error(e, `${loggerFormatText(type)}_ERROR`)
+        context.logger.error(error, `${loggerFormatText(type)}_ERROR`)
 
-        await requests.updateErrorRequest(id, e.message)
-        mq.publish('completed-requests', request.dataValues)
+        await requests.updateErrorRequest(id, error)
+        await mq.publish('error-requests', {...request.dataValues, error})
       }
     })
   },
