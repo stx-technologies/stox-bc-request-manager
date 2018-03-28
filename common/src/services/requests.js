@@ -20,13 +20,13 @@ const updateRequest = (propsToUpdate, id, transaction) =>
 
 const createRequest = ({id, type, data}) => db.requests.create({id, type, data, createdAt: new Date()})
 
-const updateErrorRequest = async (id, error) => updateRequest({error, errorAt: new Date()}, id)
+const updateErrorRequest = async (id, error) => updateRequest({error}, id)
 
 const countRequestByType = async (type, onlyPending) => ({
-  count: await db.requests.count({where: {type, ...(onlyPending ? {sentAt: null, error: null} : {})}}),
+  count: await db.requests.count({where: {type, ...(onlyPending ? {transactionPreparedAt: null, error: null} : {})}}),
 })
 
-const getPendingRequests = limit => db.requests.findAll({where: {sentAt: null, error: null}, limit})
+const getPendingRequests = limit => db.requests.findAll({where: {transactionPreparedAt: null, error: null}, limit})
 
 const getRequestByTransactionId = async (transactionId) => {
   const {requestId} = await getTransactionById(transactionId)

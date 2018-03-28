@@ -9,17 +9,18 @@ CREATE TABLE "requests"
     "data" json,
     "error" json,
     "result" json,
-    "errorAt" timestamp with time zone,
     "createdAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     "sentAt" timestamp with time zone,
-    "completedAt" timestamp with time zone
+    "completedAt" timestamp with time zone,
+    "transactionPreparedAt" timestamp with time zone,
 );
 
 CREATE INDEX requests_id ON "requests" USING btree ("id");
 CREATE INDEX requests_type ON "requests" USING btree ("type");
 CREATE INDEX requests_completed_at ON "requests" USING btree ("completedAt");
 CREATE INDEX requests_sent_at ON "requests" USING btree ("sentAt");
+CREATE INDEX requests_transaction_prepared_at ON "requests" USING btree ("transactionPreparedAt");
 
 CREATE TABLE "transactions"
 (
@@ -42,7 +43,6 @@ CREATE TABLE "transactions"
     "receipt" CHARACTER VARYING(256),
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
     "sentAt" timestamp with time zone,
-    "errorAt" timestamp with time zone,
     "completedAt" timestamp with time zone,
         "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
 
