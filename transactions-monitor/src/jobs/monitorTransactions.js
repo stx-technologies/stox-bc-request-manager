@@ -4,6 +4,7 @@ const {
   context,
   services: {transactions, requests},
 } = require('stox-bc-request-manager-common')
+const {errors: {logError}} = require('stox-common')
 const {kebabCase} = require('lodash')
 
 // TODO FOR DANNY HELMAN
@@ -58,7 +59,7 @@ module.exports = {
       await transaction.commit()
     } catch (e) {
       transaction.rollback()
-      throw new UnexpectedError(e)
+      logError(e)
     }
 
     correspondingRequests.forEach(request => mq.publish(kebabCase(request.type), request))
