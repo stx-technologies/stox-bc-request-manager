@@ -13,7 +13,7 @@ CREATE TABLE "requests"
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     "sentAt" timestamp with time zone,
     "completedAt" timestamp with time zone,
-    "transactionPreparedAt" timestamp with time zone,
+    "transactionPreparedAt" timestamp with time zone
 );
 
 CREATE INDEX requests_id ON "requests" USING btree ("id");
