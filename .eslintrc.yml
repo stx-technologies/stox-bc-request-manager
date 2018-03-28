@@ -1,6 +1,5 @@
 extends:
   airbnb-base
-  ./.eslintrc.test.yml
 
 env:
   node: true
@@ -28,3 +27,25 @@ settings:
       moduleDirectory:
         - node_modules
         - src
+
+globals:
+  jest: true
+  it: true
+  xit: true
+  expect: true
+  jestExpect: true
+  done: true
+  describe: true
+  beforeEach: true
+  React: true
+  Component: true
+  PureComponent: true
+  shallow: true
+  render: true
+  mount: true
+  sinon: true
+  localStorage: true
+  fetch: true
+  Promise: true
+  sleep: true
+  browser: true
