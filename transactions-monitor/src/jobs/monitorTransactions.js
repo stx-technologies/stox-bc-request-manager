@@ -3,7 +3,6 @@ const {monitorTransactionsCron} = require('../config')
 const {
   context,
   services: {transactions, requests},
-  utils: {getCompletedTransaction},
 } = require('stox-bc-request-manager-common')
 const {kebabCase} = require('lodash')
 
