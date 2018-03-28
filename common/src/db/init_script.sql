@@ -2,6 +2,10 @@ drop table "transactions";
 drop table "requests";
 drop table "accountNonces";
 
+DROP EXTENSION CITEXT;
+CREATE EXTENSION CITEXT;
+
+
 CREATE TABLE "requests"
 (
     "id" UUID PRIMARY KEY,
@@ -33,8 +37,8 @@ CREATE TABLE "transactions"
     "transactionHash" CHARACTER VARYING(66),
     "transactionData" bytea,
     "network" CHARACTER VARYING(256) NOT NULL,
-    "from" CHARACTER(42),
-    "to" CHARACTER(42),
+    "from" CITEXT,
+    "to" CITEXT,
     "currentBlockTime" timestamp with time zone,
     "blockNumber" BIGINT,
     "nonce" BIGINT,
@@ -64,7 +68,7 @@ CREATE INDEX transactions_transaction_hash ON "transactions" USING btree ("trans
 
 CREATE TABLE "accountNonces"
 (
-    "account" CHARACTER(42),
+    "account" CITEXT,
     "network" CHARACTER VARYING(256),
     "nonce" BIGINT,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
