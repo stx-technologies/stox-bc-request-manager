@@ -25,7 +25,7 @@ module.exports = (sequelize) => {
       createdAt: {type: DATE, allowNull: false},
       sentAt: {type: DATE},
       completedAt: {type: DATE},
-      errorAt: {type: DATE},
+      transactionPreparedAt: {type: DATE},
     },
     {
       indexes: indexes(['id', 'type', 'createdAt', 'completedAt', 'sentAt']),
@@ -54,7 +54,6 @@ module.exports = (sequelize) => {
       createdAt: {type: DATE, allowNull: false},
       sentAt: {type: DATE},
       error: {type: JSON},
-      errorAt: {type: DATE},
       completedAt: {type: DATE},
     },
     {

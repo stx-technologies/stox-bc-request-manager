@@ -23,7 +23,7 @@ module.exports = {
       try {
         const pendingTransactions = await plugins[type].prepareTransactions(request)
         await transactions.createTransactions(pendingTransactions, transaction)
-        await requests.updateRequest({sentAt: Date.now()}, id, transaction)
+        await requests.updateRequest({transactionPreparedAt: Date.now()}, id, transaction)
 
         await transaction.commit()
 
