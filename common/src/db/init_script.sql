@@ -2,9 +2,7 @@ drop table "transactions";
 drop table "requests";
 drop table "accountNonces";
 
-DROP EXTENSION CITEXT;
-CREATE EXTENSION CITEXT;
-
+CREATE EXTENSION IF NOT EXISTS CITEXT;
 
 CREATE TABLE "requests"
 (
