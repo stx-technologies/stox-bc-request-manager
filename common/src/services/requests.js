@@ -33,7 +33,7 @@ const getRequestByTransactionId = async (transactionId) => {
   return getRequestById(requestId)
 }
 
-const getCorrespandingRequests = async transations =>
+const getCorrespondingRequests = async transations =>
   db.requests.findAll({
     where: {
       id: {[Op.in]: transations.map(({requestId}) => requestId)},
@@ -49,6 +49,6 @@ module.exports = {
   getTransactionById,
   getRequestByTransactionId,
   getPendingRequests,
-  getCorrespandingRequests,
+  getCorrespondingRequests,
   updateErrorRequest,
 }

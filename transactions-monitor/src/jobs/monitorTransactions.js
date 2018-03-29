@@ -50,7 +50,7 @@ module.exports = {
   job: async () => {
     const {db, mq} = context
     const transactionToAdd = await getTransactionToAdd()
-    const correspondingRequests = await requests.getCorrespandingRequests(transactionToAdd)
+    const correspondingRequests = await requests.getCorrespondingRequests(transactionToAdd)
     const transaction = await db.sequelize.transaction()
     try {
       await Promise.all(transactionToAdd.map(bcTransaction => updateTransaction(bcTransaction, transaction)))
