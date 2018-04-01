@@ -13,9 +13,9 @@ CREATE TABLE "requests"
     "result" json,
     "createdAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
-    "transactionPreparedAt" timestamp with time zone
+    "transactionPreparedAt" timestamp with time zone,
     "sentAt" timestamp with time zone,
-    "completedAt" timestamp with time zone,
+    "completedAt" timestamp with time zone
 );
 
 CREATE INDEX requests_id ON "requests" USING btree ("id");
