@@ -1,5 +1,5 @@
 const {exceptions: {UnexpectedError}} = require('@welldone-software/node-toolbelt')
-const {monitorTransactionsCron} = require('../config')
+const {monitorTransactionsCron, limitTransactions} = require('../config')
 const {
   context,
   services: {transactions, requests},
@@ -34,7 +34,7 @@ const updateRequest = (request, bcTransaction, transaction) =>
   )
 
 const getTransactionToAdd = async () => {
-  const transactionsToCheck = await transactions.getUnhandledSentTransactions()
+  const transactionsToCheck = await transactions.getUnhandledSentTransactions(limitTransactions)
   const validatedTransactions = await Promise.all(transactionsToCheck.map(async bcTransaction => ({
     parityNode: await validateParityNode(bcTransaction),
     confirmations: await validateConfirmations(bcTransaction),

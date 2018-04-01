@@ -15,9 +15,9 @@ const getTransaction = async (query) => {
 const createTransactions = (transactions, sequelizeTransaction) =>
   db.transactions.bulkCreate(transactions, {transaction: sequelizeTransaction})
 
-const getPendingTransactions = () => db.transactions.findAll({where: {sentAt: null}})
+const getPendingTransactions = limit => db.transactions.findAll({where: {sentAt: null}, limit})
 
-const getUnhandledSentTransactions = () =>
+const getUnhandledSentTransactions = limit =>
   db.transactions.findAll({
     where: {
       sentAt: {
@@ -25,6 +25,7 @@ const getUnhandledSentTransactions = () =>
       },
       completedAt: null,
     },
+    limit,
   })
 
 module.exports = {

@@ -6,4 +6,5 @@ module.exports = mapEnv({
   mqConnectionUrl: '',
   web3Url: '',
   transactionsSignerBaseUrl: '',
+  limitTransactions: '',
 })
