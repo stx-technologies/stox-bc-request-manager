@@ -9,7 +9,7 @@ module.exports = {
     return [
       {
         requestId: id,
-        type: 'send',
+        type: 'deploy',
         from: fromAccount,
         network,
         transactionData: encodedAbi,
