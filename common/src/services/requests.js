@@ -1,9 +1,13 @@
 const {db} = require('../context')
-const {getTransactionById} = require('./transactions')
+const {getTransaction} = require('./transactions')
 const {Op} = require('sequelize')
+const {exceptions: {NotFoundError}} = require('@welldone-software/node-toolbelt')
 
 const getRequestById = async (id, full) => {
   const request = await db.requests.findOne({where: {id}})
+  if (!request) {
+    throw new NotFoundError('requestNotFound', {id})
+  }
   if (full) {
     request.dataValues.transations = await request.getTransactions()
   }
@@ -11,7 +15,7 @@ const getRequestById = async (id, full) => {
 }
 
 const getRequestByTransactionHash = async (transactionHash) => {
-  const {requestId} = await db.transations.findOne({where: {transactionHash}})
+  const {requestId} = await getTransaction({transactionHash})
   return getRequestById(requestId)
 }
 
@@ -29,7 +33,7 @@ const countRequestByType = async (type, onlyPending) => ({
 const getPendingRequests = limit => db.requests.findAll({where: {transactionPreparedAt: null, error: null}, limit})
 
 const getRequestByTransactionId = async (transactionId) => {
-  const {requestId} = await getTransactionById(transactionId)
+  const {requestId} = await getTransaction({id: transactionId})
   return getRequestById(requestId)
 }
 
@@ -46,7 +50,6 @@ module.exports = {
   countRequestByType,
   getRequestById,
   getRequestByTransactionHash,
-  getTransactionById,
   getRequestByTransactionId,
   getPendingRequests,
   getCorrespondingRequests,
