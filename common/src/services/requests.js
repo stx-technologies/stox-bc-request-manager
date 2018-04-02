@@ -44,6 +44,21 @@ const getCorrespondingRequests = async transactions =>
     },
   })
 
+const addTransactions = async (request, transactions) => {
+  const {id} = request
+  const transaction = await db.sequelize.transaction()
+
+  try {
+    await db.transactions.bulkCreate(transactions, {transaction})
+    await db.requests.update({transactionPreparedAt: Date.now()}, {where: {id}}, {transaction})
+
+    await transaction.commit()
+  } catch (error) {
+    transaction.rollback()
+    throw error
+  }
+}
+
 module.exports = {
   createRequest,
   updateRequest,
@@ -54,4 +69,5 @@ module.exports = {
   getPendingRequests,
   getCorrespondingRequests,
   updateErrorRequest,
+  addTransactions,
 }

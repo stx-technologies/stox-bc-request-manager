@@ -1,7 +1,7 @@
 const {
   context,
-  context: {db, mq},
-  services: {requests, transactions},
+  context: {mq},
+  services: {requests},
   utils: {loggerFormatText},
 } = require('stox-bc-request-manager-common')
 const {errors: {logError}} = require('stox-common')
@@ -20,23 +20,16 @@ module.exports = {
     context.logger.info({count: pendingRequests.length}, 'PENDING_REQUESTS')
 
     const funcs = pendingRequests.map(request => async () => {
-      const transaction = await db.sequelize.transaction()
       const {id, type} = request
 
       try {
         const pendingTransactions = await plugins[type].prepareTransactions(request)
-        await transactions.createTransactions(pendingTransactions, transaction)
-        await requests.updateRequest({transactionPreparedAt: Date.now()}, id, transaction)
-
-        await transaction.commit()
+        await requests.addTransactions(request, pendingTransactions)
 
         context.logger.info({request}, loggerFormatText(type))
       } catch (error) {
-        console.error({error})
-        transaction.rollback()
-        context.logger.error(error, `${loggerFormatText(type)}_ERROR`)
-
         await requests.updateErrorRequest(id, error)
+        context.logger.error(error, `${loggerFormatText(type)}_HANDLER_ERROR`)
         await mq.publish('error-requests', {...request.dataValues, error})
       }
     })
