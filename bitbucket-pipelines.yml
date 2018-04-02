@@ -1,0 +1,22 @@
+image: atlassian/default-image:2
+
+options:
+  docker: true
+
+pipelines:
+  default:
+    - step:
+        caches:
+          - node
+        script:
+#           - ./install.sh clean
+#           - ./lint.sh
+           - apt-get update
+           - curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+           - unzip awscli-bundle.zip -d /tmp/
+           - /tmp/awscli-bundle/install -b ~/bin/aws
+           - export PATH=~/bin:$PATH
+           - export IMAGE_NAME=$DOCKER_REGISTRY_DEV:$BITBUCKET_BUILD_NUMBER
+           - docker build -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" -f deploy/service.Dockerfile  .
+           - eval $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
+           - docker push $IMAGE_NAME
