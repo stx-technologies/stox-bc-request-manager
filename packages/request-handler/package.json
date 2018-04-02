@@ -8,8 +8,7 @@
     "serve": "node .",
     "lint": "eslint -c ../../.eslintrc.yml .",
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src",
-    "jest:integration": "jest",
-    "test": "jest --config ./jest.json"
+    "jest:integration": "jest"
   },
   "author": "",
   "license": "ISC",
