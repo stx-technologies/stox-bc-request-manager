@@ -2,27 +2,24 @@ FROM node:8.9.1
 
 ENV NODE_ENV=production
 
-ARG DIR
-ENV DIR $DIR
+ARG SSH_PRIVATE_KEY
+ENV SERVICE_NAME ''
 
-COPY ./deploy/id_rsa_bitbucket /root/.ssh/id_rsa
+RUN npm i -g lerna
+
+RUN mkdir /root/.ssh/
+RUN echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
 RUN chmod 400 /root/.ssh/id_rsa
 RUN chown -R root:root /root/.ssh
 RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan bitbucket.org >> /root/.ssh/known_hosts
 
-RUN mkdir -p common
-COPY ./common ./common
-RUN rm -rf ./common/node_modules
-RUN npm install --prefix common/
+RUN mkdir services
+COPY ./ ./services
 
-RUN mkdir -p $DIR
-COPY ./$DIR ./$DIR
-RUN rm -rf ./$DIR/node_modules
-RUN rm -rf ./$DIR/.env
-RUN rm -rf ./$DIR/package-lock.json
-RUN npm install --prefix $DIR/
+WORKDIR ./services
 
-WORKDIR $DIR
+RUN npm run setup:clean
 
-ENTRYPOINT [ "npm", "run", "serve"]
+CMD npm run serve --prefix packages/$SERVICE_NAME
+

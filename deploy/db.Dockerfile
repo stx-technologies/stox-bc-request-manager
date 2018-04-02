@@ -1,3 +1,3 @@
 FROM postgres:10.3
 
-COPY common/src/db/init_script.sql /docker-entrypoint-initdb.d
+COPY packages/common/src/db/init_script.sql /docker-entrypoint-initdb.d

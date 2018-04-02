@@ -2,6 +2,7 @@ extends:
   airbnb-base
 
 env:
+  jest: true
   node: true
   es6: true
 
@@ -30,6 +31,7 @@ settings:
 
 globals:
   jest: true
+  jasmine: true
   it: true
   xit: true
   expect: true

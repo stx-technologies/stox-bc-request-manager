@@ -1,42 +1,20 @@
 version: '3.3'
 services:
 
-    request-reader:
-        image: ${BASE_IMAGE}
-        container_name: request-reader
-        depends_on:
-            - activemq
-            - db
-        environment:
-            NETWORK: $NETWORK
-            DATABASE_URL: $DATABASE_URL
-            MQ_CONNECTION_URL: $MQ_CONNECTION_URL
-            SERVICE_NAME: request-reader
-
-        env_file:
-            - ../packages/request-reader/.env${ENVIRONMENT}
-
-        networks:
-            - subsystems
-        tty: true
-        restart: always
-
     request-handler:
         image: ${BASE_IMAGE}
         container_name: request-handler
         depends_on:
             - activemq
             - db
-
-        env_file:
-            - ../packages/request-handler/.env${ENVIRONMENT}
-
         environment:
             NETWORK: $NETWORK
             DATABASE_URL: $DATABASE_URL
             MQ_CONNECTION_URL: $MQ_CONNECTION_URL
-            SERVICE_NAME: request-handler
+            SERVICE_NAME: request-reader-test
 
+        env_file:
+            - ../.env${ENVIRONMENT}
         networks:
             - subsystems
         tty: true
@@ -44,7 +22,7 @@ services:
 
     db:
         build:
-            context: ../
+            context: ../../
             dockerfile: deploy/db.Dockerfile
         container_name: db
         networks:

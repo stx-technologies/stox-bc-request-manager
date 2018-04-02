@@ -1,0 +1,28 @@
+{
+  "name": "stox-bc-request-manager-common",
+  "version": "1.0.0",
+  "description": "common database and services package for request manager",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint -c ../../.eslintrc.yml .",
+    "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src"
+  },
+  "dependencies": {
+    "@welldone-software/node-toolbelt": "^1.2.0",
+    "lodash": "^4.17.5",
+    "require-all": "^2.2.0",
+    "sequelize": "^4.35.2",
+    "uuid4": "^1.0.0",
+    "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev",
+    "web3": "^1.0.0-beta.33"
+  },
+  "devDependencies": {
+    "eslint": "^4.9.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.7.0",
+    "pino": "^4.15.3",
+    "prettier": "^1.7.4",
+    "prettier-eslint": "^8.2.1",
+    "prettier-eslint-cli": "^4.4.0"
+  }
+}
