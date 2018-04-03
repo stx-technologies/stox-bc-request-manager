@@ -50,3 +50,7 @@ deletes node_modules and package_lock.json before installing
 `$ npm run lint`
 
 run lint for all packages
+
+`$ ./common.sh link`
+
+link stox-common package to all services
