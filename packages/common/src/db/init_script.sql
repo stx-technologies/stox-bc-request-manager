@@ -1,6 +1,8 @@
---drop table "transactions";
---drop table "requests";
---drop table "accountNonces";
+drop table "transactions";
+drop table "requests";
+drop table "accountNonces";
+
+CREATE EXTENSION IF NOT EXISTS CITEXT;
 
 CREATE TABLE "requests"
 (
@@ -9,9 +11,9 @@ CREATE TABLE "requests"
     "data" json,
     "error" json,
     "result" json,
-    "errorAt" timestamp with time zone,
     "createdAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
+    "transactionPreparedAt" timestamp with time zone,
     "sentAt" timestamp with time zone,
     "completedAt" timestamp with time zone
 );
@@ -20,6 +22,7 @@ CREATE INDEX requests_id ON "requests" USING btree ("id");
 CREATE INDEX requests_type ON "requests" USING btree ("type");
 CREATE INDEX requests_completed_at ON "requests" USING btree ("completedAt");
 CREATE INDEX requests_sent_at ON "requests" USING btree ("sentAt");
+CREATE INDEX requests_transaction_prepared_at ON "requests" USING btree ("transactionPreparedAt");
 
 CREATE TABLE "transactions"
 (
@@ -32,8 +35,8 @@ CREATE TABLE "transactions"
     "transactionHash" CHARACTER VARYING(66),
     "transactionData" bytea,
     "network" CHARACTER VARYING(256) NOT NULL,
-    "from" CHARACTER(42),
-    "to" CHARACTER(42),
+    "from" CITEXT,
+    "to" CITEXT,
     "currentBlockTime" timestamp with time zone,
     "blockNumber" BIGINT,
     "nonce" BIGINT,
@@ -42,7 +45,6 @@ CREATE TABLE "transactions"
     "receipt" CHARACTER VARYING(256),
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
     "sentAt" timestamp with time zone,
-    "errorAt" timestamp with time zone,
     "completedAt" timestamp with time zone,
         "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
 
@@ -60,10 +62,11 @@ CREATE INDEX transactions_from ON "transactions" USING btree ("from");
 CREATE INDEX transactions_to ON "transactions" USING btree ("to");
 CREATE INDEX transactions_network ON "transactions" USING btree ("network");
 CREATE INDEX transactions_updated_at ON "transactions" USING btree ("updatedAt");
+CREATE INDEX transactions_transaction_hash ON "transactions" USING btree ("transactionHash");
 
 CREATE TABLE "accountNonces"
 (
-    "account" CHARACTER(42),
+    "account" CITEXT,
     "network" CHARACTER VARYING(256),
     "nonce" BIGINT,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,

@@ -1,9 +1,7 @@
 const {exceptions: {UnexpectedError}} = require('@welldone-software/node-toolbelt')
-const {writePendingTransactionsCron, transactionsSignerBaseUrl} = require('../config')
-const {http,
-  utils: {promise: {promiseSerial}},
-} = require('stox-common')
-
+const {writePendingTransactionsCron, transactionsSignerBaseUrl, limitTransactions} = require('../config')
+const {http, errors: {logError}} = require('stox-common')
+const promiseSerial = require('promise-serial')
 const {
   services: {
     accounts: {fetchNextAccountNonce, findOrCreateAccountNonce},
@@ -14,11 +12,10 @@ const {
   context: {db, blockchain},
 } = require('stox-bc-request-manager-common')
 
-const {web3} = blockchain
 const clientHttp = http(transactionsSignerBaseUrl)
 
 const fetchNonceFromEtherNode = async fromAccount =>
-  web3.eth.getTransactionCount(fromAccount)
+  blockchain.web3.eth.getTransactionCount(fromAccount)
 
 const isEtherNodeNonceSynced = async ({from, network}, dbTransaction) => {
   const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
@@ -35,7 +32,7 @@ const signTransactionInTransactionSigner = async (from, unsignedTransaction, tra
 }
 
 const sendTransactionToBlockchain = async signedTransaction => new Promise(((resolve) => {
-  web3.eth.sendSignedTransaction(signedTransaction)
+  blockchain.web3.eth.sendSignedTransaction(signedTransaction)
     .once('transactionHash', (hash) => {
       context.logger.info({hash}, 'TRANSACTION_SENT')
       resolve(hash)
@@ -72,9 +69,9 @@ const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
 module.exports = {
   cron: writePendingTransactionsCron,
   job: async () => {
-    const pendingTransactions = await getPendingTransactions() // d.i
+    const pendingTransactions = await getPendingTransactions(limitTransactions) // d.i
     const dbTransaction = await db.sequelize.transaction()
-    const promises = pendingTransactions.map(async (transaction) => {
+    const promises = pendingTransactions.map(transaction => async () => {
       const [isNonceSynced, nodeNonce, dbNonce] = await isEtherNodeNonceSynced(transaction, dbTransaction)
 
       if (isNonceSynced) {
@@ -88,9 +85,9 @@ module.exports = {
         to: transaction.to,
         data: transaction.transactionData,
         gasPrice: await fetchGasPriceFromGasCalculator(),
-        chainId: await web3.eth.net.getId(),
+        chainId: await blockchain.web3.eth.net.getId(),
       }
-      unsignedTransaction.gasLimit = await web3.eth.estimateGas(transaction.from, unsignedTransaction)
+      unsignedTransaction.gasLimit = await blockchain.web3.eth.estimateGas(transaction.from, unsignedTransaction)
 
       const signedTransaction =
         await signTransactionInTransactionSigner(transaction.from, unsignedTransaction, transaction.id)
@@ -108,7 +105,7 @@ module.exports = {
       await dbTransaction.commit()
     } catch (e) {
       dbTransaction.rollback()
-      throw new UnexpectedError(e)
+      logError(e)
     }
   },
 }

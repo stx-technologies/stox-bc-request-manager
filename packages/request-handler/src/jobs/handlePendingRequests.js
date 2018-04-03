@@ -1,20 +1,16 @@
 const {
   context,
-  context: {db, mq},
-  services: {requests, transactions},
+  context: {mq},
+  services: {requests},
   utils: {loggerFormatText},
 } = require('stox-bc-request-manager-common')
+const {errors: {logError}} = require('stox-common')
 const {handlePendingRequestCron, limitPendingRequest} = require('../config')
-const plugins = require('plugins')
+const requireAll = require('require-all')
+const path = require('path')
+const promiseSerial = require('promise-serial')
 
-// fix double update on multiple servers
-const handleMultipleInstances = async (id) => {
-  const {sentAt} = await requests.getRequestById(id)
-  if (sentAt) {
-    context.logger.error({}, 'REQUEST_ALREADY_SENT')
-  }
-  return sentAt
-}
+const plugins = requireAll(path.resolve(__dirname, '../plugins'))
 
 module.exports = {
   cron: handlePendingRequestCron,
@@ -22,31 +18,26 @@ module.exports = {
     const pendingRequests = await requests.getPendingRequests(limitPendingRequest)
 
     context.logger.info({count: pendingRequests.length}, 'PENDING_REQUESTS')
-    const requestPromises = pendingRequests.map(async (request) => {
-      const transaction = await db.sequelize.transaction()
+
+    const funcs = pendingRequests.map(request => async () => {
       const {id, type} = request
+
       try {
         const pendingTransactions = await plugins[type].prepareTransactions(request)
-        const alreadyInProcess = await handleMultipleInstances(id)
+        await requests.addTransactions(request, pendingTransactions)
 
-        if (!alreadyInProcess) {
-          await transactions.createTransactions(pendingTransactions, transaction)
-          await requests.updateRequest({sentAt: Date.now()}, id, transaction)
-        }
-
-        await transaction.commit()
         context.logger.info({request}, loggerFormatText(type))
-        return null
-      } catch (e) {
-        transaction.rollback()
-        context.logger.error(e, `${loggerFormatText(type)}_ERROR`)
-
-        await requests.updateErrorRequest(id, e.message)
-        return request
+      } catch (error) {
+        await requests.updateErrorRequest(id, error)
+        context.logger.error(error, `${loggerFormatText(type)}_HANDLER_ERROR`)
+        await mq.publish('error-requests', {...request.dataValues, error})
       }
     })
-    const failedRequests = (await Promise.all(requestPromises)).filter(a => !!a)
 
-    failedRequests.forEach(request => mq.publish('completed-requests', request.dataValues))
+    try {
+      await promiseSerial(funcs)
+    } catch (e) {
+      logError(e)
+    }
   },
 }

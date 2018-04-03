@@ -17,7 +17,7 @@
     "app-module-path": "^2.2.0",
     "require-all": "^2.2.0",
     "stox-bc-request-manager-common": "1.0.0",
-    "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev"
+    "stox-common": "git+https://bitbucket.org/stx_site/stox-common.git#dev"
   },
   "devDependencies": {
     "eslint": "^4.9.0",

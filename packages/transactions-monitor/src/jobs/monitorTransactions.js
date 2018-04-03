@@ -1,9 +1,11 @@
 const {exceptions: {UnexpectedError}} = require('@welldone-software/node-toolbelt')
-const {monitorTransactionsCron} = require('../config')
+const {monitorTransactionsCron, limitTransactions} = require('../config')
 const {
   context,
   services: {transactions, requests},
 } = require('stox-bc-request-manager-common')
+const {errors: {logError}} = require('stox-common')
+const {kebabCase} = require('lodash')
 
 // TODO FOR DANNY HELMAN
 // eslint-disable-next-line no-unused-vars
@@ -32,7 +34,7 @@ const updateRequest = (request, bcTransaction, transaction) =>
   )
 
 const getTransactionToAdd = async () => {
-  const transactionsToCheck = await transactions.getUnhandledSentTransactions()
+  const transactionsToCheck = await transactions.getUnhandledSentTransactions(limitTransactions)
   const validatedTransactions = await Promise.all(transactionsToCheck.map(async bcTransaction => ({
     parityNode: await validateParityNode(bcTransaction),
     confirmations: await validateConfirmations(bcTransaction),
@@ -48,7 +50,7 @@ module.exports = {
   job: async () => {
     const {db, mq} = context
     const transactionToAdd = await getTransactionToAdd()
-    const correspondingRequests = await requests.getCorrespandingRequests(transactionToAdd)
+    const correspondingRequests = await requests.getCorrespondingRequests(transactionToAdd)
     const transaction = await db.sequelize.transaction()
     try {
       await Promise.all(transactionToAdd.map(bcTransaction => updateTransaction(bcTransaction, transaction)))
@@ -57,9 +59,9 @@ module.exports = {
       await transaction.commit()
     } catch (e) {
       transaction.rollback()
-      throw new UnexpectedError(e)
+      logError(e)
     }
 
-    correspondingRequests.forEach(request => mq.publish(request.type, request))
+    correspondingRequests.forEach(request => mq.publish(kebabCase(request.type), request))
   },
 }
