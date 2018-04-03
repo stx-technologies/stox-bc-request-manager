@@ -46,8 +46,7 @@ CREATE TABLE "transactions"
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
     "sentAt" timestamp with time zone,
     "completedAt" timestamp with time zone,
-        "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
-
+    "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     CONSTRAINT transactions_requestId_fk FOREIGN KEY ("requestId")
       REFERENCES "requests" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
