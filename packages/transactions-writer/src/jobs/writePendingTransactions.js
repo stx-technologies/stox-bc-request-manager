@@ -45,7 +45,6 @@ const sendTransactionToBlockchain = async signedTransaction => new Promise(((res
 const updateTransaction = async (transaction, unsignedTransaction, transactionHash, dbTransaction) => {
   await transaction.update(
     {
-      // f.ii
       transactionHash,
       gasPrice: unsignedTransaction.gasPrice,
       nonce: unsignedTransaction.nonce,
@@ -57,11 +56,10 @@ const updateTransaction = async (transaction, unsignedTransaction, transactionHa
 
 const updateRequest = async ({requestId}, dbTransaction) => {
   const request = await requests.getRequestById(requestId)
-  await request.update({sentAt: Date.now()}, {transaction: dbTransaction}) // f.iii
+  await request.update({sentAt: Date.now()}, {transaction: dbTransaction})
 }
 
 const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
-  // f.iv
   const accountNonce = await findOrCreateAccountNonce(from, network, dbTransaction)
   await accountNonce.update({nonce}, {transaction: dbTransaction})
 }
@@ -69,13 +67,12 @@ const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
 module.exports = {
   cron: writePendingTransactionsCron,
   job: async () => {
-    const pendingTransactions = await getPendingTransactions(limitTransactions) // d.i
+    const pendingTransactions = await getPendingTransactions(limitTransactions)
     const dbTransaction = await db.sequelize.transaction()
     const promises = pendingTransactions.map(transaction => async () => {
       const [isNonceSynced, nodeNonce, dbNonce] = await isEtherNodeNonceSynced(transaction, dbTransaction)
 
       if (isNonceSynced) {
-        // d.ii-iv
         context.logger.warn({transaction, nodeNonce, dbNonce}, 'NONCE_NOT_SYNCED')
         return
       }
