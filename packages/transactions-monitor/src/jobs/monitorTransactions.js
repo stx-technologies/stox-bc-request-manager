@@ -1,67 +1,33 @@
-const {exceptions: {UnexpectedError}} = require('@welldone-software/node-toolbelt')
-const {monitorTransactionsCron, limitTransactions} = require('../config')
-const {
-  context,
-  services: {transactions, requests},
-} = require('stox-bc-request-manager-common')
+const {monitorTransactionsCron} = require('../config')
+const promiseSerial = require('promise-serial')
+const {context, services: {transactions}, utils: {getCompletedTransaction}} = require('stox-bc-request-manager-common')
 const {errors: {logError}} = require('stox-common')
-const {kebabCase} = require('lodash')
-
-// TODO FOR DANNY HELMAN
-// eslint-disable-next-line no-unused-vars
-const validateParityNode = async transaction => true
-
-// eslint-disable-next-line no-unused-vars
-const validateConfirmations = async transaction => true
-
-// TODO by Danny hellman: fill Receipt, Blocknumber, BlockTime
-// eslint-disable-next-line no-unused-vars
-const updateTransaction = (bcTransaction, transaction) =>
-  bcTransaction.update(
-    {
-      completedAt: Date.now(),
-    },
-    {transaction}
-  )
-
-const updateRequest = (request, bcTransaction, transaction) =>
-  request.update(
-    {
-      completedAt: Date.now(),
-      error: bcTransaction.error,
-    },
-    {transaction}
-  )
-
-const getTransactionToAdd = async () => {
-  const transactionsToCheck = await transactions.getUnhandledSentTransactions(limitTransactions)
-  const validatedTransactions = await Promise.all(transactionsToCheck.map(async bcTransaction => ({
-    parityNode: await validateParityNode(bcTransaction),
-    confirmations: await validateConfirmations(bcTransaction),
-    transaction: bcTransaction,
-  })))
-  return validatedTransactions
-    .filter(({parityNode, confirmations}) => parityNode && confirmations)
-    .map(({transaction}) => transaction)
-}
 
 module.exports = {
   cron: monitorTransactionsCron,
   job: async () => {
-    const {db, mq} = context
-    const transactionToAdd = await getTransactionToAdd()
-    const correspondingRequests = await requests.getCorrespondingRequests(transactionToAdd)
-    const transaction = await db.sequelize.transaction()
+    const {mq, logger} = context
+    const uncompletedTransactions = await transactions.getUncompletedTransactions()
+
+    context.logger.info({count: uncompletedTransactions.length}, 'UNCOMPLETED_TRANSACTIONS')
+
+    const funcs = uncompletedTransactions.map(transaction => async () => {
+      const {transactionHash} = transaction.dataValues
+
+      try {
+        const completedTransaction = await getCompletedTransaction(transactionHash)
+        const {requestId} = await transactions.updateCompletedTransaction(transaction, completedTransaction)
+
+        mq.publish('completed-requests', {requestId})
+      } catch (e) {
+        logger.error(e, 'COMPLETED_TRANSACTION')
+      }
+    })
+
     try {
-      await Promise.all(transactionToAdd.map(bcTransaction => updateTransaction(bcTransaction, transaction)))
-      await Promise.all(correspondingRequests.map(request =>
-        updateRequest(request, transactionToAdd.find(({requestId}) => requestId === request.id), transaction)))
-      await transaction.commit()
+      await promiseSerial(funcs)
     } catch (e) {
-      transaction.rollback()
       logError(e)
     }
-
-    correspondingRequests.forEach(request => mq.publish(kebabCase(request.type), request))
   },
 }
