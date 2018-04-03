@@ -50,10 +50,10 @@ queue, so other subsystems can handle process the results if needed.
 
 ## install
 
-`$ ./install.sh`
+`$ npm run setup`
 
 run npm install in all packages
 
-`$ ./install.sh clean`
+`$ npm run setup:clean`
 
-delete node_modules and package_lock.json before installing
+deletes node_modules and package_lock.json before installing
