@@ -33,11 +33,11 @@ const updateCompletedTransaction = async ({id, transactionHash}, {isSuccessful, 
   const transaction = await db.sequelize.transaction()
 
   try {
-    const transactionModel = await db.transactions.findOne({where: {id}, transaction})
-    const requestModel = await db.transactions.findOne({where: {transactionHash}, transaction})
+    const transactionInstance = await db.transactions.findOne({where: {id}, transaction})
+    const requestInstance = await db.transactions.findOne({where: {transactionHash}, transaction})
 
-    await requestModel.updateAttributes({completedAt: new Date()}, {transaction})
-    await transactionModel.updateAttributes(
+    await requestInstance.updateAttributes({completedAt: new Date()}, {transaction})
+    await transactionInstance.updateAttributes(
       {
         completedAt: Date.now(),
         receipt: JSON.stringify(receipt),
@@ -51,7 +51,7 @@ const updateCompletedTransaction = async ({id, transactionHash}, {isSuccessful, 
     )
     await transaction.commit()
 
-    return requestModel.dataValues
+    return requestInstance.dataValues
   } catch (e) {
     transaction.rollback()
     throw e
