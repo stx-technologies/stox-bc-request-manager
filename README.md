@@ -1,5 +1,4 @@
-#Request Manager
-
+# Request Manager
 
 ## Description
 The Request Manager holds the data of all pending and confirmed requests related to the
@@ -27,28 +26,18 @@ publish the request + transaction to a queue to notify other subsystems about it
 Reads all pending transactions from the database, it prepares them (with the help of the
 Blockchain Signer and the Gas Calculator), and sends it to the Parity Node.
 
-
-## Queues
-
-**Incoming Requests​**
-
-Listen to incoming requests and writes them to the database
-
-**Completed Requests​**
-
-Send completed requests (either failed or successful) to this
-queue, so other subsystems can handle process the results if needed.
-
-
 ## Docker containers
-**Postgress database**
+**postgress database**
+```
+docker build -f db.Dockerfile -t stox-bc-rm-postgres .
+docker run --name stox-bc-rm-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=secret -e POSTGRES_DB=stoxbcrm -d -p 5434:5432 stox-bc-rm-postgres
+```
+**active mq**
+```
+$ docker run -p 61613:61613 -p 8161:8161 -d --name="activemq" rmohr/activemq
+```
 
-`$ docker run --name stox-bc-rm-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=secret -e POSTGRES_DB=stoxbcrm -d -p 5434:5432 postgres`
-
-`$ docker run -p 61613:61613 -p 8161:8161 -d --name="activemq" rmohr/activemq`
-
-
-## install
+## Getting Started
 
 `$ npm run setup`
 
@@ -57,3 +46,7 @@ run npm install in all packages
 `$ npm run setup:clean`
 
 deletes node_modules and package_lock.json before installing
+
+`$ npm run lint`
+
+run lint for all packages
