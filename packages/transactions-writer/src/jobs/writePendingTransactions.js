@@ -19,8 +19,8 @@ const fetchNonceFromEtherNode = async fromAccount =>
 
 const isEtherNodeNonceSynced = async ({from, network}, dbTransaction) => {
   const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
-  const nonceFromAccountNonce = await fetchNextAccountNonce(from, network, dbTransaction)
-  return [nonceFromAccountNonce >= nonceFromEtherNode, nonceFromEtherNode, nonceFromAccountNonce]
+  const nonceFromAccountNonces = await fetchNextAccountNonce(from, network, dbTransaction)
+  return [nonceFromAccountNonces >= nonceFromEtherNode, nonceFromEtherNode, nonceFromAccountNonces]
 }
 
 const fetchGasPriceFromGasCalculator = async () => '5000000000' // 5 Gwei
@@ -72,19 +72,26 @@ module.exports = {
     const promises = pendingTransactions.map(transaction => async () => {
       const [isNonceSynced, nodeNonce, dbNonce] = await isEtherNodeNonceSynced(transaction, dbTransaction)
 
-      if (isNonceSynced) {
-        context.logger.warn({transaction, nodeNonce, dbNonce}, 'NONCE_NOT_SYNCED')
+      if (!isNonceSynced) {
+        context.logger.warn({transactionId: transaction.id, nodeNonce, dbNonce}, 'NONCE_NOT_SYNCED')
         return
       }
 
       const unsignedTransaction = {
         nonce: nodeNonce,
         to: transaction.to,
-        data: transaction.transactionData,
+        data: transaction.transactionData.toString(),
         gasPrice: await fetchGasPriceFromGasCalculator(),
         chainId: await blockchain.web3.eth.net.getId(),
       }
-      unsignedTransaction.gasLimit = await blockchain.web3.eth.estimateGas(transaction.from, unsignedTransaction)
+
+      unsignedTransaction.gasLimit = await blockchain.web3.eth.estimateGas({
+        from: transaction.from,
+        to: unsignedTransaction.to,
+        gasPrice: unsignedTransaction.gasPrice,
+        nonce: unsignedTransaction.nonce,
+        data: unsignedTransaction.data,
+      })
 
       const signedTransaction =
         await signTransactionInTransactionSigner(transaction.from, unsignedTransaction, transaction.id)
