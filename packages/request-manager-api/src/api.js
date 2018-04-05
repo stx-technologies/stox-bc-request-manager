@@ -10,6 +10,7 @@ module.exports = {
   cors: false,
   routes: (router, _) => {
     router.post('/requests', _(({body}) => requests.createRequest(body)))
+    router.get('/longPendingRequests/:days', _(({params: {days}}) => requests.getLongPendingRequests(days)))
     router.get('/requests/:id', _(({params: {id}}) => requests.getRequestById(id)))
     router.get('/requests/:id/transactions', _(({params: {id}}) => requests.getRequestById(id, true)))
     router.get('/requests/transactions/:id', _(({params: {id}}) => requests.getRequestByTransactionId(id)))
