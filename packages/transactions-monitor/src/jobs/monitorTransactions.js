@@ -1,4 +1,4 @@
-const {monitorTransactionsCron} = require('../config')
+const {monitorTransactionsCron, requiredConfirmations} = require('../config')
 const promiseSerial = require('promise-serial')
 const {context, services: {transactions}, utils: {getCompletedTransaction}} = require('stox-bc-request-manager-common')
 const {errors: {logError}} = require('stox-common')
@@ -16,11 +16,13 @@ module.exports = {
 
       try {
         const completedTransaction = await getCompletedTransaction(transactionHash)
-        const {requestId} = await transactions.updateCompletedTransaction(transaction, completedTransaction)
 
-        mq.publish('completed-requests', {requestId})
+        if (completedTransaction.confirmations >= requiredConfirmations) {
+          const {requestId} = await transactions.updateCompletedTransaction(transaction, completedTransaction)
+          mq.publish('completed-requests', {requestId})
+        }
       } catch (e) {
-        logger.error(e, 'COMPLETED_TRANSACTION')
+        logger.error(e, 'MONITOR_TRANSACTION_ERROR', {transactionId: transaction.Id})
       }
     })
 

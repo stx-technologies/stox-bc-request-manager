@@ -6,4 +6,5 @@ module.exports = mapEnv({
   mqConnectionUrl: '',
   requiredConfirmations: '',
   limitTransactions: '',
+  web3Url: '',
 })
