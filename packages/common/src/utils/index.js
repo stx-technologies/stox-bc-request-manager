@@ -17,7 +17,13 @@ const getCompletedTransaction = async (transactionHash, currentBlockNumber) => {
   const transactionReceipt = await blockchain.web3.eth.getTransactionReceipt(transactionHash)
 
   if (transactionReceipt) {
-    const isSuccessful = transactionReceipt.status === '0x1'
+    // status field is not set for parity dev chain. Will be fixed on parity 1.10.
+    // On main ethereum chain (post byzantium fork) it can only be 0 or 1.
+    // For now we consider null status as a success
+    // See also:
+    // https://github.com/paritytech/parity/issues/7735
+    // https://github.com/paritytech/parity/pull/7753
+    const isSuccessful = (transactionReceipt.status === '0x1' || transactionReceipt.status === null)
     return {
       isSuccessful,
       blockTime: secondsToDate((await blockchain.web3.eth.getBlock(transactionReceipt.blockNumber, false)).timestamp),
