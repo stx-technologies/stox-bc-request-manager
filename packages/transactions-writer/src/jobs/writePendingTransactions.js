@@ -99,7 +99,13 @@ module.exports = {
       await updateRequest(transaction, dbTransaction)
       await updateAccountNonce(transaction, nodeNonce, dbTransaction)
 
-      context.logger.info({transaction}, 'SUCCESSFULLY_UPDATED_TRANSACTION')
+      context.logger.info(
+        {
+          id: transaction.id,
+          transactionHash: transaction.transactionHash,
+        },
+        'SUCCESSFULLY_UPDATED_TRANSACTION'
+      )
     })
 
     try {
