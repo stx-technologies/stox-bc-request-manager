@@ -1,4 +1,3 @@
-const {exceptions: {UnexpectedError}} = require('@welldone-software/node-toolbelt')
 const {writePendingTransactionsCron, transactionsSignerBaseUrl, limitTransactions} = require('../config')
 const {http, errors: {logError}} = require('stox-common')
 const promiseSerial = require('promise-serial')
@@ -19,26 +18,27 @@ const fetchNonceFromEtherNode = async fromAccount =>
 
 const isEtherNodeNonceSynced = async ({from, network}, dbTransaction) => {
   const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
-  const nonceFromAccountNonces = await fetchNextAccountNonce(from, network, dbTransaction)
-  return [nonceFromAccountNonces >= nonceFromEtherNode, nonceFromEtherNode, nonceFromAccountNonces]
+  const nonceFromDB = await fetchNextAccountNonce(from, network, dbTransaction)
+  return [nonceFromDB <= nonceFromEtherNode, nonceFromEtherNode, nonceFromDB]
 }
 
-const fetchGasPriceFromGasCalculator = async () => '5000000000' // 5 Gwei
+const fetchGasPriceFromGasCalculator = async () => '5' // 5 Gwei
 
-const signTransactionInTransactionSigner = async (from, unsignedTransaction, transactionId) => {
-  const signedTransaction = await clientHttp.post('/transactions/sign', {from, unsignedTransaction, transactionId})
-  context.logger.info({from, unsignedTransaction, signedTransaction, transactionId}, 'TRANSACTION_SIGNED')
+const signTransactionInTransactionSigner = async (fromAddress, unsignedTransaction, transactionId) => {
+  const signedTransaction =
+    await clientHttp.post('/transactions/sign', {fromAddress, unsignedTransaction, transactionId})
+  context.logger.info({fromAddress, unsignedTransaction, signedTransaction, transactionId}, 'TRANSACTION_SIGNED')
   return signedTransaction
 }
 
-const sendTransactionToBlockchain = async signedTransaction => new Promise(((resolve) => {
+const sendTransactionToBlockchain = async signedTransaction => new Promise(((resolve, reject) => {
   blockchain.web3.eth.sendSignedTransaction(signedTransaction)
     .once('transactionHash', (hash) => {
       context.logger.info({hash}, 'TRANSACTION_SENT')
       resolve(hash)
     })
     .on('error', (error) => {
-      throw new UnexpectedError(error)
+      reject(error)
     })
 }))
 
@@ -54,10 +54,8 @@ const updateTransaction = async (transaction, unsignedTransaction, transactionHa
   )
 }
 
-const updateRequest = async ({requestId}, dbTransaction) => {
-  const request = await requests.getRequestById(requestId)
-  await request.update({sentAt: Date.now()}, {transaction: dbTransaction})
-}
+const updateRequest = async ({requestId}, dbTransaction) =>
+  requests.updateRequest({sentAt: Date.now()}, requestId, dbTransaction)
 
 const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
   const accountNonce = await findOrCreateAccountNonce(from, network, dbTransaction)
