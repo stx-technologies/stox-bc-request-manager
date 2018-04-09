@@ -1,4 +1,4 @@
-const {writePendingTransactionsCron, transactionsSignerBaseUrl, limitTransactions} = require('../config')
+const {writePendingTransactionsCron, transactionsSignerBaseUrl, limitTransactions, defaultGasPrice} = require('../config')
 const {http, errors: {logError}} = require('stox-common')
 const promiseSerial = require('promise-serial')
 const {
@@ -22,7 +22,7 @@ const isEtherNodeNonceSynced = async ({from, network}, dbTransaction) => {
   return [nonceFromDB <= nonceFromEtherNode, nonceFromEtherNode, nonceFromDB]
 }
 
-const fetchGasPriceFromGasCalculator = async () => '5' // 5 Gwei
+const fetchGasPriceFromGasCalculator = async () => parseInt(defaultGasPrice, 10)
 
 const signTransactionInTransactionSigner = async (fromAddress, unsignedTransaction, transactionId) => {
   const signedTransaction =

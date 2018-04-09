@@ -33,7 +33,7 @@ docker run --name stox-postgres-bc-rm -e POSTGRES_USER=postgres -e POSTGRES_PASS
 
 ### Active MQ
 ```
-$ docker run -p 61613:61613 -p 8161:8161 -d --name="activemq" rmohr/activemq
+docker run -p 61613:61613 -p 8161:8161 -d --name="activemq" rmohr/activemq
 ```
 [Apache ActiveMQ Console](http://localhost:8161)
 
