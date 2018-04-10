@@ -96,6 +96,22 @@ module.exports = {
         data: unsignedTransaction.data,
       })
 
+      const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
+      const requiredBalance = unsignedTransaction.gasLimit * unsignedTransaction.gasPrice
+      if (fromAccountBalance < requiredBalance) {
+        context.logger.error(
+          {
+            requestId: transaction.requestId,
+            transactionId: transaction.id,
+            fromAccount: transaction.from,
+            fromAccountBalance,
+            requiredBalance,
+          },
+          'INSUFFICIENT_FUNDS_FOR_TRANSACTION'
+        )
+        return
+      }
+
       const signedTransaction =
         await signTransactionInTransactionSigner(transaction.from, unsignedTransaction, transaction.id)
       const transactionHash = await sendTransactionToBlockchain(signedTransaction)
