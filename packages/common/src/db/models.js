@@ -50,7 +50,7 @@ module.exports = (sequelize) => {
       blockNumber: {type: BIGINT},
       nonce: {type: BIGINT}, // ?
       gasPrice: {type: INTEGER}, // ?
-      receipt: {type: STRING(256)}, // ?
+      receipt: {type: JSON}, // ?
       createdAt: {type: DATE, allowNull: false},
       sentAt: {type: DATE},
       error: {type: JSON},

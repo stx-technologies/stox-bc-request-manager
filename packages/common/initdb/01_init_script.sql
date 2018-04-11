@@ -42,7 +42,7 @@ CREATE TABLE "transactions"
     "nonce" BIGINT,
     "error" json,
     "gasPrice" INTEGER,
-    "receipt" CHARACTER VARYING(256),
+    "receipt" json,
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
     "sentAt" timestamp with time zone,
     "completedAt" timestamp with time zone,
