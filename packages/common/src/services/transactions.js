@@ -13,9 +13,6 @@ const getTransaction = async (query) => {
   return transaction
 }
 
-const createTransactions = (transactions, sequelizeTransaction) =>
-  db.transactions.bulkCreate(transactions, {transaction: sequelizeTransaction})
-
 const getPendingTransactions = limit => db.transactions.findAll({where: {sentAt: null}, limit})
 
 const getUncompletedTransactions = limit =>
@@ -75,7 +72,6 @@ const addTransactions = async (requestId, transactions) => {
 module.exports = {
   getTransaction,
   createTransaction,
-  createTransactions,
   getPendingTransactions,
   getUncompletedTransactions,
   updateCompletedTransaction,
