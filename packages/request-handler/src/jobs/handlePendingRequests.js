@@ -1,7 +1,7 @@
 const {
   context,
   context: {mq},
-  services: {requests},
+  services: {requests, transactions},
   utils: {loggerFormatText},
 } = require('stox-bc-request-manager-common')
 const {errors: {logError}} = require('stox-common')
@@ -24,7 +24,7 @@ module.exports = {
 
       try {
         const pendingTransactions = await plugins[type].prepareTransactions(request)
-        await requests.addTransactions(request, pendingTransactions)
+        await transactions.addTransactions(request, pendingTransactions)
 
         context.logger.info({request}, loggerFormatText(type))
       } catch (error) {
