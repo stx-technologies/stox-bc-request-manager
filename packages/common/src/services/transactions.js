@@ -55,7 +55,7 @@ const updateCompletedTransaction = async ({id, transactionHash}, {isSuccessful, 
   }
 }
 
-const addTransactions = async (requestId, transactions) => {
+const addTransactions = async ({requestId}, transactions) => {
   const transaction = await db.sequelize.transaction()
 
   try {

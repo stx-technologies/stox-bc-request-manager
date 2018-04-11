@@ -25,6 +25,7 @@ module.exports = {
       try {
         const pendingTransactions = await plugins[type].prepareTransactions(request)
         await transactions.addTransactions(request, pendingTransactions)
+        await requests.updateRequest({transactionPreparedAt: Date.now()}, id)
 
         context.logger.info({request}, loggerFormatText(type))
       } catch (error) {
