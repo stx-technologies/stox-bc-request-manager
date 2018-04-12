@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint -c ../../.eslintrc.yml .",
+    "test": "jest src/tests/__tests__/ --verbose --testEnvironment node --runInBand",
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src"
   },
   "dependencies": {

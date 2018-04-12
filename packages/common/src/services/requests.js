@@ -10,7 +10,7 @@ const getRequestById = async (id, full) => {
     throw new NotFoundError('requestNotFound', {id})
   }
   if (full) {
-    request.dataValues.transactions = await request.getTransactions()
+    request.dataValues.transactions = await getTransaction({id: request.id})
   }
   return request.dataValues
 }
@@ -28,7 +28,11 @@ const createRequest = ({id, type, data}) => db.requests.create({id, type, data, 
 const updateRequestCompleted = async (id, error = null) => updateRequest({error, completedAt: Date.now()}, id)
 
 const countRequestByType = async (type, onlyPending) => ({
-  count: await db.requests.count({where: {type, ...(onlyPending ? {transactionPreparedAt: null, error: null} : {})}}),
+  count: await db.requests.count({where: {type}}),
+})
+
+const countPendingRequestByType = async (type, onlyPending) => ({
+  count: await db.requests.count({where: {type, transactionPreparedAt: null, error: null}}),
 })
 
 const getPendingRequests = limit => db.requests.findAll({where: {transactionPreparedAt: null, error: null}, limit})
@@ -65,4 +69,5 @@ module.exports = {
   getCorrespondingRequests,
   updateRequestCompleted,
   publishCompletedRequest,
+  countPendingRequestByType,
 }
