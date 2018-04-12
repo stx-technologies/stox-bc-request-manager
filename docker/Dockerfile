@@ -16,4 +16,3 @@ WORKDIR ./services
 
 RUN npm i -g lerna
 RUN npm run setup:clean
-CMD npm run serve --prefix packages/${SERVICE_NAME}

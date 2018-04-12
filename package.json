@@ -1,7 +1,11 @@
 {
   "scripts": {
     "lint": "eslint . --ignore-path .gitignore --cache",
+    "link": "common.sh link",
     "setup": "lerna bootstrap --hoist",
-    "setup:clean": "lerna clean --yes && npm run setup"
+    "setup:clean": "lerna clean --yes && npm run setup",
+    "containers": "docker-compose -f docker/docker-compose.yml up -d",
+    "test": "cross-env SERVICE_NAME=request-handler docker-compose -f docker/docker-compose.test.yml up --abort-on-container-exit && npm run test:clean",
+    "test:clean": "cross-env SERVICE_NAME=request-handler docker-compose -f docker/docker-compose.test.yml down"
   }
 }

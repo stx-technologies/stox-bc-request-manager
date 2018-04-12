@@ -8,13 +8,7 @@
     "serve": "node .",
     "lint": "eslint -c ../../.eslintrc.yml .",
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src",
-    "test": "jest --config ./jest.json ../integration_tests",
-    "test:pact": "jest src/tests/__tests__/ --verbose --testEnvironment node --runInBand",
-    "docker:build": "docker-compose -f file build --build-arg SSH_PRIVATE_KEY=\"$(cat ./id_rsa)\" request-handler",
-    "docker:up": "docker-compose up -d",
-    "docker:stop": "docker-compose stop",
-    "docker:restart": "docker-compose restart",
-    "docker:logs": "docker logs request-handler"
+    "test": "jest src/tests/__tests__/ --verbose --testEnvironment node --runInBand"
   },
   "author": "",
   "license": "ISC",
