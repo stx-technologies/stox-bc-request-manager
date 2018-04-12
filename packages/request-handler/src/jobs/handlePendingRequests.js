@@ -19,7 +19,6 @@ module.exports = {
           await handleRequest(request)
           context.logger.info({request: request.dataValues}, loggerFormatText(type))
         } catch (error) {
-          await context.mq.publish('error-requests', {...request.dataValues, error})
           context.logger.error(error, `${loggerFormatText(type)}_HANDLER_ERROR`)
           await requests.publishCompletedRequest(await requests.getRequestById(id, true))
         }

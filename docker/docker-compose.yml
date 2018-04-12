@@ -6,8 +6,8 @@ services:
             context: ../
             dockerfile: ./docker/db.Dockerfile
         container_name: stox-postgres-bc-rm
-        networks:
-            - subsystems
+        ports:
+            - 5434:5432
         environment:
             POSTGRES_PASSWORD: secret
             POSTGRES_USER: postgres
@@ -16,11 +16,5 @@ services:
     activemq:
         image: rmohr/activemq:5.14.5
         container_name: stox-activemq
-        networks:
-            - subsystems
         ports:
             - 61613:61613
-
-networks:
-    subsystems:
-        driver: bridge

@@ -10,11 +10,14 @@ const prepareTransactions = async (request) => {
 }
 
 const createRequestTransactions = async (request) => {
+  const {id} = request
   try {
-    const preparedTransactions = await prepareTransactions(request)
-    await transactions.addTransactions(request.id, preparedTransactions)
+    const pendingTransactions = await prepareTransactions(request)
+    await transactions.addTransactions(request.id, pendingTransactions)
+    await requests.updateRequest({transactionPreparedAt: Date.now()}, id)
   } catch (error) {
-    await requests.updateErrorRequest(request.id, error.message)
+    await requests.updateRequestCompleted(id, error)
+    throw error
   }
 }
 

@@ -3,11 +3,10 @@ const {
   interactions,
   createInteraction,
   createFailedInteraction,
-  createExpectedResult,
 } = require('../pacts/walletsApi')
 const uuid4 = require('uuid4')
 const {initContext, context, createService, models} = require('stox-bc-request-manager-common')
-const {prepareTransactions, createRequestTransactions} = require('../../services/requestHandler')
+const {createRequestTransactions} = require('../../services/requestHandler')
 const config = require('../../config')
 
 const {databaseUrl} = config
@@ -28,30 +27,17 @@ describe('request-handler integration with database', () => {
     done()
   })
 
-  afterAll((done) => {
-    provider.finalize()
+  afterAll(async (done) => {
+    await provider.finalize()
     done()
   })
 
   interactions.forEach((interaction) => {
     const {type} = interaction
-    const request = {id: uuid4(), type, data: interaction.data}
-    const expectedTransactions = createExpectedResult(interaction, request.id)
-
-    it(`returns prepared transactions for ${type}`, async (done) => {
-      // prepare
-      await createInteraction(interaction)
-
-      // act
-      const transactions = await prepareTransactions(request)
-
-      // assert
-      expect(transactions).toEqual(expectedTransactions)
-      done()
-    })
 
     it(`should create '${type}' transactions and update the request with transactionPreparedAt value`, async (done) => {
       // prepare
+      const request = {id: uuid4(), type, data: interaction.data}
       await createInteraction(interaction)
       await context.db.requests.create(request)
 
@@ -74,11 +60,15 @@ describe('request-handler integration with database', () => {
 
     it('should not create transactions and fail the request with the error and competedAt values', async (done) => {
       // prepare
-      await context.db.requests.create(request)
+      const request = {id: uuid4(), type, data: interaction.data}
       await createFailedInteraction(interaction)
+      await context.db.requests.create(request)
 
       // act
-      await createRequestTransactions(request)
+      try {
+        await createRequestTransactions(request)
+      } catch (e) {
+      }
 
       // assert
       const {dataValues: updatedRequest} = await context.db.requests.findOne({where: {id: request.id}})

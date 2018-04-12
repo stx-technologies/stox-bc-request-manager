@@ -186,9 +186,9 @@ const createFailedInteraction = ({type, query}) =>
       headers: {Accept: 'application/json, text/plain, */*'},
     },
     willRespondWith: {
-      status: 400,
+      status: 500,
       headers: {'Content-Type': 'application/json'},
-      body: {error: 'test error'},
+      body: {error: 'interaction error mock'},
     },
   })
 
