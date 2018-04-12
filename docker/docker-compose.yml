@@ -1,0 +1,54 @@
+version: '3.3'
+services:
+
+    request-manager-service:
+#        build:
+#            context: ../
+#            dockerfile: ./docker/Dockerfile
+#            args:
+#               - SSH_PRIVATE_KEY
+        image: request-manager
+        container_name: ${SERVICE_NAME}
+        depends_on:
+            - activemq
+            - request-manager-db
+        env_file:
+            - ../packages/${SERVICE_NAME}/.env
+#        volumes:
+#            - ./:/services/packages/${SERVICE_NAME}
+#            - ../common/:/services/packages/common
+        environment:
+            DATABASE_URL: postgres://postgres:secret@request-manager-db/stoxbcrm
+            MQ_CONNECTION_URL: stomp://activemq:61613
+            SERVICE_NAME: $SERVICE_NAME
+        networks:
+            - subsystems
+        tty: true
+        restart: always
+
+    request-manager-db:
+        build:
+            context: ../
+            dockerfile: ./docker/db.Dockerfile
+        container_name: stox-postgres-bc-rm
+        networks:
+            - subsystems
+        ports:
+            - 5434:5432
+        environment:
+            POSTGRES_PASSWORD: secret
+            POSTGRES_USER: postgres
+            POSTGRES_DB: stoxbcrm
+
+    activemq:
+        image: rmohr/activemq:5.14.5
+        container_name: stox-activemq
+        networks:
+            - subsystems
+        ports:
+            - 61613:61613
+            - 8161:8161
+
+networks:
+    subsystems:
+        driver: bridge

@@ -7,8 +7,7 @@
     "start": "nodemon -e js . | pino",
     "serve": "node .",
     "lint": "eslint -c ../../.eslintrc.yml .",
-    "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src",
-    "jest:integration": "jest"
+    "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src"
   },
   "author": "",
   "license": "ISC",
@@ -17,16 +16,21 @@
     "app-module-path": "^2.2.0",
     "require-all": "^2.2.0",
     "stox-bc-request-manager-common": "1.0.0",
-    "stox-common": "git+https://bitbucket.org/stx_site/stox-common.git#dev"
+    "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev"
   },
   "devDependencies": {
+    "@pact-foundation/pact": "^5.9.0",
+    "chai": "^4.1.2",
+    "chai-jest-diff": "^1.0.2",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.9.0",
+    "jest": "^22.4.3",
+    "jest-cli": "^22.4.3",
+    "nodemon": "^1.12.1",
+    "pino": "^4.15.3",
     "prettier": "^1.7.4",
     "prettier-eslint": "^8.2.1",
-    "prettier-eslint-cli": "^4.4.0",
-    "nodemon": "^1.12.1",
-    "pino": "^4.15.3"
+    "prettier-eslint-cli": "^4.4.0"
   }
 }

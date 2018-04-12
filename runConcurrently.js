@@ -14,6 +14,7 @@ const runConcurrently = () => {
       const envPath = path.join(__dirname, directory, `.env.${type}`)
       if (type) {
         if (!fs.existsSync(envPath)) {
+          // eslint-disable-next-line no-console
           console.log(`No .env.${type} on service ${directory}, using default .env`)
           return startCommand
         }
@@ -27,7 +28,10 @@ const runConcurrently = () => {
 
   commands.forEach((command) => {
     const process = exec(command)
+    // eslint-disable-next-line no-console
     process.stdout.on('data', console.log)
+
+    // eslint-disable-next-line no-console
     process.stderr.on('data', console.error)
   })
 }

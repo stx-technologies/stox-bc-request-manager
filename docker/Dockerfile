@@ -1,11 +1,7 @@
 FROM node:8.9.1
 
-ENV NODE_ENV=production
-
 ARG SSH_PRIVATE_KEY
-ENV SERVICE_NAME ''
-
-RUN npm i -g lerna
+ENV SERVICE_NAME=${SERVICE_NAME}
 
 RUN mkdir /root/.ssh/
 RUN echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
@@ -16,10 +12,8 @@ RUN ssh-keyscan bitbucket.org >> /root/.ssh/known_hosts
 
 RUN mkdir services
 COPY ./ ./services
-
 WORKDIR ./services
 
+RUN npm i -g lerna
 RUN npm run setup:clean
-
-CMD npm run serve --prefix packages/$SERVICE_NAME
-
+CMD npm run serve --prefix packages/${SERVICE_NAME}
