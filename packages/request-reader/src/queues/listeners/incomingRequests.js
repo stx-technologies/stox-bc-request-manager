@@ -4,7 +4,12 @@ module.exports = async ({body: message}) => {
   try {
     await requests.createRequest(message)
   } catch (e) {
-    mq.publish('error-requests', {...message, error: e})
+    if (message.type) {
+      requests.publishCompletedRequest({...message, error: e})
+    } else {
+      mq.publish('error-requests', {...message, error: e})
+    }
+
     throw e
   }
 }

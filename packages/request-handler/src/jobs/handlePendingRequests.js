@@ -1,6 +1,5 @@
 const {
   context,
-  context: {mq},
   services: {requests, transactions},
   utils: {loggerFormatText},
 } = require('stox-bc-request-manager-common')
@@ -29,9 +28,9 @@ module.exports = {
 
         context.logger.info({request}, loggerFormatText(type))
       } catch (error) {
-        await requests.updateErrorRequest(id, error)
+        await requests.updateRequestCompleted(id, error)
         context.logger.error(error, `${loggerFormatText(type)}_HANDLER_ERROR`)
-        await mq.publish('error-requests', {...request.dataValues, error})
+        await requests.publishCompletedRequest(await requests.getRequestById(id, true))
       }
     })
 

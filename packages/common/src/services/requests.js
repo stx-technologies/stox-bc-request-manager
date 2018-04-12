@@ -1,7 +1,8 @@
-const {db} = require('../context')
+const {db, mq} = require('../context')
 const {getTransaction} = require('./transactions')
 const {Op} = require('sequelize')
 const {exceptions: {NotFoundError}} = require('@welldone-software/node-toolbelt')
+const {kebabCase} = require('lodash')
 
 const getRequestById = async (id, full) => {
   const request = await db.requests.findOne({where: {id}})
@@ -24,7 +25,7 @@ const updateRequest = (propsToUpdate, id, transaction) =>
 
 const createRequest = ({id, type, data}) => db.requests.create({id, type, data, createdAt: new Date()})
 
-const updateErrorRequest = async (id, error) => updateRequest({error, completedAt: Date.now()}, id)
+const updateRequestCompleted = async (id, error = null) => updateRequest({error, completedAt: Date.now()}, id)
 
 const countRequestByType = async (type, onlyPending) => ({
   count: await db.requests.count({where: {type, ...(onlyPending ? {transactionPreparedAt: null, error: null} : {})}}),
@@ -44,6 +45,15 @@ const getCorrespondingRequests = async transactions =>
     },
   })
 
+const publishCompletedRequest = async (request) => {
+  request.transactions = request.transactions.map((transaction) => {
+    transaction.transactionData = undefined
+    return transaction
+  })
+
+  mq.publish(`completed-${kebabCase(request.type)}-requests`, {...request})
+}
+
 module.exports = {
   createRequest,
   updateRequest,
@@ -53,5 +63,6 @@ module.exports = {
   getRequestByTransactionId,
   getPendingRequests,
   getCorrespondingRequests,
-  updateErrorRequest,
+  updateRequestCompleted,
+  publishCompletedRequest,
 }
