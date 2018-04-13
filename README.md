@@ -26,15 +26,20 @@ link stox-common package to all services
 npm run link
 ```
 
+##Build
+
+To build subsystem base image, data base image and activemq, run the command:
+
+```
+npm run containers:build
+```
+
 ## Run
 Run Active MQ and Postgress database containers
 ```
-npm run containers
+npm run containers:up
 ```
-To build a base image for a service you will need an id_rsa located at the root of the repository
-```
-docker build --no-cache -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY="$(cat ./id_rsa)" .
-```
+
 
 ## Tests
 To run docker-compose tests first build the base image and then run:

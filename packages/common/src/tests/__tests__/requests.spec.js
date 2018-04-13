@@ -115,6 +115,7 @@ describe('requests service sanity checks', () => {
 
   afterEach(async (done) => {
     await context.db.requests.destroy({where: {}})
+    await context.db.transactions.destroy({where: {}})
     done()
   })
 })

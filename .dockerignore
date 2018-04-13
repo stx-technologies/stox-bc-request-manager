@@ -11,3 +11,4 @@ package-lock.json
 
 Dockerfile
 .env
+id_rsa

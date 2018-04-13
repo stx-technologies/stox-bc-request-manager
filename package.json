@@ -4,7 +4,8 @@
     "link": "common.sh link",
     "setup": "lerna bootstrap --hoist",
     "setup:clean": "lerna clean --yes && npm run setup",
-    "containers": "docker-compose -f docker/docker-compose.yml up -d",
+    "containers:up": "docker-compose -f docker/docker-compose.yml up -d",
+    "containers:build": "export SSH_PRIVATE_KEY=\"$(cat ./id_rsa)\" && docker-compose -f docker/docker-compose.yml build",
     "test": "cross-env SERVICE_NAME=request-handler docker-compose -f docker/docker-compose.test.yml up --abort-on-container-exit && npm run test:clean",
     "test:clean": "cross-env SERVICE_NAME=request-handler docker-compose -f docker/docker-compose.test.yml down"
   }
