@@ -1,9 +1,7 @@
 const uuid4 = require('uuid4')
 const {initContext, context, createService, models} = require('../../index')
 const requests = require('../../services/requests')
-
-// TODO: make a config file?
-const databaseUrl = 'postgres://postgres:secret@localhost:5432/stoxbcrm'
+const {databaseUrl, network} = require('../test_config')
 
 describe('requests service sanity checks', () => {
   beforeAll(async (done) => {
@@ -65,7 +63,7 @@ describe('requests service sanity checks', () => {
   it('should return the request by transaction id corresponding to him', async () => {
     // prepare
     const requestToAdd = {id: uuid4(), type: 'createWallet', data: {}}
-    const transaction = {id: uuid4(), requestId: requestToAdd.id, type: 'send', from: 'from', network: 'MAIN'}
+    const transaction = {id: uuid4(), requestId: requestToAdd.id, type: 'send', from: 'from', network}
     await context.db.requests.create(requestToAdd)
     await context.db.transactions.create(transaction)
 
@@ -80,8 +78,8 @@ describe('requests service sanity checks', () => {
     const type = 'createWallet'
     const requestsToAdd = [{id: uuid4(), type, data: {}}, {id: uuid4(), type, data: {}}, {id: uuid4(), type, data: {}}]
     const transactionsToAdd = [
-      {id: uuid4(), requestId: requestsToAdd[0].id, type: 'send', from: 'from', network: 'MAIN'},
-      {id: uuid4(), requestId: requestsToAdd[1].id, type: 'send', from: 'from', network: 'MAIN'},
+      {id: uuid4(), requestId: requestsToAdd[0].id, type: 'send', from: 'from', network},
+      {id: uuid4(), requestId: requestsToAdd[1].id, type: 'send', from: 'from', network},
     ]
     await context.db.requests.bulkCreate(requestsToAdd)
     await context.db.transactions.bulkCreate(transactionsToAdd)

@@ -24,6 +24,8 @@
     "prettier": "^1.7.4",
     "prettier-eslint": "^8.2.1",
     "prettier-eslint-cli": "^4.4.0",
+    "jest": "^22.4.3",
+    "jest-cli": "^22.4.3",
     "pino": "^4.15.3"
   }
 }

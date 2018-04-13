@@ -44,9 +44,16 @@ npm run containers:up
 ## Tests
 To run docker-compose tests first build the base image and then run:
 ```
-npm run test
+npm run test --request-manager:service=<service_name>
 ```
 
+eg. to test common run:
+
+```
+npm run test --request-manager:service=common 
+```
+
+default service to test is request-handler.
 
 
 ## Docs
