@@ -27,19 +27,14 @@ npm run link
 ```
 
 ##Build
-
-To build subsystem base image, data base image and activemq, run the command:
-
+To build a base image for a service you will need an id_rsa located at the root of the repository
 ```
-npm run containers:build
+docker build --no-cache -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY="$(cat ./id_rsa)" .
 ```
-
-## Run
-Run Active MQ and Postgress database containers
+To build database and activemq images, run the command:
 ```
-npm run containers:up
+npm run containers
 ```
-
 
 ## Tests
 To run docker-compose tests first build the base image and then run:

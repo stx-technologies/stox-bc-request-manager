@@ -1,14 +1,6 @@
 version: '3.3'
 services:
 
-    request-manager:
-        build:
-            context: ../
-            dockerfile: ./docker/Dockerfile
-            args:
-             SSH_PRIVATE_KEY: $SSH_PRIVATE_KEY
-        image: request-manager
-
     request-manager-db:
         build:
             context: ../
