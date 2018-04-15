@@ -37,18 +37,18 @@ npm run containers
 ```
 
 ## Tests
-To run docker-compose tests first build the base image and then run:
-```
-npm run test --request-manager:service=<service_name>
-```
-
-eg. to test common run:
+To run all unit test locally run
 
 ```
-npm run test --request-manager:service=common 
+npm run test 
 ```
 
-default service to test is request-handler.
+To run all integration tests in one container, first build the base image and then run:
+```
+npm run test:compose
+```
+
+
 
 
 ## Docs

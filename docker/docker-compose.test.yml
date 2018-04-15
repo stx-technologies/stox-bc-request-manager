@@ -3,20 +3,19 @@ services:
 
     sut:
         image: request-manager
-        container_name: ${SERVICE_NAME}-test
+        container_name: services-test
         depends_on:
             - activemq-test
             - request-manager-db-test
         env_file:
-            - ../packages/${SERVICE_NAME}/.env.test
+            - ../docker/.env.test
         environment:
             DATABASE_URL: postgres://postgres:secret@request-manager-db-test/stoxbcrm
             MQ_CONNECTION_URL: stomp://activemq-test:61613
-            SERVICE_NAME: $SERVICE_NAME
         networks:
             - subsystems
         tty: true
-        entrypoint: npm run test --prefix packages/${SERVICE_NAME}
+        entrypoint: lerna exec -- npm run test:integration
 
     request-manager-db-test:
         build:
