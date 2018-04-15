@@ -10,7 +10,7 @@ const getRequestById = async (id, full) => {
     throw new NotFoundError('requestNotFound', {id})
   }
   if (full) {
-    request.dataValues.transactions = await getTransaction({id: request.id})
+    request.dataValues.transactions = await request.getTransactions()
   }
   return request.dataValues
 }
