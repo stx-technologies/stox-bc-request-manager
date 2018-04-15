@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint -c ../../.eslintrc.yml .",
+    "test": "jest src/tests/__tests__/ --verbose --testEnvironment node --runInBand",
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src"
   },
   "dependencies": {
@@ -23,6 +24,8 @@
     "prettier": "^1.7.4",
     "prettier-eslint": "^8.2.1",
     "prettier-eslint-cli": "^4.4.0",
+    "jest": "^22.4.3",
+    "jest-cli": "^22.4.3",
     "pino": "^4.15.3"
   }
 }

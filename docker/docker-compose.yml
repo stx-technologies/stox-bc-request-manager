@@ -1,0 +1,20 @@
+version: '3.3'
+services:
+
+    request-manager-db:
+        build:
+            context: ../
+            dockerfile: ./docker/db.Dockerfile
+        container_name: stox-postgres-bc-rm
+        ports:
+            - 5434:5432
+        environment:
+            POSTGRES_PASSWORD: secret
+            POSTGRES_USER: postgres
+            POSTGRES_DB: stoxbcrm
+
+    activemq:
+        image: rmohr/activemq:5.14.5
+        container_name: stox-activemq
+        ports:
+            - 61613:61613

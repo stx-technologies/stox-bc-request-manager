@@ -55,13 +55,12 @@ const updateCompletedTransaction = async ({id, transactionHash}, {isSuccessful, 
   }
 }
 
-const addTransactions = async ({requestId}, transactions) => {
+const addTransactions = async (requestId, transactions) => {
   const transaction = await db.sequelize.transaction()
 
   try {
     await db.transactions.bulkCreate(transactions, {transaction})
     await db.requests.update({transactionPreparedAt: Date.now()}, {where: {id: requestId}}, {transaction})
-
     await transaction.commit()
   } catch (error) {
     transaction.rollback()

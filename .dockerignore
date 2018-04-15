@@ -1,6 +1,7 @@
 node_modules
 packages/*/node_modules
 packages/*/package-lock.json
+package-lock.json
 .idea
 .vscode
 
@@ -9,3 +10,5 @@ packages/*/package-lock.json
 .editorconfig
 
 Dockerfile
+.env
+id_rsa
