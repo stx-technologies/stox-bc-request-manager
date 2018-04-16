@@ -9,7 +9,7 @@
     "lint": "eslint -c ../../.eslintrc.yml .",
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src",
     "test": "jest src/tests/__tests__/* --verbose --testEnvironment node --runInBand",
-    "test:integration": "jest src/tests/__integration__/* --verbose --testEnvironment node --runInBand"
+    "test:integration": "jest src/tests/__integration__/* --config=./jest.json --verbose --testEnvironment node --runInBand"
   },
   "author": "",
   "license": "ISC",

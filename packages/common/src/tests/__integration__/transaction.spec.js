@@ -11,6 +11,19 @@ describe('requests service sanity checks', () => {
     initContext({...ctx}, context)
     done()
   })
+
+
+  afterEach(async (done) => {
+    await context.db.requests.destroy({where: {}})
+    await context.db.transactions.destroy({where: {}})
+    done()
+  })
+
+  afterAll(async (done) => {
+    await context.db.sequelize.close()
+    done()
+  })
+
   const type = 'createWallet'
 
   it('should return only pending request when calling getPendingTransactions', async () => {
@@ -109,7 +122,6 @@ describe('requests service sanity checks', () => {
     expect(updatedTransaction.error).toBeFalsy()
   })
 
-
   it('should add transaction to database and update corresponding request when calling addTransactions', async () => {
     // prepare
     const requestToAdd = {id: uuid4(), type, data: {}}
@@ -132,16 +144,5 @@ describe('requests service sanity checks', () => {
     expect(updatedTransactions).toHaveLength(3)
     expect(updatedRequest.transactionPreparedAt).toBeTruthy()
 
-  })
-
-  afterEach(async (done) => {
-    await context.db.requests.destroy({where: {}})
-    await context.db.transactions.destroy({where: {}})
-    done()
-  })
-
-  afterAll(async (done) => {
-    await context.db.sequelize.close()
-    done()
   })
 })

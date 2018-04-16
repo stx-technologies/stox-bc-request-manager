@@ -29,7 +29,7 @@ npm run link
 ##Build
 To build a base image for a service you will need an id_rsa located at the root of the repository
 ```
-docker build --no-cache -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY="$(cat ./id_rsa)" .
+docker build -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY="$(cat ./id_rsa)" .
 ```
 To build database and activemq images, run the command:
 ```
