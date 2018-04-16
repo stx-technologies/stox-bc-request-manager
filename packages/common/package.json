@@ -15,7 +15,7 @@
     "sequelize": "^4.35.2",
     "uuid4": "^1.0.0",
     "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev",
-    "web3": "^1.0.0-beta.33"
+    "web3": "^1.0.0-beta.34"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
