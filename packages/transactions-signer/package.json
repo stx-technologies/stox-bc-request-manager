@@ -7,8 +7,7 @@
     "start": "nodemon -e js . | pino",
     "serve": "node .",
     "lint": "eslint -c ../../.eslintrc.yml .",
-    "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src",
-    "test:integration": "echo \"no tests\""
+    "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src"
   },
   "author": "",
   "license": "ISC",

@@ -8,7 +8,6 @@
     "chai-jest-diff": "^1.0.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\"",
     "test:integration": "echo \"no tests\""
   },
   "author": "",
