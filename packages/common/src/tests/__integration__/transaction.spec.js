@@ -139,4 +139,9 @@ describe('requests service sanity checks', () => {
     await context.db.transactions.destroy({where: {}})
     done()
   })
+
+  afterAll(async (done) => {
+    await context.db.sequelize.close()
+    done()
+  })
 })
