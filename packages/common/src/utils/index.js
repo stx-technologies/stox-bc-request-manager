@@ -23,7 +23,10 @@ const getCompletedTransaction = async (transactionHash, currentBlockNumber) => {
     // See also:
     // https://github.com/paritytech/parity/issues/7735
     // https://github.com/paritytech/parity/pull/7753
-    const isSuccessful = (transactionReceipt.status === true || transactionReceipt.status === null)
+    const isSuccessful = (
+      transactionReceipt.status === true ||
+      transactionReceipt.status === '0x1' ||
+      transactionReceipt.status === null)
     return {
       isSuccessful,
       blockTime: secondsToDate((await blockchain.web3.eth.getBlock(transactionReceipt.blockNumber, false)).timestamp),
