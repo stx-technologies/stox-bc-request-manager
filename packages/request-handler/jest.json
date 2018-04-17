@@ -8,5 +8,7 @@
   ],
   "setupTestFrameworkScriptFile": "<rootDir>/../jest/jestSetup.js",
   "cacheDirectory": "<rootDir>/../jest/cache",
+  "testEnvironment": "node",
+  "verbose": true,
   "collectCoverage": false
 }
