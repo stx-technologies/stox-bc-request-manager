@@ -21,22 +21,24 @@ link stox-common package to all services
 ```
 npm run link
 ```
-run lint for all packages
-```
-npm run lint
-```
 
 ##Build
 To build a sub-system base image, you will need an id_rsa located at the root of the repository
 ```
 docker build -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY="$(cat ./id_rsa)" .
 ```
+
+##Run
+To run a docker container for a service:
+```
+docker run -it -d --name <service-name> request-manager npm start --prefix=packages/<service-name>
+```
 To run service containers:
 ```
 npm run containers
 ```
 
-## Tests
+## Test
 To run all unit test locally run
 
 ```

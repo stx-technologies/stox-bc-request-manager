@@ -1,6 +1,5 @@
 {
   "name"	 : "request-manager",
-  "config" : { "service" : "request-handler" },
   "scripts": {
     "lint": "eslint . --ignore-path .gitignore --cache",
     "link": "common.sh link",
