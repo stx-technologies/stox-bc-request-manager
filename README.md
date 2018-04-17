@@ -17,21 +17,21 @@ Remove all node_modules directories from all packages and run setup
 ```
 npm run setup:clean
 ```
-run lint for all packages
-```
-npm run lint
-```
 link stox-common package to all services
 ```
 npm run link
 ```
+run lint for all packages
+```
+npm run lint
+```
 
 ##Build
-To build a base image for a service you will need an id_rsa located at the root of the repository
+To build a sub-system base image, you will need an id_rsa located at the root of the repository
 ```
 docker build -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY="$(cat ./id_rsa)" .
 ```
-To build database and activemq images, run the command:
+To run service containers:
 ```
 npm run containers
 ```
@@ -47,9 +47,6 @@ To run all integration tests in one container, first build the base image and th
 ```
 npm run test:compose
 ```
-
-
-
 
 ## Docs
 [Blockchain Writer Architecture](https://docs.google.com/document/d/1eXrxDFgjDl-2No22om8vesqGhU7iGtw8iDSuN3VoHJ4/edit#heading=h.jsy3plhn9pv8)
