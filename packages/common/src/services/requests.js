@@ -27,11 +27,11 @@ const createRequest = ({id, type, data}) => db.requests.create({id, type, data, 
 
 const updateRequestCompleted = async (id, error = null) => updateRequest({error, completedAt: Date.now()}, id)
 
-const countRequestByType = async (type, onlyPending) => ({
+const countRequestByType = async type => ({
   count: await db.requests.count({where: {type}}),
 })
 
-const countPendingRequestByType = async (type, onlyPending) => ({
+const countPendingRequestByType = async type => ({
   count: await db.requests.count({where: {type, transactionPreparedAt: null, error: null}}),
 })
 

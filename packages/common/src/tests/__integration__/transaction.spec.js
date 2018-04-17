@@ -26,7 +26,7 @@ describe('requests service sanity checks', () => {
 
   const type = 'createWallet'
 
-  it('should return only pending request when calling getPendingTransactions', async () => {
+  it('getPendingTransactions', async () => {
     // prepare
     const requestsToAdd = range(0, 5).map(() => ({id: uuid4(), type, data: {}}))
     const transactionsToAdd = range(0, 4).map(i => ({
@@ -57,7 +57,7 @@ describe('requests service sanity checks', () => {
     expect(pendindTransaction2).toHaveLength(2)
   })
 
-  it('should return only sent and uncompleted transaction when calling getUncompletedTransactions', async () => {
+  it('getUncompletedTransactions', async () => {
     // prepare
     const requestsToAdd = range(0, 5).map(() => ({id: uuid4(), type, data: {}}))
     const transactionsToAdd = range(0, 3).map(i => ({
@@ -90,7 +90,7 @@ describe('requests service sanity checks', () => {
     expect(uncompletedTransaction2).toHaveLength(2)
   })
 
-  it('should update successful transaction when calling updateCompletedTransaction with correct parameters ', async () => {
+  it('updateCompletedTransaction ', async () => {
     // prepare
     const transactionHash = uuid4()
       .toString()
@@ -112,7 +112,7 @@ describe('requests service sanity checks', () => {
       },
     })
 
-    const {dataValues: updatedTransaction } = await context.db.transactions.findOne({id: transactionToAdd})
+    const {dataValues: updatedTransaction} = await context.db.transactions.findOne({id: transactionToAdd})
 
     // assert
     expect(updatedTransaction.completedAt).toBeTruthy()
@@ -122,10 +122,10 @@ describe('requests service sanity checks', () => {
     expect(updatedTransaction.error).toBeFalsy()
   })
 
-  it('should add transaction to database and update corresponding request when calling addTransactions', async () => {
+  it('addTransactions', async () => {
     // prepare
     const requestToAdd = {id: uuid4(), type, data: {}}
-    const transactionsToAdd = range(0, 3).map(i => ({
+    const transactionsToAdd = range(0, 3).map(() => ({
       id: uuid4(),
       requestId: requestToAdd.id,
       type: 'send',
@@ -136,13 +136,12 @@ describe('requests service sanity checks', () => {
     await context.db.requests.create(requestToAdd)
 
     // act
-    await transactions.addTransactions(requestToAdd.id,transactionsToAdd)
+    await transactions.addTransactions(requestToAdd.id, transactionsToAdd)
     const {dataValues: updatedRequest} = await context.db.requests.findOne({where: {id: requestToAdd.id}})
     const updatedTransactions = await context.db.transactions.findAll({requestId: requestToAdd.id})
 
     // assert
     expect(updatedTransactions).toHaveLength(3)
     expect(updatedRequest.transactionPreparedAt).toBeTruthy()
-
   })
 })

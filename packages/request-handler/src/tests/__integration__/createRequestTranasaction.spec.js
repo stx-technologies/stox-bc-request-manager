@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 const {provider, interactions, createInteraction, createFailedInteraction} = require('../pacts/walletsApi')
 const uuid4 = require('uuid4')
 const {initContext, context, createService, models} = require('stox-bc-request-manager-common')
@@ -46,7 +47,6 @@ describe('request-handler integration with database', () => {
       const numberOfCreatedTransactions = await context.db.transactions.count({where: {requestId: request.id}})
       expect(numberOfCreatedTransactions).to.equal(1)
       expect(updatedRequest.transactionPreparedAt).to.exist
-
       expect(updatedRequest.error).to.not.exist
       expect(updatedRequest.completedAt).to.not.exist
       expect(transaction.error).to.not.exist
