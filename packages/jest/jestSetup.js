@@ -9,4 +9,4 @@ global.jestExpect = global.expect
 
 global.sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000

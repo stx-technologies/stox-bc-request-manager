@@ -44,13 +44,14 @@ describe('request-handler integration with database', () => {
       const {dataValues: updatedRequest} = await context.db.requests.findOne({where: {id: request.id}})
       const {dataValues: transaction} = await context.db.transactions.findOne({where: {requestId: request.id}})
       const numberOfCreatedTransactions = await context.db.transactions.count({where: {requestId: request.id}})
-      expect(numberOfCreatedTransactions).toBe(1)
-      expect(updatedRequest.transactionPreparedAt).toBeTruthy()
-      expect(updatedRequest.error).toBeFalsy()
-      expect(updatedRequest.completedAt).toBeFalsy()
-      expect(transaction.error).toBeFalsy()
-      expect(transaction.completedAt).toBeFalsy()
-      expect(transaction.createdAt).toBeTruthy()
+      expect(numberOfCreatedTransactions).to.equal(1)
+      expect(updatedRequest.transactionPreparedAt).to.exist
+
+      expect(updatedRequest.error).to.not.exist
+      expect(updatedRequest.completedAt).to.not.exist
+      expect(transaction.error).to.not.exist
+      expect(transaction.completedAt).to.not.exist
+      expect(transaction.createdAt).to.exist
       done()
     })
 
@@ -68,10 +69,10 @@ describe('request-handler integration with database', () => {
       // assert
       const {dataValues: updatedRequest} = await context.db.requests.findOne({where: {id: request.id}})
       const numberOfCreatedTransactions = await context.db.transactions.count({where: {requestId: request.id}})
-      expect(numberOfCreatedTransactions).toBe(0)
-      expect(updatedRequest.transactionPreparedAt).toBeFalsy()
-      expect(updatedRequest.error).toBeTruthy()
-      expect(updatedRequest.completedAt).toBeTruthy()
+      expect(numberOfCreatedTransactions).to.equal(0)
+      expect(updatedRequest.transactionPreparedAt).to.not.exist
+      expect(updatedRequest.error).to.exist
+      expect(updatedRequest.completedAt).to.exist
       done()
     })
   })
