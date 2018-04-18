@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-expressions */
-const {provider, interactions, createInteraction, createFailedInteraction} = require('../pacts/walletsApi')
 const uuid4 = require('uuid4')
 const {initContext, context, createService, models} = require('stox-bc-request-manager-common')
-const {createRequestTransactions} = require('../../services/requestHandler')
-const config = require('../../config')
+const {createRequestTransactions} = require('services/requestHandler')
+const config = require('config')
+const {provider, interactions, createInteraction, createFailedInteraction} = require('../pacts/walletsApi')
 
 const {databaseUrl} = config
 

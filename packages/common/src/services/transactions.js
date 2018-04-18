@@ -40,7 +40,7 @@ const updateCompletedTransaction = async ({id, transactionHash}, {isSuccessful, 
         receipt: receipt,
         currentBlockTime: blockTime,
         blockNumber: receipt.blockNumber,
-        error: !isSuccessful,
+        error: isSuccessful ? null : {message: "error in blockchain transaction"},
       },
       {
         transaction,

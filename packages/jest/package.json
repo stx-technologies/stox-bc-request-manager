@@ -8,5 +8,8 @@
     "chai-jest-diff": "^1.0.2"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "chai-shallow-deep-equal": "^1.4.6"
+  }
 }

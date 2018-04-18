@@ -20,8 +20,8 @@ describe('requests service sanity checks', () => {
     const {dataValues: updatedRequest} = await context.db.requests.findOne({where: {id: requestToAdd.id}})
 
     // assert
-    expect(updatedRequest).toMatchObject(requestToAdd)
-    expect(updatedRequest.createdAt).toBeTruthy()
+    expect(updatedRequest).to.shallowDeepEqual(requestToAdd)
+    expect(updatedRequest.createdAt).to.exist
   })
 
   it('should add error field with completedAtField', async () => {
@@ -35,9 +35,9 @@ describe('requests service sanity checks', () => {
     const {dataValues: updatedRequest} = await context.db.requests.findOne({where: {id: requestToAdd.id}})
 
     // assert
-    expect(updatedRequest).toMatchObject(requestToAdd)
-    expect(updatedRequest.error).toEqual(error)
-    expect(updatedRequest.completedAt).toBeTruthy()
+    expect(updatedRequest).to.shallowDeepEqual(requestToAdd)
+    expect(updatedRequest.error).eql(error)
+    expect(updatedRequest.completedAt).to.exist
   })
 
   it('should return the count of request by type, with pending ot not pending', async () => {
@@ -56,8 +56,8 @@ describe('requests service sanity checks', () => {
     const {count: countOfPendingRequests} = await requests.countPendingRequestByType(type)
 
     // assert
-    expect(countOfAllRequests).toBe(3)
-    expect(countOfPendingRequests).toBe(1)
+    expect(countOfAllRequests).eql(3)
+    expect(countOfPendingRequests).eql(1)
   })
 
   it('should return the request by transaction id corresponding to him', async () => {
@@ -71,7 +71,7 @@ describe('requests service sanity checks', () => {
     const updatedRequest = await requests.getRequestByTransactionId(transaction.id)
 
     // assert
-    expect(updatedRequest).toMatchObject(requestToAdd)
+    expect(updatedRequest).to.shallowDeepEqual(requestToAdd)
   })
 
   it('should return all pending requests by limit', async () => {
@@ -88,7 +88,7 @@ describe('requests service sanity checks', () => {
     const correspendingRequests = await requests.getCorrespondingRequests(transactionsToAdd)
 
     // assert
-    expect(correspendingRequests).toHaveLength(2)
+    expect(correspendingRequests).to.have.length(2)
   })
 
   it('should return all corresponding request to of given transaction', async () => {
@@ -107,8 +107,8 @@ describe('requests service sanity checks', () => {
     const limitedPendingRequest = await requests.getPendingRequests(2)
 
     // assert
-    expect(allPendingRequests).toHaveLength(3)
-    expect(limitedPendingRequest).toHaveLength(2)
+    expect(allPendingRequests).to.have.length(3)
+    expect(limitedPendingRequest).to.have.length(2)
   })
 
   afterEach(async (done) => {

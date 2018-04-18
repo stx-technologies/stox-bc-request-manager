@@ -23,6 +23,7 @@
     "@pact-foundation/pact": "^5.9.0",
     "chai": "^4.1.2",
     "chai-jest-diff": "^1.0.2",
+    "chai-shallow-deep-equal": "^1.4.6",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.9.0",

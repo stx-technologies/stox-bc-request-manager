@@ -53,8 +53,8 @@ describe('requests service sanity checks', () => {
     const pendindTransaction2 = await transactions.getPendingTransactions(2)
 
     // assert
-    expect(pendindTransaction1).toHaveLength(4)
-    expect(pendindTransaction2).toHaveLength(2)
+    expect(pendindTransaction1).to.have.length(4)
+    expect(pendindTransaction2).to.have.length(2)
   })
 
   it('getUncompletedTransactions', async () => {
@@ -86,8 +86,8 @@ describe('requests service sanity checks', () => {
     const uncompletedTransaction2 = await transactions.getUncompletedTransactions(2)
 
     // assert
-    expect(uncompletedTransaction1).toHaveLength(3)
-    expect(uncompletedTransaction2).toHaveLength(2)
+    expect(uncompletedTransaction1).to.have.length(3)
+    expect(uncompletedTransaction2).to.have.length(2)
   })
 
   it('updateCompletedTransaction ', async () => {
@@ -115,11 +115,11 @@ describe('requests service sanity checks', () => {
     const {dataValues: updatedTransaction} = await context.db.transactions.findOne({id: transactionToAdd})
 
     // assert
-    expect(updatedTransaction.completedAt).toBeTruthy()
-    expect(updatedTransaction.receipt).toBeTruthy()
-    expect(updatedTransaction.currentBlockTime).toBeTruthy()
-    expect(updatedTransaction.blockNumber).toBeTruthy()
-    expect(updatedTransaction.error).toBeFalsy()
+    expect(updatedTransaction.completedAt).to.exist
+    expect(updatedTransaction.receipt).to.exist
+    expect(updatedTransaction.currentBlockTime).to.exist
+    expect(updatedTransaction.blockNumber).to.exist
+    expect(updatedTransaction.error).to.not.exist
   })
 
   it('addTransactions', async () => {
@@ -141,7 +141,7 @@ describe('requests service sanity checks', () => {
     const updatedTransactions = await context.db.transactions.findAll({requestId: requestToAdd.id})
 
     // assert
-    expect(updatedTransactions).toHaveLength(3)
-    expect(updatedRequest.transactionPreparedAt).toBeTruthy()
+    expect(updatedTransactions).to.have.length(3)
+    expect(updatedRequest.transactionPreparedAt).to.exist
   })
 })
