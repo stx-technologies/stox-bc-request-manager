@@ -10,9 +10,11 @@ pipelines:
           caches:
             - node
           script:
-#            - npm install eslint -g
+            - apk add --no-cache nodejs
+#            - npm install eslint eslint-config-airbnb-base eslint-plugin-import -g
+#            - npm i lerna -g
+#            - npm run setup
 #            - npm run lint
-
 #            - export IMAGE_NAME=$DOCKER_REGISTRY_DEV:$BITBUCKET_BUILD_NUMBER
             - export IMAGE_NAME=test
             - docker build -f ./docker/Dockerfile -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" .
@@ -20,7 +22,6 @@ pipelines:
             - apk add --no-cache py-pip bash
             - pip install --no-cache-dir docker-compose
             - docker-compose -v
-            - apk add --no-cache nodejs
             - npm run test:compose
 #            - apt-get update
 #            - curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"

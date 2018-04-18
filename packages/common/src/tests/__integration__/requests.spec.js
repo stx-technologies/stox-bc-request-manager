@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 const uuid4 = require('uuid4')
 const {initContext, context, createService, models} = require('../../index')
 const requests = require('../../services/requests')

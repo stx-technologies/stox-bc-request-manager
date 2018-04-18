@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 const uuid4 = require('uuid4')
 const {range} = require('lodash')
 const {initContext, context, createService, models} = require('../../index')
@@ -11,7 +12,6 @@ describe('requests service sanity checks', () => {
     initContext({...ctx}, context)
     done()
   })
-
 
   afterEach(async (done) => {
     await context.db.requests.destroy({where: {}})
@@ -96,9 +96,14 @@ describe('requests service sanity checks', () => {
       .toString()
       .substring(0, 66)
     const requestToAdd = {id: uuid4(), type, data: {}}
-    const transactionToAdd =
-      {id: uuid4(), requestId: requestToAdd.id, type: 'send', from: 'from', network, transactionHash}
-
+    const transactionToAdd = {
+      id: uuid4(),
+      requestId: requestToAdd.id,
+      type: 'send',
+      from: 'from',
+      network,
+      transactionHash,
+    }
 
     await context.db.requests.create(requestToAdd)
     await context.db.transactions.create(transactionToAdd)

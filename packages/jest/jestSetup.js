@@ -1,6 +1,7 @@
 const chai = require('chai')
 const chaiShallowDeepEqual = require('chai-shallow-deep-equal')
 const chaiJestDiff = require('chai-jest-diff').default
+
 chai.use(chaiShallowDeepEqual)
 chai.use(chaiJestDiff())
 
