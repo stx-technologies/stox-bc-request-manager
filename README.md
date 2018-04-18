@@ -13,14 +13,6 @@ Installs all of the packages dependencies and links any cross-dependencies
 ```
 npm run setup
 ```
-Remove all node_modules directories from all packages and run setup
-```
-npm run setup:clean
-```
-link stox-common package to all services
-```
-npm run link
-```
 
 ##Build
 To build a sub-system base image, you will need an id_rsa located at the root of the repository

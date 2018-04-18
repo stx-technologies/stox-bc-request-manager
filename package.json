@@ -3,8 +3,7 @@
   "scripts": {
     "lint": "eslint . --ignore-path .gitignore --cache",
     "link": "common.sh link",
-    "setup": "lerna bootstrap --hoist",
-    "setup:clean": "lerna clean --yes && npm run setup",
+    "setup": "lerna clean --yes && lerna bootstrap --hoist",
     "containers": "docker-compose -f docker/docker-compose.yml up -d",
     "test": "lerna run test",
     "test:compose": "docker-compose -f docker/docker-compose.test.yml up --abort-on-container-exit && npm run test:clean",

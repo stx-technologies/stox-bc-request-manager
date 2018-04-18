@@ -2,7 +2,7 @@ version: '3.3'
 services:
 
     sut:
-        image: request-manager
+        image: $IMAGE_NAME
         container_name: sut
         depends_on:
             - sut-db
