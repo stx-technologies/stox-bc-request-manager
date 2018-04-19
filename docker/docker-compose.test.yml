@@ -6,8 +6,6 @@ services:
         container_name: sut
         depends_on:
             - sut-db
-        env_file:
-            - ../docker/.env.test
         environment:
             DATABASE_URL: postgres://postgres:secret@sut-db/stoxbcrm
         networks:

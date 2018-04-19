@@ -14,5 +14,5 @@ RUN mkdir services
 COPY ./ ./services
 WORKDIR ./services
 
-RUN npm install lerna rimraf cross-env -g && \
+RUN npm install lerna rimraf cross-env env-cmd -g && \
     npm run setup
