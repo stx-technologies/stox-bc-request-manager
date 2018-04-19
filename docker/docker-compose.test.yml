@@ -1,9 +1,19 @@
 version: '3.3'
 services:
 
-    sut:
+    sut-unit-tests:
         image: $IMAGE_NAME
-        container_name: sut
+        container_name: sut-unit-tests
+        entrypoint: lerna run test
+
+    sut-lint:
+        image: $IMAGE_NAME
+        container_name: sut-lint
+        entrypoint: npm run lint
+
+    sut-integration-tests:
+        image: $IMAGE_NAME
+        container_name: sut-integration-tests
         depends_on:
             - sut-db
         env_file:
@@ -14,9 +24,6 @@ services:
             - subsystems
         tty: true
         entrypoint: lerna run test:integration
-#            - npm run lint
-#            - lerna run test
-#            - lerna run test:integration
 
     sut-db:
         build:
