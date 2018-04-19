@@ -11,16 +11,7 @@ services:
         networks:
             - subsystems
         tty: true
-        entrypoint:
-          - lerna
-          - run
-          - test:integration
-          - npm
-          - run
-          - lint
-          - npm
-          - test
-          - lint
+        entrypoint: bash -c " npm run lint && npm run test && lerna run test:integration"
 
     sut-db:
         build:
