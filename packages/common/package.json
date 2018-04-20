@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@welldone-software/node-toolbelt": "^1.2.0",
+    "env-cmd": "^7.0.0",
     "lodash": "^4.17.5",
     "require-all": "^2.2.0",
     "sequelize": "^4.35.2",

@@ -17,6 +17,7 @@
     "@pact-foundation/pact": "^5.9.0",
     "@welldone-software/node-toolbelt": "^1.2.0",
     "app-module-path": "^2.2.0",
+    "env-cmd": "^7.0.0",
     "promise-serial": "^0.1.5",
     "require-all": "^2.2.0",
     "stox-bc-request-manager-common": "1.0.0",

@@ -7,7 +7,7 @@ microservices and handles their resolution process.
 ## Setup
 install global packages
 ```
-npm install lerna rimraf cross-env -g
+npm install lerna rimraf cross-env env-cmd -g
 ```
 Installs all of the packages dependencies and links any cross-dependencies
 ```

@@ -6,7 +6,8 @@
   "dependencies": {
     "chai": "^4.1.2",
     "chai-jest-diff": "^1.0.2",
-    "chai-shallow-deep-equal": "^1.4.6"
+    "chai-shallow-deep-equal": "^1.4.6",
+    "env-cmd": "^7.0.0"
   },
   "author": "",
   "license": "ISC"

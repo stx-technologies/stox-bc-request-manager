@@ -11,18 +11,15 @@ pipelines:
             - node
           script:
             - apk add --no-cache nodejs
-#            - npm install eslint eslint-config-airbnb-base eslint-plugin-import -g
-#            - npm i lerna -g
-#            - npm run setup
-#            - npm run lint
+            - npm install lerna rimraf cross-env env-cmd -g
 #            - export IMAGE_NAME=$DOCKER_REGISTRY_DEV:$BITBUCKET_BUILD_NUMBER
-            - export IMAGE_NAME=test
+            - export IMAGE_NAME=request-manager
             - docker build -f ./docker/Dockerfile -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" .
             - set -eu
             - apk add --no-cache py-pip bash
             - pip install --no-cache-dir docker-compose
             - docker-compose -v
-            - npm run test:compose
+            - npm run test
 #            - apt-get update
 #            - curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
 #            - unzip awscli-bundle.zip -d /tmp/
