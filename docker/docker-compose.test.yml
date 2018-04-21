@@ -11,7 +11,7 @@ services:
         networks:
             - subsystems
         tty: true
-        entrypoint: bash -c " npm run lint && lerna run test && lerna run test:integration"
+        entrypoint: bash -c "lerna run test && lerna run test:integration"
         volumes:
           - ../packages:/services/packages
     sut-db:
