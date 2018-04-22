@@ -17,7 +17,7 @@ npm run setup
 ##Build
 To build a sub-system base image, you will need an id_rsa located at the root of the repository
 ```
-docker build -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY="$(cat ./id_rsa)" .
+npm run build
 ```
 
 ##Run

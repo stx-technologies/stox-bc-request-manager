@@ -5,6 +5,8 @@
     "link": "common.sh link",
     "setup": "lerna clean --yes && lerna bootstrap --hoist",
     "containers": "docker-compose -f docker/docker-compose.yml up -d",
+    "build": "docker build -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY=\"$(cat ./id_rsa)\" .",
+    "test:local": "cross-env IMAGE_NAME=request-manager npm run test",
     "test": "docker-compose -f docker/docker-compose.test.yml up --abort-on-container-exit && npm run test:clean",
     "test:clean": "docker-compose -f docker/docker-compose.test.yml down"
   }
