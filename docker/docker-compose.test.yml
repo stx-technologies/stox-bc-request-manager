@@ -12,8 +12,8 @@ services:
             - subsystems
         tty: true
         entrypoint: bash -c "lerna run test && lerna run test:integration"
-        volumes:
-          - ../packages:/services/packages
+#        volumes:
+#          - ../packages:/services/packages
     sut-db:
         build:
             context: ../

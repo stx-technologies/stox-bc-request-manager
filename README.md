@@ -23,7 +23,7 @@ npm run build
 ##Run
 To run a docker container for a service:
 ```
-docker run -it -d --name <service-name> request-manager npm start --prefix=packages/<service-name>
+docker run -d --name <service-name> request-manager npm start --prefix=packages/<service-name>
 ```
 To run service containers:
 ```
