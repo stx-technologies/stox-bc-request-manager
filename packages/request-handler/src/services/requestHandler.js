@@ -14,7 +14,6 @@ const createRequestTransactions = async (request) => {
   try {
     const pendingTransactions = await prepareTransactions(request)
     await transactions.addTransactions(request.id, pendingTransactions)
-    await requests.updateRequest({transactionPreparedAt: Date.now()}, id)
   } catch (error) {
     await requests.updateRequestCompleted(id, error)
     throw error

@@ -1,7 +1,8 @@
 const {monitorTransactionsCron, requiredConfirmations} = require('../config')
 const promiseSerial = require('promise-serial')
 const {
-  context, services: {transactions, requests},
+  context,
+  services: {transactions, requests},
   utils: {getCompletedTransaction},
 } = require('stox-bc-request-manager-common')
 const {errors: {logError}} = require('stox-common')
@@ -30,6 +31,7 @@ module.exports = {
         }
       } catch (e) {
         logger.error(e, 'MONITOR_TRANSACTION_ERROR', {transactionId: transaction.Id})
+        await requests.handleTransactionError(transaction, e)
       }
     })
 

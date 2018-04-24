@@ -18,8 +18,7 @@ const {
 
 const clientHttp = http(transactionsSignerBaseUrl)
 
-const fetchNonceFromEtherNode = async fromAccount =>
-  blockchain.web3.eth.getTransactionCount(fromAccount)
+const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTransactionCount(fromAccount)
 
 const isEtherNodeNonceSynced = async ({from, network}, dbTransaction) => {
   const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
@@ -30,22 +29,27 @@ const isEtherNodeNonceSynced = async ({from, network}, dbTransaction) => {
 const fetchGasPriceFromGasCalculator = async () => parseInt(defaultGasPrice, 10)
 
 const signTransactionInTransactionSigner = async (fromAddress, unsignedTransaction, transactionId) => {
-  const signedTransaction =
-    await clientHttp.post('/transactions/sign', {fromAddress, unsignedTransaction, transactionId})
+  const signedTransaction = await clientHttp.post('/transactions/sign', {
+    fromAddress,
+    unsignedTransaction,
+    transactionId,
+  })
   context.logger.info({fromAddress, unsignedTransaction, signedTransaction, transactionId}, 'TRANSACTION_SIGNED')
   return signedTransaction
 }
 
-const sendTransactionToBlockchain = async signedTransaction => new Promise(((resolve, reject) => {
-  blockchain.web3.eth.sendSignedTransaction(signedTransaction)
-    .once('transactionHash', (hash) => {
-      context.logger.info({hash}, 'TRANSACTION_SENT')
-      resolve(hash)
-    })
-    .on('error', (error) => {
-      reject(error)
-    })
-}))
+const sendTransactionToBlockchain = async signedTransaction =>
+  new Promise((resolve, reject) => {
+    blockchain.web3.eth
+      .sendSignedTransaction(signedTransaction)
+      .once('transactionHash', (hash) => {
+        context.logger.info({hash}, 'TRANSACTION_SENT')
+        resolve(hash)
+      })
+      .on('error', (error) => {
+        reject(error)
+      })
+  })
 
 const updateTransaction = async (transaction, unsignedTransaction, transactionHash, dbTransaction) => {
   await transaction.update(
@@ -71,70 +75,73 @@ module.exports = {
   cron: writePendingTransactionsCron,
   job: async () => {
     const pendingTransactions = await getPendingTransactions(limitTransactions)
-    const dbTransaction = await db.sequelize.transaction()
     const promises = pendingTransactions.map(transaction => async () => {
-      const [isNonceSynced, nodeNonce, dbNonce] = await isEtherNodeNonceSynced(transaction, dbTransaction)
+      const dbTransaction = await db.sequelize.transaction()
+      try {
+        const [isNonceSynced, nodeNonce, dbNonce] = await isEtherNodeNonceSynced(transaction, dbTransaction)
 
-      if (!isNonceSynced) {
-        context.logger.warn({transactionId: transaction.id, nodeNonce, dbNonce}, 'NONCE_NOT_SYNCED')
-        return
-      }
+        if (!isNonceSynced) {
+          context.logger.warn({transactionId: transaction.id, nodeNonce, dbNonce}, 'NONCE_NOT_SYNCED')
+          return
+        }
 
-      const unsignedTransaction = {
-        nonce: nodeNonce,
-        to: transaction.to,
-        data: transaction.transactionData.toString(),
-        gasPrice: await fetchGasPriceFromGasCalculator(),
-        chainId: await blockchain.web3.eth.net.getId(),
-      }
+        const unsignedTransaction = {
+          nonce: nodeNonce,
+          to: transaction.to,
+          data: transaction.transactionData.toString(),
+          gasPrice: await fetchGasPriceFromGasCalculator(),
+          chainId: await blockchain.web3.eth.net.getId(),
+        }
 
-      unsignedTransaction.gasLimit = await blockchain.web3.eth.estimateGas({
-        from: transaction.from,
-        to: unsignedTransaction.to,
-        gasPrice: unsignedTransaction.gasPrice,
-        nonce: unsignedTransaction.nonce,
-        data: unsignedTransaction.data,
-      })
+        unsignedTransaction.gasLimit = await blockchain.web3.eth.estimateGas({
+          from: transaction.from,
+          to: unsignedTransaction.to,
+          gasPrice: unsignedTransaction.gasPrice,
+          nonce: unsignedTransaction.nonce,
+          data: unsignedTransaction.data,
+        })
 
-      const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
-      const requiredBalance = unsignedTransaction.gasLimit * unsignedTransaction.gasPrice
-      if (fromAccountBalance < requiredBalance) {
-        context.logger.error(
-          {
-            requestId: transaction.requestId,
-            transactionId: transaction.id,
-            fromAccount: transaction.from,
-            fromAccountBalance,
-            requiredBalance,
-          },
-          'INSUFFICIENT_FUNDS_FOR_TRANSACTION'
+        const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
+        const requiredBalance = unsignedTransaction.gasLimit * unsignedTransaction.gasPrice
+        if (fromAccountBalance < requiredBalance) {
+          context.logger.error(
+            {
+              requestId: transaction.requestId,
+              transactionId: transaction.id,
+              fromAccount: transaction.from,
+              fromAccountBalance,
+              requiredBalance,
+            },
+            'INSUFFICIENT_FUNDS_FOR_TRANSACTION'
+          )
+          return
+        }
+
+        const signedTransaction = await signTransactionInTransactionSigner(
+          transaction.from,
+          unsignedTransaction,
+          transaction.id
         )
-        return
+        const transactionHash = await sendTransactionToBlockchain(signedTransaction)
+
+        await updateTransaction(transaction, unsignedTransaction, transactionHash, dbTransaction)
+        await updateRequest(transaction, dbTransaction)
+        await updateAccountNonce(transaction, nodeNonce, dbTransaction)
+
+        context.logger.info(
+          {
+            id: transaction.id,
+            transactionHash: transaction.transactionHash,
+          },
+          'SUCCESSFULLY_UPDATED_TRANSACTION'
+        )
+        await dbTransaction.commit()
+      } catch (e) {
+        dbTransaction.rollback()
+        logError(e)
+        await requests.handleTransactionError(transaction, e)
       }
-
-      const signedTransaction =
-        await signTransactionInTransactionSigner(transaction.from, unsignedTransaction, transaction.id)
-      const transactionHash = await sendTransactionToBlockchain(signedTransaction)
-
-      await updateTransaction(transaction, unsignedTransaction, transactionHash, dbTransaction)
-      await updateRequest(transaction, dbTransaction)
-      await updateAccountNonce(transaction, nodeNonce, dbTransaction)
-
-      context.logger.info(
-        {
-          id: transaction.id,
-          transactionHash: transaction.transactionHash,
-        },
-        'SUCCESSFULLY_UPDATED_TRANSACTION'
-      )
     })
-
-    try {
-      await promiseSerial(promises)
-      await dbTransaction.commit()
-    } catch (e) {
-      dbTransaction.rollback()
-      logError(e)
-    }
+    await promiseSerial(promises)
   },
 }

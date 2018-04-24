@@ -149,4 +149,26 @@ describe('requests service sanity checks', () => {
     expect(updatedTransactions).to.have.length(3)
     expect(updatedRequest.transactionPreparedAt).to.exist
   })
+
+  it('updateTransactionError', async () => {
+    // prepare
+    const requestToAdd = {id: uuid4(), type, data: {}}
+    const transactionToAdd = {
+      id: uuid4(),
+      requestId: requestToAdd.id,
+      type: 'send',
+      from: 'from',
+      network,
+    }
+    await context.db.requests.create(requestToAdd)
+    await context.db.transactions.create(transactionToAdd)
+
+    // act
+    await transactions.updateTransactionError(transactionToAdd.id, {message: 'error'})
+    const {dataValues: updatedTransaction} = await context.db.transactions.findOne({where: {id: transactionToAdd.id}})
+
+    // assert
+    expect(updatedTransaction.completedAt).to.exist
+    expect(updatedTransaction.error).to.exist
+  })
 })

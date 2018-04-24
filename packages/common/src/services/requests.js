@@ -1,5 +1,5 @@
 const {db, mq} = require('../context')
-const {getTransaction} = require('./transactions')
+const {getTransaction, updateTransactionError} = require('./transactions')
 const {Op} = require('sequelize')
 const {exceptions: {NotFoundError}} = require('@welldone-software/node-toolbelt')
 const {kebabCase} = require('lodash')
@@ -58,6 +58,12 @@ const publishCompletedRequest = async (request) => {
   mq.publish(`completed-${kebabCase(request.type)}-requests`, {...request})
 }
 
+const handleTransactionError = async ({id, requestId}, error) => {
+  await updateRequestCompleted(requestId, error)
+  await updateTransactionError(id, error)
+  await publishCompletedRequest(await getRequestById(requestId, true))
+}
+
 module.exports = {
   createRequest,
   updateRequest,
@@ -70,4 +76,5 @@ module.exports = {
   updateRequestCompleted,
   publishCompletedRequest,
   countPendingRequestByType,
+  handleTransactionError,
 }

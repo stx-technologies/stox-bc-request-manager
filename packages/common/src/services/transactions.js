@@ -67,6 +67,8 @@ const addTransactions = async (requestId, transactions) => {
   }
 }
 
+const updateTransactionError = (id, error) => db.transactions.update({error, completedAt: Date.now()}, {where: {id}})
+
 module.exports = {
   getTransaction,
   createTransaction,
@@ -74,4 +76,5 @@ module.exports = {
   getUncompletedTransactions,
   updateCompletedTransaction,
   addTransactions,
+  updateTransactionError,
 }
