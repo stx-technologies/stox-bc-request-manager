@@ -17,7 +17,7 @@ npm run setup
 ##Build
 To build a sub-system base image, you will need an id_rsa located at the root of the repository
 ```
-npm run build
+docker build -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY="$(cat ./id_rsa)" .
 ```
 
 ##Run
@@ -32,9 +32,8 @@ npm run containers
 
 ## Test
 To run all unit test
-
 ```
-lerna run test 
+npm run test 
 ```
 
 To run all integration tests in one container, first build the base image and then run:
