@@ -12,7 +12,7 @@ pipelines:
           script:
             - apk update && apk add bash
             - export IMAGE_NAME=request-manager:$BITBUCKET_BUILD_NUMBER
-            - ./bitbucket_scripts/setup.sh
-            - ./bitbucket_scripts/build.sh
-            - ./bitbucket_scripts/test.sh
-            - ./bitbucket_scripts/deploy.sh
+            - ./scripts/setup.sh
+            - ./scripts/build.sh
+            - ./scripts/test.sh
+            - ./scripts/deploy.sh

@@ -36,7 +36,7 @@ const updateCompletedTransaction = async ({id, transactionHash}, {isSuccessful, 
     await transactionInstance.updateAttributes(
       {
         completedAt: Date.now(),
-        receipt: receipt,
+        receipt,
         currentBlockTime: blockTime,
         blockNumber: receipt.blockNumber,
         error: isSuccessful ? null : {message: 'error in blockchain transaction'},

@@ -2,7 +2,7 @@
   "name"	 : "request-manager",
   "scripts": {
     "lint": "eslint . --ignore-path .eslintignore --cache",
-    "link": "common.sh link",
+    "link": "./scripts/common.sh link",
     "setup": "lerna clean --yes && lerna bootstrap --hoist",
     "containers": "docker-compose -f docker/docker-compose.yml up -d",
     "build": "docker build -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY=\"$(cat ./id_rsa)\" .",

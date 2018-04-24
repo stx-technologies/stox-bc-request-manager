@@ -31,15 +31,15 @@ npm run containers
 ```
 
 ## Test
-To run all unit test locally run
+To run all unit test
 
 ```
-npm run test 
+lerna run test 
 ```
 
 To run all integration tests in one container, first build the base image and then run:
 ```
-npm run test:compose
+npm run test:local
 ```
 
 ## Docs
