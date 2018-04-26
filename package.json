@@ -1,13 +1,13 @@
 {
   "name"	 : "request-manager",
-  "config" : { "service" : "request-manager" },
   "scripts": {
-    "lint": "eslint . --ignore-path .gitignore --cache",
-    "link": "common.sh link",
-    "setup": "lerna bootstrap --hoist",
-    "setup:clean": "lerna clean --yes && npm run setup",
+    "lint": "eslint . --ignore-path .eslintignore --cache",
+    "link": "./scripts/common.sh link",
+    "setup": "lerna clean --yes && lerna bootstrap --hoist",
     "containers": "docker-compose -f docker/docker-compose.yml up -d",
-    "test": "cross-env SERVICE_NAME=$npm_package_config_service docker-compose -f docker/docker-compose.test.yml up --abort-on-container-exit && npm run test:clean",
-    "test:clean": "cross-env SERVICE_NAME=$npm_package_config_service docker-compose -f docker/docker-compose.test.yml down"
+    "build": "docker build -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY=\"$(cat ./id_rsa)\" .",
+    "test:local": "cross-env IMAGE_NAME=request-manager npm run test",
+    "test": "docker-compose -f docker/docker-compose.test.yml up --abort-on-container-exit && npm run test:clean",
+    "test:clean": "docker-compose -f docker/docker-compose.test.yml down"
   }
 }

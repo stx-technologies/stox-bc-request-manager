@@ -1,7 +1,6 @@
 const {db} = require('../context')
 const {exceptions: {NotFoundError}} = require('@welldone-software/node-toolbelt')
 
-
 const createTransaction = ({id, type, from}) => db.transactions.create({id, type, from})
 
 const getTransaction = async (query) => {
@@ -37,14 +36,14 @@ const updateCompletedTransaction = async ({id, transactionHash}, {isSuccessful, 
     await transactionInstance.updateAttributes(
       {
         completedAt: Date.now(),
-        receipt: receipt,
+        receipt,
         currentBlockTime: blockTime,
         blockNumber: receipt.blockNumber,
-        error: !isSuccessful,
+        error: isSuccessful ? null : {message: 'error in blockchain transaction'},
       },
       {
         transaction,
-      },
+      }
     )
     await transaction.commit()
 

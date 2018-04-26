@@ -1,11 +1,11 @@
+const uuid4 = require('uuid4')
+const {prepareTransactions} = require('services/requestHandler')
 const {
   provider,
   interactions,
   createInteraction,
   createExpectedResult,
 } = require('../pacts/walletsApi')
-const uuid4 = require('uuid4')
-const {prepareTransactions} = require('../../services/requestHandler')
 
 describe('request-handler integration with database', () => {
   beforeAll(async (done) => {
@@ -36,7 +36,7 @@ describe('request-handler integration with database', () => {
       const transactions = await prepareTransactions(request)
 
       // assert
-      expect(transactions).toEqual(expectedTransactions)
+      expect(transactions).eql(expectedTransactions)
       done()
     })
   })

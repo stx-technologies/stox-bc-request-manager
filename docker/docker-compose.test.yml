@@ -2,39 +2,29 @@ version: '3.3'
 services:
 
     sut:
-        image: request-manager
-        container_name: ${SERVICE_NAME}-test
+        image: $IMAGE_NAME
+        container_name: sut
         depends_on:
-            - activemq-test
-            - request-manager-db-test
-        env_file:
-            - ../packages/${SERVICE_NAME}/.env.test
+            - sut-db
         environment:
-            DATABASE_URL: postgres://postgres:secret@request-manager-db-test/stoxbcrm
-            MQ_CONNECTION_URL: stomp://activemq-test:61613
-            SERVICE_NAME: $SERVICE_NAME
+            DATABASE_URL: postgres://postgres:secret@sut-db/stoxbcrm
         networks:
             - subsystems
         tty: true
-        entrypoint: npm run test --prefix packages/${SERVICE_NAME}
-
-    request-manager-db-test:
+        entrypoint: bash -c "lerna run test && lerna run test:integration"
+#        volumes:
+#          - ../packages:/services/packages
+    sut-db:
         build:
             context: ../
             dockerfile: ./docker/db.Dockerfile
-        container_name: stox-postgres-bc-rm-test
+        container_name: sut-db
         networks:
             - subsystems
         environment:
             POSTGRES_PASSWORD: secret
             POSTGRES_USER: postgres
             POSTGRES_DB: stoxbcrm
-
-    activemq-test:
-        image: rmohr/activemq:5.14.5
-        container_name: stox-activemq-test
-        networks:
-            - subsystems
 
 networks:
     subsystems:
