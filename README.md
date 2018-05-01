@@ -14,13 +14,13 @@ Installs all of the packages dependencies and links any cross-dependencies
 npm run setup
 ```
 
-##Build
+## Build
 To build a sub-system base image, you will need an id_rsa located at the root of the repository
 ```
 docker build -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY="$(cat ./id_rsa)" .
 ```
 
-##Run
+## Run
 To run a docker container for a service:
 ```
 docker run -d --name <service-name> request-manager npm start --prefix=packages/<service-name>
