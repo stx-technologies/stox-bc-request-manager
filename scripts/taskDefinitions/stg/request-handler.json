@@ -1,0 +1,62 @@
+{
+  "family": "stg-request-handler",
+  "volumes": [],
+  "networkMode": "awsvpc",
+  "memory": "512",
+  "cpu": "256",
+  "placementConstraints": [],
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "containerDefinitions": [
+    {
+      "name": "stg-request-handler",
+      "image": "",
+      "memoryReservation": 300,
+      "cpu": 128,
+      "essential": true,
+      "portMappings": [],
+      "command": [
+        "npm",
+        "run",
+        "serve",
+        "--prefix",
+        "packages/request-handler"
+      ],
+      "environment": [
+        {
+          "name": "DATABASE_URL",
+          "value": "postgres://stoxappuser:wnImFeGXXurqw5NONoXu@stg-stox.cychkzdvrrri.eu-west-1.rds.amazonaws.com:5432/stoxbcrm1"
+        },
+        {
+          "name": "HANDLE_PENDING_REQUEST_CRON",
+          "value": "*/10 * * * * *"
+        },
+        {
+          "name": "LIMIT_PENDING_REQUEST",
+          "value": "10"
+        },
+        {
+          "name": "MQ_CONNECTION_URL",
+          "value": "stg-activemq.stox-stg:61613"
+        },
+        {
+          "name": "NETWORK",
+          "value": "MAIN"
+        },
+        {
+          "name": "WALLETS_API_BASE_URL",
+          "value": "http://wallets-api.stox-stg:3001/api/v1/"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "stg-request-manager",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "request-handler"
+        }
+      }
+    }
+  ]
+}

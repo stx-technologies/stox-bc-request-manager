@@ -1,0 +1,66 @@
+{
+  "family": "stg-transactions-writer",
+  "volumes": [],
+  "networkMode": "awsvpc",
+  "memory": "512",
+  "cpu": "256",
+  "placementConstraints": [],
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "containerDefinitions": [
+    {
+      "name": "stg-transactions-writer",
+      "image": "",
+      "memoryReservation": 300,
+      "cpu": 128,
+      "essential": true,
+      "portMappings": [],
+      "command": [
+        "npm",
+        "run",
+        "serve",
+        "--prefix",
+        "packages/transactions-writer"
+      ],
+      "environment": [
+        {
+          "name": "DATABASE_URL",
+          "value": "postgres://stoxappuser:wnImFeGXXurqw5NONoXu@stg-stox.cychkzdvrrri.eu-west-1.rds.amazonaws.com:5432/stoxbcrm1"
+        },
+        {
+          "name": "DEFAULT_GAS_PRICE",
+          "value": "4000000000"
+        },
+        {
+          "name": "LIMIT_TRANSACTIONS",
+          "value": "10"
+        },
+        {
+          "name": "MQ_CONNECTION_URL",
+          "value": "stg-activemq.stox-stg:61613"
+        },
+        {
+          "name": "TRANSACTIONS_SIGNER_BASE_URL",
+          "value": "http://stg-signer.stox-stg:3011/api/v1"
+        },
+        {
+          "name": "WEB_3_URL",
+          "value": "http://10.240.2.224:8545/api/v1/"
+        },
+        {
+          "name": "WRITE_PENDING_TRANSACTIONS_CRON",
+          "value": "*/5 * * * * *"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "stg-request-manager",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "transactions-writer"
+        }
+      }
+    }
+  ]
+}

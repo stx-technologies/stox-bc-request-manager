@@ -1,0 +1,59 @@
+{
+  "family": "dev-request-manager-api",
+  "volumes": [],
+  "networkMode": "awsvpc",
+  "memory": "512",
+  "cpu": "256",
+  "placementConstraints": [],
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "containerDefinitions": [
+    {
+      "name": "dev-request-manager-api",
+      "image": "572502612946.dkr.ecr.eu-west-1.amazonaws.com/bc_request_manager",
+      "memoryReservation": 300,
+      "cpu": 128,
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3003,
+          "protocol": "tcp"
+        }
+      ],
+      "command": [
+        "npm",
+        "run",
+        "serve",
+        "--prefix",
+        "packages/request-manager-api"
+      ],
+      "environment": [
+        {
+          "name": "DATABASE_URL",
+          "value": "postgres://stoxappuser:wnImFeGXXurqw5NONoXu@dev-stox.cychkzdvrrri.eu-west-1.rds.amazonaws.com:5432/stoxbcrm1"
+        },
+        {
+          "name": "NETWORK",
+          "value": "MAIN"
+        },
+        {
+          "name": "PORT",
+          "value": "3009"
+        },
+        {
+          "name": "WEB_3_URL",
+          "value": "http://10.240.2.224:8545/api/v1/"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "dev-request-manager",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "request-manager-api"
+        }
+      }
+    }
+  ]
+}

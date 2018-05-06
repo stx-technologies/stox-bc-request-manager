@@ -35,11 +35,18 @@ To run all unit test
 ```
 npm run test 
 ```
-
 To run all integration tests in one container, first build the base image and then run:
 ```
 npm run test:local
 ```
+
+## Register all tasks
+Register all services tasks to aws ecs by image name after login locally to aws, e.g.
+```
+node scripts/createTasksDefition.js <image_name>:<tag>
+```
+
+
 
 ## Docs
 [Blockchain Writer Architecture](https://docs.google.com/document/d/1eXrxDFgjDl-2No22om8vesqGhU7iGtw8iDSuN3VoHJ4/edit#heading=h.jsy3plhn9pv8)

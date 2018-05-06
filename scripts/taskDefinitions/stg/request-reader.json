@@ -1,0 +1,50 @@
+{
+  "family": "stg-request-reader",
+  "volumes": [],
+  "networkMode": "awsvpc",
+  "memory": "512",
+  "cpu": "256",
+  "placementConstraints": [],
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "containerDefinitions": [
+    {
+      "name": "stg-request-reader",
+      "image": "",
+      "memoryReservation": 300,
+      "cpu": 128,
+      "essential": true,
+      "portMappings": [],
+      "command": [
+        "npm",
+        "run",
+        "serve",
+        "--prefix",
+        "packages/request-reader"
+      ],
+      "environment": [
+        {
+          "name": "DATABASE_URL",
+          "value": "postgres://stoxappuser:wnImFeGXXurqw5NONoXu@stg-stox.cychkzdvrrri.eu-west-1.rds.amazonaws.com:5432/stoxbcrm1"
+        },
+        {
+          "name": "MQ_CONNECTION_URL",
+          "value": "stg-activemq.stox-stg:61613"
+        },
+        {
+          "name": "NETWORK",
+          "value": "MAIN"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "stg-request-manager",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "request-reader"
+        }
+      }
+    }
+  ]
+}
