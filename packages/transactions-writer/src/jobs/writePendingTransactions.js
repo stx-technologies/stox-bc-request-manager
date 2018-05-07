@@ -20,14 +20,14 @@ const clientHttp = http(transactionsSignerBaseUrl)
 
 const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTransactionCount(fromAccount)
 
-const isEtherNodeNonceSynced = async ({from, network}, dbTransaction) => {
+const isEtherNodeNonceSynced = async ({from, network}) => {
   try {
     const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
-    const nonceFromDB = await fetchNextAccountNonce(from, network, dbTransaction)
+    const nonceFromDB = await fetchNextAccountNonce(from, network)
     return [nonceFromDB <= nonceFromEtherNode, nonceFromEtherNode, nonceFromDB]
   } catch (e) {
     context.logger.error(e, 'ERROR_FETCHING_NONCE')
-    return false
+    return [false, null, null]
   }
 }
 
@@ -75,16 +75,40 @@ const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
   const accountNonce = await findOrCreateAccountNonce(from, network, dbTransaction)
   await accountNonce.update({nonce}, {transaction: dbTransaction})
 }
+const commitTransactionData = async (transaction, unsignedTransaction, nodeNonce) => {
+  const dbTransaction = await db.sequelize.transaction()
+  try {
+    const signedTransaction = await signTransactionInTransactionSigner(
+      transaction.from,
+      unsignedTransaction,
+      transaction.id
+    )
+    const transactionHash = await sendTransactionToBlockchain(signedTransaction)
+    await updateTransaction(transaction, unsignedTransaction, transactionHash, dbTransaction)
+    await updateRequest(transaction, dbTransaction)
+    await updateAccountNonce(transaction, nodeNonce, dbTransaction)
+
+    context.logger.info(
+      {
+        id: transaction.id,
+        transactionHash: transaction.transactionHash,
+      },
+      'SUCCESSFULLY_UPDATED_TRANSACTION'
+    )
+    await dbTransaction.commit()
+  } catch (e) {
+    dbTransaction.rollback()
+    throw (e)
+  }
+}
 
 module.exports = {
   cron: writePendingTransactionsCron,
   job: async () => {
     const pendingTransactions = await getPendingTransactions(limitTransactions)
     const promises = pendingTransactions.map(transaction => async () => {
-      const dbTransaction = await db.sequelize.transaction()
       try {
-        const [isNonceSynced, nodeNonce, dbNonce] = await isEtherNodeNonceSynced(transaction, dbTransaction)
-
+        const [isNonceSynced, nodeNonce, dbNonce] = await isEtherNodeNonceSynced(transaction)
         if (!isNonceSynced) {
           context.logger.warn({transactionId: transaction.id, nodeNonce, dbNonce}, 'NONCE_NOT_SYNCED')
           return
@@ -121,28 +145,8 @@ module.exports = {
           )
           return
         }
-
-        const signedTransaction = await signTransactionInTransactionSigner(
-          transaction.from,
-          unsignedTransaction,
-          transaction.id
-        )
-        const transactionHash = await sendTransactionToBlockchain(signedTransaction)
-
-        await updateTransaction(transaction, unsignedTransaction, transactionHash, dbTransaction)
-        await updateRequest(transaction, dbTransaction)
-        await updateAccountNonce(transaction, nodeNonce, dbTransaction)
-
-        context.logger.info(
-          {
-            id: transaction.id,
-            transactionHash: transaction.transactionHash,
-          },
-          'SUCCESSFULLY_UPDATED_TRANSACTION'
-        )
-        await dbTransaction.commit()
+        commitTransactionData(transaction, unsignedTransaction, nodeNonce)
       } catch (e) {
-        dbTransaction.rollback()
         logError(e, 'TRANSACTION_FAILED')
         await requests.handleTransactionError(transaction, e)
       }

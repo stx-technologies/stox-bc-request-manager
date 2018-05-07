@@ -1,7 +1,7 @@
 const {db} = require('../context')
 
-const fetchNextAccountNonce = async (account, network, transaction) => {
-  const accountNonce = await db.accountNonces.findOne({where: {account, network}}, {transaction})
+const fetchNextAccountNonce = async (account, network) => {
+  const accountNonce = await db.accountNonces.findOne({where: {account, network}})
 
   return accountNonce ? accountNonce.nonce : 0
 }
