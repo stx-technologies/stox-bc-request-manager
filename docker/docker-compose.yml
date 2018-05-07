@@ -18,3 +18,4 @@ services:
         container_name: stox-activemq
         ports:
             - 61613:61613
+            - 8161:8161
