@@ -32,7 +32,7 @@ const countRequestByType = async type => ({
 })
 
 const countPendingRequestByType = async type => ({
-  count: await db.requests.count({where: {type, transactionPreparedAt: null, error: null}}),
+  count: await db.requests.count({where: {type, completedAt: null}}),
 })
 
 const getPendingRequests = limit => db.requests.findAll({where: {transactionPreparedAt: null, error: null}, limit})
