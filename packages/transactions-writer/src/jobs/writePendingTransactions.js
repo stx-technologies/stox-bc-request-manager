@@ -75,7 +75,28 @@ const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
   const accountNonce = await findOrCreateAccountNonce(from, network, dbTransaction)
   await accountNonce.update({nonce}, {transaction: dbTransaction})
 }
-const commitTransactionData = async (transaction, unsignedTransaction, nodeNonce) => {
+
+const createUnsignedTransaction = async (nodeNonce, transaction) => {
+  const unsignedTransaction = {
+    nonce: nodeNonce,
+    to: transaction.to,
+    data: transaction.transactionData.toString(),
+    gasPrice: await fetchGasPriceFromGasCalculator(),
+    chainId: await blockchain.web3.eth.net.getId(),
+  }
+
+  unsignedTransaction.gasLimit = await blockchain.web3.eth.estimateGas({
+    from: transaction.from,
+    to: unsignedTransaction.to,
+    gasPrice: unsignedTransaction.gasPrice,
+    nonce: unsignedTransaction.nonce,
+    data: unsignedTransaction.data,
+  })
+
+  return unsignedTransaction
+}
+
+const commitAndSendTransaction = async (transaction, unsignedTransaction, nodeNonce) => {
   const dbTransaction = await db.sequelize.transaction()
   try {
     const signedTransaction = await signTransactionInTransactionSigner(
@@ -114,22 +135,7 @@ module.exports = {
           return
         }
 
-        const unsignedTransaction = {
-          nonce: nodeNonce,
-          to: transaction.to,
-          data: transaction.transactionData.toString(),
-          gasPrice: await fetchGasPriceFromGasCalculator(),
-          chainId: await blockchain.web3.eth.net.getId(),
-        }
-
-        unsignedTransaction.gasLimit = await blockchain.web3.eth.estimateGas({
-          from: transaction.from,
-          to: unsignedTransaction.to,
-          gasPrice: unsignedTransaction.gasPrice,
-          nonce: unsignedTransaction.nonce,
-          data: unsignedTransaction.data,
-        })
-
+        const unsignedTransaction = createUnsignedTransaction(nodeNonce, transaction)
         const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
         const requiredBalance = unsignedTransaction.gasLimit * unsignedTransaction.gasPrice
         if (fromAccountBalance < requiredBalance) {
@@ -145,7 +151,8 @@ module.exports = {
           )
           return
         }
-        commitTransactionData(transaction, unsignedTransaction, nodeNonce)
+
+        commitAndSendTransaction(transaction, unsignedTransaction, nodeNonce)
       } catch (e) {
         logError(e, 'TRANSACTION_FAILED')
         await requests.handleTransactionError(transaction, e)
