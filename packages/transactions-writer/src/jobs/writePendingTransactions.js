@@ -96,15 +96,9 @@ const createUnsignedTransaction = async (nodeNonce, transaction) => {
   return unsignedTransaction
 }
 
-const commitAndSendTransaction = async (transaction, unsignedTransaction, nodeNonce) => {
+const commitAndSendTransaction = async (transaction, unsignedTransaction, transactionHash, nodeNonce) => {
   const dbTransaction = await db.sequelize.transaction()
   try {
-    const signedTransaction = await signTransactionInTransactionSigner(
-      transaction.from,
-      unsignedTransaction,
-      transaction.id
-    )
-    const transactionHash = await sendTransactionToBlockchain(signedTransaction)
     await updateTransaction(transaction, unsignedTransaction, transactionHash, dbTransaction)
     await updateRequest(transaction, dbTransaction)
     await updateAccountNonce(transaction, nodeNonce, dbTransaction)
@@ -151,8 +145,13 @@ module.exports = {
           )
           return
         }
-
-        commitAndSendTransaction(transaction, unsignedTransaction, nodeNonce)
+        const signedTransaction = await signTransactionInTransactionSigner(
+          transaction.from,
+          unsignedTransaction,
+          transaction.id
+        )
+        const transactionHash = await sendTransactionToBlockchain(signedTransaction)
+        commitAndSendTransaction(transaction, unsignedTransaction, transactionHash, nodeNonce)
       } catch (e) {
         logError(e, 'TRANSACTION_FAILED')
         await requests.handleTransactionError(transaction, e)
