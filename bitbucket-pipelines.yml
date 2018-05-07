@@ -15,5 +15,5 @@ pipelines:
             - echo $IMAGE_NAME
             - ./scripts/setup.sh
             - ./scripts/build.sh
-#            - ./scripts/test.sh
+            - ./scripts/test.sh
             - ./scripts/deploy.sh
