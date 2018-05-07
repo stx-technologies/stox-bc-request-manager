@@ -57,7 +57,7 @@ describe('requests service sanity checks', () => {
     expect(pendindTransaction2).to.have.length(2)
   })
 
-  it('getUncompletedTransactions', async () => {
+  it('getUnconfirmedTransactions', async () => {
     // prepare
     const requestsToAdd = range(0, 5).map(() => ({id: uuid4(), type, data: {}}))
     const transactionsToAdd = range(0, 3).map(i => ({
@@ -82,8 +82,8 @@ describe('requests service sanity checks', () => {
     await context.db.transactions.bulkCreate(transactionsToAdd)
 
     // act
-    const uncompletedTransaction1 = await transactions.getUncompletedTransactions(5)
-    const uncompletedTransaction2 = await transactions.getUncompletedTransactions(2)
+    const uncompletedTransaction1 = await transactions.getUnconfirmedTransactions(5)
+    const uncompletedTransaction2 = await transactions.getUnconfirmedTransactions(2)
 
     // assert
     expect(uncompletedTransaction1).to.have.length(3)

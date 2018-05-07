@@ -12,9 +12,9 @@ const getTransaction = async (query) => {
   return transaction
 }
 
-const getPendingTransactions = limit => db.transactions.findAll({where: {sentAt: null}, limit})
+const getPendingTransactions = limit => db.transactions.findAll({where: {sentAt: null, completedAt: null}, limit})
 
-const getUncompletedTransactions = limit =>
+const getUnconfirmedTransactions = limit =>
   db.transactions.findAll({
     where: {
       sentAt: {
@@ -73,7 +73,7 @@ module.exports = {
   getTransaction,
   createTransaction,
   getPendingTransactions,
-  getUncompletedTransactions,
+  getUnconfirmedTransactions,
   updateCompletedTransaction,
   addTransactions,
   updateTransactionError,

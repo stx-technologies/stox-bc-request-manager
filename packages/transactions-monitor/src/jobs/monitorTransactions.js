@@ -11,7 +11,7 @@ module.exports = {
   cron: monitorTransactionsCron,
   job: async () => {
     const {logger} = context
-    const uncompletedTransactions = await transactions.getUncompletedTransactions()
+    const uncompletedTransactions = await transactions.getUnconfirmedTransactions()
 
     context.logger.info({count: uncompletedTransactions.length}, 'UNCOMPLETED_TRANSACTIONS')
 
