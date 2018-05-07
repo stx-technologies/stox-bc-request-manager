@@ -21,9 +21,14 @@ const clientHttp = http(transactionsSignerBaseUrl)
 const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTransactionCount(fromAccount)
 
 const isEtherNodeNonceSynced = async ({from, network}, dbTransaction) => {
-  const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
-  const nonceFromDB = await fetchNextAccountNonce(from, network, dbTransaction)
-  return [nonceFromDB <= nonceFromEtherNode, nonceFromEtherNode, nonceFromDB]
+  try {
+    const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
+    const nonceFromDB = await fetchNextAccountNonce(from, network, dbTransaction)
+    return [nonceFromDB <= nonceFromEtherNode, nonceFromEtherNode, nonceFromDB]
+  } catch (e) {
+    context.logger.error(e, 'ERROR_FETCHING_NONCE')
+    return false
+  }
 }
 
 const fetchGasPriceFromGasCalculator = async () => parseInt(defaultGasPrice, 10)
@@ -138,7 +143,7 @@ module.exports = {
         await dbTransaction.commit()
       } catch (e) {
         dbTransaction.rollback()
-        logError(e)
+        logError(e, 'TRANSACTION_FAILED')
         await requests.handleTransactionError(transaction, e)
       }
     })
