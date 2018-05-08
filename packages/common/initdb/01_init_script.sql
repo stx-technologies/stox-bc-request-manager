@@ -41,7 +41,7 @@ CREATE TABLE "transactions"
     "blockNumber" BIGINT,
     "nonce" BIGINT,
     "error" json,
-    "gasPrice" INTEGER,
+    "gasPrice" BIGINT,
     "receipt" json,
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
     "sentAt" timestamp with time zone,
