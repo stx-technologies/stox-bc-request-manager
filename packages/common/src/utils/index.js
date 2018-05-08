@@ -10,7 +10,7 @@ const loggerFormatText = text => snakeCase(text).toUpperCase()
 const secondsToDate = date => new Date(date * 1000)
 
 const getCompletedTransaction = async (transactionHash, currentBlockNumber) => {
-  if (currentBlockNumber === undefined) {
+  if (!currentBlockNumber) {
     currentBlockNumber = await blockchain.web3.eth.getBlockNumber()
   }
 

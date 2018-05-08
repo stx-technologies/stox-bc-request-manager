@@ -128,7 +128,7 @@ module.exports = {
           context.logger.warn({transactionId: transaction.id, nodeNonce, dbNonce}, 'NONCE_NOT_SYNCED')
           return
         }
-
+        
         const unsignedTransaction = await createUnsignedTransaction(nodeNonce, transaction)
         const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
         const requiredBalance = unsignedTransaction.gasLimit * unsignedTransaction.gasPrice
@@ -151,7 +151,7 @@ module.exports = {
           transaction.id
         )
         const transactionHash = await sendTransactionToBlockchain(signedTransaction)
-        commitTransaction(transaction, unsignedTransaction, transactionHash, nodeNonce)
+        await commitTransaction(transaction, unsignedTransaction, transactionHash, nodeNonce)
       } catch (e) {
         logError(e, 'TRANSACTION_FAILED')
         await requests.handleTransactionError(transaction, e)
