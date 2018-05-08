@@ -29,8 +29,12 @@ const getCompletedTransaction = async (transactionHash, currentBlockNumber) => {
       transactionReceipt.status === null)
     return {
       isSuccessful,
-      blockTime: secondsToDate((await blockchain.web3.eth.getBlock(transactionReceipt.blockNumber, false)).timestamp),
-      confirmations: currentBlockNumber - transactionReceipt.blockNumber,
+      blockTime: transactionReceipt.blockNumber ?
+        secondsToDate((await blockchain.web3.eth.getBlock(transactionReceipt.blockNumber, false)).timestamp) :
+        undefined,
+      confirmations: transactionReceipt.blockNumber ?
+        currentBlockNumber - transactionReceipt.blockNumber :
+        undefined,
       receipt: transactionReceipt,
     }
   }
