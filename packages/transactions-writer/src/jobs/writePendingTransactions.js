@@ -34,8 +34,6 @@ const isEtherNodeNonceSynced = async ({from, network}) => {
 const fetchGasPriceFromGasCalculator = async () => parseInt(defaultGasPrice, 10)
 
 const signTransactionInTransactionSigner = async (fromAddress, unsignedTransaction, transactionId) => {
-  console.log({unsignedTransaction},'11111111')
-  
   const signedTransaction = await clientHttp.post('/transactions/sign', {
     fromAddress,
     unsignedTransaction,
