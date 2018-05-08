@@ -101,7 +101,7 @@ const commitTransaction = async (transaction, unsignedTransaction, transactionHa
   try {
     await updateTransaction(transaction, unsignedTransaction, transactionHash, dbTransaction)
     await updateRequest(transaction, dbTransaction)
-    await updateAccountNonce(transaction, nodeNonce, dbTransaction)
+    await updateAccountNonce(transaction, nodeNonce + 1, dbTransaction)
 
     context.logger.info(
       {
