@@ -30,7 +30,8 @@ module.exports = {
           await requests.publishCompletedRequest(await requests.getRequestById(requestId, true))
         }
       } catch (e) {
-        logger.error({e, transactionId: transaction.Id}, 'MONITOR_TRANSACTION_ERROR')
+        logger.error({transactionId: transaction.Id}, 'MONITOR_TRANSACTION_ERROR')
+        logError(e)
         await requests.handleTransactionError(transaction, e)
       }
     })
