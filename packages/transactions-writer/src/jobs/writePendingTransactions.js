@@ -34,6 +34,8 @@ const isEtherNodeNonceSynced = async ({from, network}) => {
 const fetchGasPriceFromGasCalculator = async () => parseInt(defaultGasPrice, 10)
 
 const signTransactionInTransactionSigner = async (fromAddress, unsignedTransaction, transactionId) => {
+  console.log({unsignedTransaction},'11111111')
+  
   const signedTransaction = await clientHttp.post('/transactions/sign', {
     fromAddress,
     unsignedTransaction,
@@ -96,7 +98,7 @@ const createUnsignedTransaction = async (nodeNonce, transaction) => {
   return unsignedTransaction
 }
 
-const commitAndSendTransaction = async (transaction, unsignedTransaction, transactionHash, nodeNonce) => {
+const commitTransaction = async (transaction, unsignedTransaction, transactionHash, nodeNonce) => {
   const dbTransaction = await db.sequelize.transaction()
   try {
     await updateTransaction(transaction, unsignedTransaction, transactionHash, dbTransaction)
@@ -129,7 +131,7 @@ module.exports = {
           return
         }
 
-        const unsignedTransaction = createUnsignedTransaction(nodeNonce, transaction)
+        const unsignedTransaction = await createUnsignedTransaction(nodeNonce, transaction)
         const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
         const requiredBalance = unsignedTransaction.gasLimit * unsignedTransaction.gasPrice
         if (fromAccountBalance < requiredBalance) {
@@ -151,7 +153,7 @@ module.exports = {
           transaction.id
         )
         const transactionHash = await sendTransactionToBlockchain(signedTransaction)
-        commitAndSendTransaction(transaction, unsignedTransaction, transactionHash, nodeNonce)
+        commitTransaction(transaction, unsignedTransaction, transactionHash, nodeNonce)
       } catch (e) {
         logError(e, 'TRANSACTION_FAILED')
         await requests.handleTransactionError(transaction, e)
