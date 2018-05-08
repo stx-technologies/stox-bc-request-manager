@@ -11,7 +11,7 @@ pipelines:
             - node
           script:
             - apk update && apk add bash
-            - export IMAGE_NAME=$DOCKER_REGISTRY:$BITBUCKET_BUILD_NUMBER
+            - export IMAGE_NAME=$DOCKER_REGISTRY_DEV:$BITBUCKET_BUILD_NUMBER
             - echo $IMAGE_NAME
             - ./scripts/setup.sh
             - ./scripts/build.sh
