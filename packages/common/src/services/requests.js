@@ -52,12 +52,10 @@ const getCorrespondingRequests = async transactions =>
   })
 
 const publishCompletedRequest = async (request) => {
-  request.transactions = request.transactions.map((transaction) => {
-    transaction.transactionData = undefined
-    return transaction
-  })
+  const transactions = request.transactions &&
+   request.transactions.map(transaction => ({...transaction, transactionData: undefined}))
 
-  mq.publish(`completed-${kebabCase(request.type)}-requests`, {...request})
+  mq.publish(`completed-${kebabCase(request.type)}-requests`, {...request, transactions})
 }
 
 const handleTransactionError = async ({id, requestId}, error) => {

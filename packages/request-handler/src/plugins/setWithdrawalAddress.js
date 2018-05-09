@@ -15,7 +15,7 @@ module.exports = {
         requestId: id,
         type: 'send',
         from: fromAccount,
-        to: userWithdrawalAddress,
+        to: walletAddress,
         network,
         transactionData: encodedAbi,
       },
