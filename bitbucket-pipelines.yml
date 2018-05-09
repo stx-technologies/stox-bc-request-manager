@@ -4,8 +4,8 @@ options:
     docker: true
 
 pipelines:
-    branches:
-        feature/*:
+    custom:
+        test:
             - step:
                 deployment: test
                 caches:
@@ -13,7 +13,7 @@ pipelines:
                 script:
                     # setup
                     - apk update && apk add bash
-                    - apk add --no-cache nodejs openssh py-pip alpine-sdk jq
+                    - apk add --no-cache nodejs openssh py-pip alpine-sdk
                     - set -eu
                     - pip install --no-cache-dir docker-compose
                     - npm install lerna rimraf cross-env env-cmd -g
@@ -41,7 +41,7 @@ pipelines:
                     # register ecs tasks
                     - node scripts/createTaskDefinition.js $IMAGE_NAME dev
 
-        release/*:
+        staging:
             - step:
                 deployment: staging
                 caches:
@@ -49,7 +49,7 @@ pipelines:
                 script:
                     # setup
                     - apk update && apk add bash
-                    - apk add --no-cache nodejs openssh py-pip alpine-sdk jq
+                    - apk add --no-cache nodejs openssh py-pip alpine-sdk
                     - set -eu
                     - pip install --no-cache-dir docker-compose
                     - npm install lerna rimraf cross-env env-cmd -g
@@ -73,7 +73,7 @@ pipelines:
                     # register ecs tasks
                     - node scripts/createTaskDefinition.js $IMAGE_NAME stg
 
-        master:
+        production:
             - step:
                 deployment: production
                 caches:
@@ -81,14 +81,14 @@ pipelines:
                 script:
                     # setup
                     - apk update && apk add bash
-                    - apk add --no-cache nodejs openssh py-pip alpine-sdk jq
+                    - apk add --no-cache nodejs openssh py-pip alpine-sdk
                     - set -eu
                     - pip install --no-cache-dir docker-compose
                     - npm install lerna rimraf cross-env env-cmd -g
                     - npm run setup
 
                     # build
-                    - export IMAGE_NAME=$DOCKER_REGISTRY:$BITBUCKET_COMMIT-$BITBUCKET_BUILD_NUMBER
+                    - export IMAGE_NAME=$DOCKER_REGISTRY:prod-$BITBUCKET_COMMIT-$BITBUCKET_BUILD_NUMBER
                     - echo $IMAGE_NAME
                     - docker build -f ./docker/Dockerfile -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" .
 
@@ -103,4 +103,4 @@ pipelines:
                     - docker push $IMAGE_NAME
 
                     # register ecs tasks
-                    - node scripts/createTaskDefinition.js $IMAGE_NAME
+                    - node scripts/createTaskDefinition.js $IMAGE_NAME prod
