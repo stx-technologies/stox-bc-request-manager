@@ -3,6 +3,7 @@ const {getTransaction, updateTransactionError} = require('./transactions')
 const {Op} = require('sequelize')
 const {exceptions: {NotFoundError}} = require('@welldone-software/node-toolbelt')
 const {kebabCase} = require('lodash')
+const {errors: {errSerializer}} = require('stox-common')
 
 const getRequestById = async (id, full) => {
   const request = await db.requests.findOne({where: {id}})
@@ -25,7 +26,8 @@ const updateRequest = (propsToUpdate, id, transaction) =>
 
 const createRequest = ({id, type, data}) => db.requests.create({id, type, data, createdAt: new Date()})
 
-const updateRequestCompleted = async (id, error = null) => updateRequest({error, completedAt: Date.now()}, id)
+const updateRequestCompleted = async (id, error = null) =>
+  updateRequest({error: errSerializer(error), completedAt: Date.now()}, id)
 
 const countRequestByType = async type => ({
   count: await db.requests.count({where: {type}}),
@@ -50,12 +52,10 @@ const getCorrespondingRequests = async transactions =>
   })
 
 const publishCompletedRequest = async (request) => {
-  request.transactions = request.transactions.map((transaction) => {
-    transaction.transactionData = undefined
-    return transaction
-  })
+  const transactions = request.transactions &&
+   request.transactions.map(transaction => ({...transaction, transactionData: undefined}))
 
-  mq.publish(`completed-${kebabCase(request.type)}-requests`, {...request})
+  mq.publish(`completed-${kebabCase(request.type)}-requests`, {...request, transactions})
 }
 
 const handleTransactionError = async ({id, requestId}, error) => {
