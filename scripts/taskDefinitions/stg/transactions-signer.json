@@ -13,9 +13,15 @@
       "name": "stg-transactions-signer",
       "image": "",
       "memoryReservation": 300,
-      "cpu": 128,
+      "cpu": 256,
       "essential": true,
-      "portMappings": [],
+      "portMappings": [
+        {
+          "hostPort": 3011,
+          "protocol": "tcp",
+          "containerPort": 3011
+        }
+      ],
       "command": [
         "npm",
         "run",
@@ -46,8 +52,14 @@
         "options": {
           "awslogs-group": "stg-request-manager",
           "awslogs-region": "eu-west-1",
+          "awslogs-create-group": "true",
           "awslogs-stream-prefix": "transactions-signer"
         }
+      },
+      "dockerLabels": {
+        "SUB-SYSTEM": "request-manager",
+        "Environment": "stg",
+        "SERVICE": "transactions-signer-stg"
       }
     }
   ]

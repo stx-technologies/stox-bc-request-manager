@@ -11,14 +11,15 @@
   "containerDefinitions": [
     {
       "name": "dev-request-manager-api",
-      "image": "572502612946.dkr.ecr.eu-west-1.amazonaws.com/bc_request_manager",
+      "image": "",
       "memoryReservation": 300,
-      "cpu": 128,
+      "cpu": 256,
       "essential": true,
       "portMappings": [
         {
-          "containerPort": 3003,
-          "protocol": "tcp"
+          "hostPort": 3009,
+          "protocol": "tcp",
+          "containerPort": 3009
         }
       ],
       "command": [
@@ -53,6 +54,11 @@
           "awslogs-region": "eu-west-1",
           "awslogs-stream-prefix": "request-manager-api"
         }
+      },
+      "dockerLabels": {
+        "SUB-SYSTEM": "request-manager",
+        "Environment": "dev",
+        "SERVICE": "request-manager-api-dev"
       }
     }
   ]

@@ -13,7 +13,7 @@
       "name": "stg-request-reader",
       "image": "",
       "memoryReservation": 300,
-      "cpu": 128,
+      "cpu": 256,
       "essential": true,
       "portMappings": [],
       "command": [
@@ -42,8 +42,14 @@
         "options": {
           "awslogs-group": "stg-request-manager",
           "awslogs-region": "eu-west-1",
+          "awslogs-create-group": "true",
           "awslogs-stream-prefix": "request-reader"
         }
+      },
+      "dockerLabels": {
+        "SUB-SYSTEM": "request-manager",
+        "Environment": "stg",
+        "SERVICE": "request-reader-stg"
       }
     }
   ]

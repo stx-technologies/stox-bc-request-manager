@@ -13,12 +13,13 @@
       "name": "stg-request-manager-api",
       "image": "",
       "memoryReservation": 300,
-      "cpu": 128,
+      "cpu": 256,
       "essential": true,
       "portMappings": [
         {
-          "containerPort": 3003,
-          "protocol": "tcp"
+          "hostPort": 3009,
+          "protocol": "tcp",
+          "containerPort": 3009
         }
       ],
       "command": [
@@ -53,6 +54,11 @@
           "awslogs-region": "eu-west-1",
           "awslogs-stream-prefix": "request-manager-api"
         }
+      },
+      "dockerLabels": {
+        "SUB-SYSTEM": "request-manager",
+        "Environment": "stg",
+        "SERVICE": "request-manager-api-stg"
       }
     }
   ]
