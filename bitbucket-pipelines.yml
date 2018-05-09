@@ -7,15 +7,16 @@ pipelines:
     branches:
         feature/*:
             - step:
+                deployment: test
                 caches:
                     - node
                 script:
                     # setup
                     - apk update && apk add bash
-                    - apk add --no-cache nodejs openssh py-pip alpine-sdk;
+                    - apk add --no-cache nodejs openssh py-pip alpine-sdk jq
                     - set -eu
                     - pip install --no-cache-dir docker-compose
-                    - npm install lerna rimraf cross-env env-cmd -g;
+                    - npm install lerna rimraf cross-env env-cmd -g
                     - npm run setup
 #                    - npm run lint
 
@@ -42,15 +43,16 @@ pipelines:
 
         release/*:
             - step:
+                deployment: staging
                 caches:
                     - node
                 script:
                     # setup
                     - apk update && apk add bash
-                    - apk add --no-cache nodejs openssh py-pip alpine-sdk;
+                    - apk add --no-cache nodejs openssh py-pip alpine-sdk jq
                     - set -eu
                     - pip install --no-cache-dir docker-compose
-                    - npm install lerna rimraf cross-env env-cmd -g;
+                    - npm install lerna rimraf cross-env env-cmd -g
                     - npm run setup
 
                     # build
@@ -73,15 +75,16 @@ pipelines:
 
         master:
             - step:
+                deployment: production
                 caches:
                     - node
                 script:
                     # setup
                     - apk update && apk add bash
-                    - apk add --no-cache nodejs openssh py-pip alpine-sdk;
+                    - apk add --no-cache nodejs openssh py-pip alpine-sdk jq
                     - set -eu
                     - pip install --no-cache-dir docker-compose
-                    - npm install lerna rimraf cross-env env-cmd -g;
+                    - npm install lerna rimraf cross-env env-cmd -g
                     - npm run setup
 
                     # build

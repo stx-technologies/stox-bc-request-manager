@@ -9,17 +9,38 @@ const escapeJson = json =>
     .replace(/'/g, '\\\'')
     .replace(/"/g, '\\"')
 
-const executCommand = command =>
-  exec(command, (error) => {
-    console.error(error)
+const executeCommand = command => new Promise((resolve, reject) => {
+  exec(command, (error, stdout) => {
+    if (error) {
+      reject(error)
+      return
+    }
+    resolve(stdout)
   })
+})
 
 const image = process.argv[2]
 const env = process.argv[3]
 const tasksPath = join(__dirname, 'taskDefinitions', env)
 
-readdirSync(tasksPath).map((d) => {
-  const template = JSON.parse(readFileSync(join(tasksPath, d), 'utf8'))
-  template.containerDefinitions[0].image = image
-  return `aws ecs register-task-definition --cli-input-json "${escapeJson(template)}"`
-}).forEach(executCommand)
+readdirSync(tasksPath).forEach(async (d) => {
+  try {
+    const template = JSON.parse(readFileSync(join(tasksPath, d), 'utf8'))
+    template.containerDefinitions[0].image = image
+
+    const {family} = template
+    const options = `--cli-input-json "${escapeJson(template)}"`
+    const result = await executeCommand(`aws ecs register-task-definition ${options}`)
+
+    const jsonResult = JSON.parse(result)
+    console.log(jsonResult)
+
+    const {revision} = jsonResult.taskDefinition
+    const updateService = `aws ecs update-service --cluster stox-${env} --service ${family}`
+
+    await executeCommand(`${updateService} --desired-count 0`)
+    await executeCommand(`${updateService} --desired-count 1 --task-definition ${family}:${revision}`)
+  } catch (e) {
+    console.error(e)
+  }
+})
