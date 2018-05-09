@@ -5,6 +5,7 @@
   "memory": "512",
   "cpu": "256",
   "placementConstraints": [],
+  "taskRoleArn": "arn:aws:iam::572502612946:role/ECS_STG_Allow_KMS",
   "requiresCompatibilities": [
     "EC2"
   ],
@@ -36,11 +37,11 @@
         },
         {
           "name": "KEYS",
-          "value": "{\"0xB642F8e816f64CF7b022d7521be162cBB7193dd5\": \"AQICAHg20O4ps3f7fugEM9nd8GdGny+5diwhLDcuZH48rInHIwGoIZWLKAsLisAmGSNradokAAAAojCBnwYJKoZIhvcNAQcGoIGRMIGOAgEAMIGIBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDAHBOfmEoG7NHekmSAIBEIBbee9FrQl5Pnk+cLraVLipPu3hy4zfFQJlPMuN7T7UmunQ/knFjAukasZeilAaCkJrX7W0o0V++SHpXfy1is25WfS7GDMMATpvljrEZA2JktvCOB9D7vuMlnTQCQ==\", \"0x4dD05Ff4fdeb68D3205e309F6FbbD257292cE8E7\": \"AQICAHg20O4ps3f7fugEM9nd8GdGny+5diwhLDcuZH48rInHIwGELA8QVeaqOxetT2NA+HgjAAAAojCBnwYJKoZIhvcNAQcGoIGRMIGOAgEAMIGIBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDCiSuHBa6T8hc+lfnwIBEIBb/dPElMeI4/8DF47+3IKlCF9n9iG9OXD7kurzWgScuEUKwH17FfSECOpxBixIy2yY5vyLjU6s7agXyirPjTOXF4bIMa6Ywgf7LybpJgVIol67GJzdvwhLrN4l3A==\", \"0xc1CBAbc64e52b19103F5eCE37B8bA0A52173682B\" : \" AQICAHg20O4ps3f7fugEM9nd8GdGny+5diwhLDcuZH48rInHIwFQntpqP4ET2815joeDDbq2AAAAojCBnwYJKoZIhvcNAQcGoIGRMIGOAgEAMIGIBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDBeHGSO0XxKMySRKMwIBEIBb4FM294JrS659k5dZACkj304Dw/uSzsgkfi08Zh0oX6uiGuyzggr3PKuFmvs7YyQs0K7ZHCgZavC4XBmrjWLyf19dMTwAZ6ouziXWSgJaWbxtoEhCbR7Fz81IGw==\",\"0xFf0C115EBAD999de26E68221082Dba0b6dbD6d7e\": \"AQICAHg20O4ps3f7fugEM9nd8GdGny+5diwhLDcuZH48rInHIwGO2+dPUejkJ1aqWI78s2TLAAAAojCBnwYJKoZIhvcNAQcGoIGRMIGOAgEAMIGIBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDJwkDbwOUTfJpPYuLAIBEIBbG1MkJ2i8OgLyFVK71Yy69jZAyH1VdDFtTrnhmryhNzevlGS0Wu9CEO4VZ4IyS1y7+VaRjF7EqQVOpq4L4V7wmPHajZ2UgmnBC72MDr+E2rxKYfLTALTzLbaxWQ==\"}"
+          "value": "{\"0x0fA4BE05d6C7accdeB1e59F355315Ec61C9A6dBB\": \"AQICAHhI7vNWc5qBaiBIn1/vI7zVMmqXJ/aevA9uLD/WxV8vBwGMc7IPFxyWG0a+NUpSDsXcAAAApDCBoQYJKoZIhvcNAQcGoIGTMIGQAgEAMIGKBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDJbiLIaxaYyxU1p+agIBEIBdni66sISPiOFc/vs7Rxy2sM3CSu3fY4xY7M7S0kIoJUyy7XhOwOayGdYuT2B5YAO/mD4ldbWxlW3bTrL/D/0b3cg1J1Zv6SKaf3OI3U+TgmQlHD9HM4MLzqc0dgk8\", \"0x93450575F31eCa528BC74bAeba59A6950BF28Aa9\": \"AQICAHhI7vNWc5qBaiBIn1/vI7zVMmqXJ/aevA9uLD/WxV8vBwGHElNqpRLDxjtGQQ2iv4AfAAAApDCBoQYJKoZIhvcNAQcGoIGTMIGQAgEAMIGKBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDJKNFEBr+u19UptZpwIBEIBddtlB3t0wH83B+SYhllK9ZUqkY/DTCCUwYhxr7UBpx6lib0V2l0PYO7PE1TESvWq9nkNQQ4OtIVg1b9VB8+Hwc94a4J2h9LkHzsGs7JNYnyiKtBgO3ZYN/3MHkOYU\", \"0x05C1C64b0d19Ba38690668FF8f3Ba1B934d707d5\": \"AQICAHhI7vNWc5qBaiBIn1/vI7zVMmqXJ/aevA9uLD/WxV8vBwEQ4VHIsC2lCrIlbnQCKwo9AAAApDCBoQYJKoZIhvcNAQcGoIGTMIGQAgEAMIGKBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDGvowYhdZxyQ9JEeDQIBEIBdaUJncIhl1IdfxXAd7sRknF7Ij7j/VHtOblyacEJCxjoUzIcjHbLaB0ZtpEXWkwlcRd8Do4ePQAy5bYbjhLoQshtGu6wkT2CHLbzbULB3WXsKKF4PNw4Ktui5OwxB\", \"0x1Cd8519B515807956DD42BbEe05BB807bFb4Af87\": \"AQICAHhI7vNWc5qBaiBIn1/vI7zVMmqXJ/aevA9uLD/WxV8vBwE2raCarIr8PFM+hXZ2yGI5AAAApDCBoQYJKoZIhvcNAQcGoIGTMIGQAgEAMIGKBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDPBpwJCsTtGRA7+MzwIBEIBdtkVQxeSPekPOhssjvWQSQE92sSXoflduMRmw9heU57CbY933BvTHTzR65VrlN685q9Yd5wAYwj1a5UVq4H0zRNr51PCO3vaeoxE+jPmWkD8oKLYKIDtGiHOFuGNv\"}"
         },
         {
           "name": "KMS_KEY_ID",
-          "value": "38ac30ad-0fd5-4edc-b43a-a5f464418bc0"
+          "value": "48304317-2eaa-4afc-b4df-2a63e103047f"
         },
         {
           "name": "PORT",
@@ -50,9 +51,8 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "stg-request-manager",
+          "awslogs-group": "stg-request-manager-logs",
           "awslogs-region": "eu-west-1",
-          "awslogs-create-group": "true",
           "awslogs-stream-prefix": "transactions-signer"
         }
       },
