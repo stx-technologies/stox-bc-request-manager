@@ -49,7 +49,7 @@
       "dockerLabels": {
         "SUB-SYSTEM": "request-manager",
         "Environment": "stg",
-        "SERVICE": "request-reader-stg"
+        "SERVICE": "request-reader"
       }
     }
   ]

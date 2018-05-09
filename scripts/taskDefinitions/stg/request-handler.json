@@ -61,7 +61,7 @@
       "dockerLabels": {
         "SUB-SYSTEM": "request-manager",
         "Environment": "stg",
-        "SERVICE": "request-handler-stg"
+        "SERVICE": "request-handler"
       }
     }
   ]

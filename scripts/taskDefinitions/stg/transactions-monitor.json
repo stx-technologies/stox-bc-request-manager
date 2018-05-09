@@ -65,7 +65,7 @@
       "dockerLabels": {
         "SUB-SYSTEM": "request-manager",
         "Environmet": "stg",
-        "SERVICE": "transaction-monitor-stg"
+        "SERVICE": "transaction-monitor"
       }
     }
   ]

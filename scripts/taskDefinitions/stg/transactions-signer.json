@@ -59,7 +59,7 @@
       "dockerLabels": {
         "SUB-SYSTEM": "request-manager",
         "Environment": "stg",
-        "SERVICE": "transactions-signer-stg"
+        "SERVICE": "transactions-signer"
       }
     }
   ]

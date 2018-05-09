@@ -65,7 +65,7 @@
       "dockerLabels": {
         "SUB-SYSTEM": "request-manager",
         "Environment": "stg",
-        "SERVICE": "transactions-writer-stg"
+        "SERVICE": "transactions-writer"
       }
     }
   ]

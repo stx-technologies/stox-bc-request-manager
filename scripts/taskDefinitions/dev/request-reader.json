@@ -49,7 +49,7 @@
       "dockerLabels": {
         "SUB-SYSTEM": "request-manager",
         "Environment": "dev",
-        "SERVICE": "request-reader-dev"
+        "SERVICE": "request-reader"
       }
     }
   ]
