@@ -1,10 +1,7 @@
 const AWS = require('aws-sdk')
-const {exceptions: {UnexpectedError}} = require('@welldone-software/node-toolbelt')
-const {kmsKeyId, keys} = require('config')
+const {kmsKeyId} = require('config')
 
 const kms = new AWS.KMS()
-
-const BLOCKCHAIN_PRIVATE_KEY_LENGTH = 64
 
 const decrypt = encryptedKey => new Promise((resolve, reject) => {
   const params = {
@@ -33,22 +30,7 @@ const encrypt = privateKey => new Promise((resolve, reject) => {
   })
 })
 
-const shouldDecrypt = privateKey => privateKey.length > BLOCKCHAIN_PRIVATE_KEY_LENGTH
-
-const getPrivateKey = async (from) => {
-  const privateKey = JSON.parse(keys)[from]
-  if (!privateKey) {
-    throw new UnexpectedError('Invalid Public Key', {from})
-  }
-  try {
-    const decryptedKey = shouldDecrypt(privateKey) ? await decrypt(privateKey) : privateKey
-    return Buffer.from(decryptedKey, 'hex')
-  } catch (e) {
-    throw new UnexpectedError('Failed Decrypting', e)
-  }
-}
-
 module.exports = {
   encrypt,
-  getPrivateKey,
+  decrypt,
 }
