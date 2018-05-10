@@ -15,8 +15,8 @@ const getPrivateKey = async (from) => {
     throw new UnexpectedError('Invalid Public Key', {from})
   }
   try {
-    const decryptedKey = shouldDecrypt(privateKey) ? await decrypt(privateKey) : truncatePrefix(privateKey)
-    return Buffer.from(decryptedKey, 'hex')
+    const decryptedKey = shouldDecrypt(privateKey) ? await decrypt(privateKey) : privateKey
+    return Buffer.from(truncatePrefix(decryptedKey), 'hex')
   } catch (e) {
     throw new UnexpectedError('Failed Decrypting', e)
   }
