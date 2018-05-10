@@ -50,7 +50,7 @@
         },
         {
           "name": "WEB_3_URL",
-          "value": "http://bc-proxy-api.stox-stg/api/v1/"
+          "value": "http://stg-bc-proxy-api.stox-stg/api/v1/"
         }
       ],
       "logConfiguration": {

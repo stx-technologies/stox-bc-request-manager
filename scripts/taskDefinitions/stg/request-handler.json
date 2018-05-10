@@ -46,7 +46,7 @@
         },
         {
           "name": "WALLETS_API_BASE_URL",
-          "value": "http://wallets-api.stox-stg:3001/api/v1/"
+          "value": "http://stg-wallets-api.stox-stg:3001/api/v1/"
         }
       ],
       "logConfiguration": {
