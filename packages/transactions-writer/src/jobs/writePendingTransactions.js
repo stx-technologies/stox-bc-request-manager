@@ -96,18 +96,12 @@ const createUnsignedTransaction = async (nodeNonce, transaction) => {
   return unsignedTransaction
 }
 
-const commitAndSendTransaction = async (transaction, unsignedTransaction, nodeNonce) => {
+const commitTransaction = async (transaction, unsignedTransaction, transactionHash, nodeNonce) => {
   const dbTransaction = await db.sequelize.transaction()
   try {
-    const signedTransaction = await signTransactionInTransactionSigner(
-      transaction.from,
-      unsignedTransaction,
-      transaction.id
-    )
-    const transactionHash = await sendTransactionToBlockchain(signedTransaction)
     await updateTransaction(transaction, unsignedTransaction, transactionHash, dbTransaction)
     await updateRequest(transaction, dbTransaction)
-    await updateAccountNonce(transaction, nodeNonce, dbTransaction)
+    await updateAccountNonce(transaction, nodeNonce + 1, dbTransaction)
 
     context.logger.info(
       {
@@ -134,8 +128,8 @@ module.exports = {
           context.logger.warn({transactionId: transaction.id, nodeNonce, dbNonce}, 'NONCE_NOT_SYNCED')
           return
         }
-
-        const unsignedTransaction = createUnsignedTransaction(nodeNonce, transaction)
+        
+        const unsignedTransaction = await createUnsignedTransaction(nodeNonce, transaction)
         const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
         const requiredBalance = unsignedTransaction.gasLimit * unsignedTransaction.gasPrice
         if (fromAccountBalance < requiredBalance) {
@@ -151,8 +145,13 @@ module.exports = {
           )
           return
         }
-
-        commitAndSendTransaction(transaction, unsignedTransaction, nodeNonce)
+        const signedTransaction = await signTransactionInTransactionSigner(
+          transaction.from,
+          unsignedTransaction,
+          transaction.id
+        )
+        const transactionHash = await sendTransactionToBlockchain(signedTransaction)
+        await commitTransaction(transaction, unsignedTransaction, transactionHash, nodeNonce)
       } catch (e) {
         logError(e, 'TRANSACTION_FAILED')
         await requests.handleTransactionError(transaction, e)

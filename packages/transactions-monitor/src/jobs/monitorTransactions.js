@@ -20,8 +20,7 @@ module.exports = {
 
       try {
         const completedTransaction = await getCompletedTransaction(transactionHash)
-
-        if (completedTransaction.confirmations >= requiredConfirmations) {
+        if (completedTransaction && completedTransaction.confirmations >= requiredConfirmations) {
           const {requestId} = await transactions.updateCompletedTransaction(transaction, completedTransaction)
           await requests.updateRequestCompleted(
             requestId,
@@ -30,7 +29,8 @@ module.exports = {
           await requests.publishCompletedRequest(await requests.getRequestById(requestId, true))
         }
       } catch (e) {
-        logger.error(e, 'MONITOR_TRANSACTION_ERROR', {transactionId: transaction.Id})
+        logger.error({transactionId: transaction.Id}, 'MONITOR_TRANSACTION_ERROR')
+        logError(e)
         await requests.handleTransactionError(transaction, e)
       }
     })

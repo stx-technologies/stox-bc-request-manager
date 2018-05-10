@@ -49,7 +49,7 @@ module.exports = (sequelize) => {
       currentBlockTime: {type: DATE},
       blockNumber: {type: BIGINT},
       nonce: {type: BIGINT}, // ?
-      gasPrice: {type: INTEGER}, // ?
+      gasPrice: {type: BIGINT}, // ?
       receipt: {type: JSON}, // ?
       createdAt: {type: DATE, allowNull: false},
       sentAt: {type: DATE},

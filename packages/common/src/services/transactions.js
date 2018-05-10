@@ -1,5 +1,6 @@
 const {db} = require('../context')
 const {exceptions: {NotFoundError}} = require('@welldone-software/node-toolbelt')
+const {errors: {errSerializer}} = require('stox-common')
 
 const createTransaction = ({id, type, from}) => db.transactions.create({id, type, from})
 
@@ -67,7 +68,8 @@ const addTransactions = async (requestId, transactions) => {
   }
 }
 
-const updateTransactionError = (id, error) => db.transactions.update({error, completedAt: Date.now()}, {where: {id}})
+const updateTransactionError = (id, error) =>
+  db.transactions.update({error: errSerializer(error), completedAt: Date.now()}, {where: {id}})
 
 module.exports = {
   getTransaction,
