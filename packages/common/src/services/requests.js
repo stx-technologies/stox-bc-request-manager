@@ -53,7 +53,7 @@ const getCorrespondingRequests = async transactions =>
 
 const publishCompletedRequest = async (request) => {
   const transactions = request.transactions &&
-   request.transactions.map(transaction => ({...transaction, transactionData: undefined}))
+  request.transactions.map(transaction => ({...transaction.dataValues, transactionData: undefined}))
 
   mq.publish(`completed-${kebabCase(request.type)}-requests`, {...request, transactions})
 }
