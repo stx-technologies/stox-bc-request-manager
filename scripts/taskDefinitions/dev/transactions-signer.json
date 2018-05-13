@@ -31,20 +31,12 @@
       ],
       "environment": [
         {
+          "name": "NODE_ENV",
+          "value": "dev"
+        },
+        {
           "name": "AWS_REGION",
           "value": "eu-west-1"
-        },
-        {
-          "name": "KEYS",
-          "value": "{\"0xB642F8e816f64CF7b022d7521be162cBB7193dd5\": \"AQICAHg20O4ps3f7fugEM9nd8GdGny+5diwhLDcuZH48rInHIwGoIZWLKAsLisAmGSNradokAAAAojCBnwYJKoZIhvcNAQcGoIGRMIGOAgEAMIGIBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDAHBOfmEoG7NHekmSAIBEIBbee9FrQl5Pnk+cLraVLipPu3hy4zfFQJlPMuN7T7UmunQ/knFjAukasZeilAaCkJrX7W0o0V++SHpXfy1is25WfS7GDMMATpvljrEZA2JktvCOB9D7vuMlnTQCQ==\", \"0x4dD05Ff4fdeb68D3205e309F6FbbD257292cE8E7\": \"AQICAHg20O4ps3f7fugEM9nd8GdGny+5diwhLDcuZH48rInHIwGELA8QVeaqOxetT2NA+HgjAAAAojCBnwYJKoZIhvcNAQcGoIGRMIGOAgEAMIGIBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDCiSuHBa6T8hc+lfnwIBEIBb/dPElMeI4/8DF47+3IKlCF9n9iG9OXD7kurzWgScuEUKwH17FfSECOpxBixIy2yY5vyLjU6s7agXyirPjTOXF4bIMa6Ywgf7LybpJgVIol67GJzdvwhLrN4l3A==\", \"0xc1CBAbc64e52b19103F5eCE37B8bA0A52173682B\" : \" AQICAHg20O4ps3f7fugEM9nd8GdGny+5diwhLDcuZH48rInHIwFQntpqP4ET2815joeDDbq2AAAAojCBnwYJKoZIhvcNAQcGoIGRMIGOAgEAMIGIBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDBeHGSO0XxKMySRKMwIBEIBb4FM294JrS659k5dZACkj304Dw/uSzsgkfi08Zh0oX6uiGuyzggr3PKuFmvs7YyQs0K7ZHCgZavC4XBmrjWLyf19dMTwAZ6ouziXWSgJaWbxtoEhCbR7Fz81IGw==\",\"0xFf0C115EBAD999de26E68221082Dba0b6dbD6d7e\": \"AQICAHg20O4ps3f7fugEM9nd8GdGny+5diwhLDcuZH48rInHIwGO2+dPUejkJ1aqWI78s2TLAAAAojCBnwYJKoZIhvcNAQcGoIGRMIGOAgEAMIGIBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDJwkDbwOUTfJpPYuLAIBEIBbG1MkJ2i8OgLyFVK71Yy69jZAyH1VdDFtTrnhmryhNzevlGS0Wu9CEO4VZ4IyS1y7+VaRjF7EqQVOpq4L4V7wmPHajZ2UgmnBC72MDr+E2rxKYfLTALTzLbaxWQ==\"}"
-        },
-        {
-          "name": "KMS_KEY_ID",
-          "value": "38ac30ad-0fd5-4edc-b43a-a5f464418bc0"
-        },
-        {
-          "name": "PORT",
-          "value": "3011"
         }
       ],
       "logConfiguration": {
@@ -52,7 +44,6 @@
         "options": {
           "awslogs-group": "dev-request-manager",
           "awslogs-region": "eu-west-1",
-          "awslogs-create-group": "true",
           "awslogs-stream-prefix": "transactions-signer"
         }
       },

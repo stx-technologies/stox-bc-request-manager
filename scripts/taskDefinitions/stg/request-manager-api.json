@@ -31,20 +31,12 @@
       ],
       "environment": [
         {
-          "name": "DATABASE_URL",
-          "value": "postgres://stgrmuser:NvDdaV48NBkAjb584F4UuVsP6PQ9M5@stg-request-manager.cychkzdvrrri.eu-west-1.rds.amazonaws.com:5432/stoxbcrm"
+          "name": "NODE_ENV",
+          "value": "stg"
         },
         {
-          "name": "NETWORK",
-          "value": "MAIN"
-        },
-        {
-          "name": "PORT",
-          "value": "3009"
-        },
-        {
-          "name": "WEB_3_URL",
-          "value": "http://stg-bc-proxy-api.stox-stg:8545/api/v1/"
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
         }
       ],
       "logConfiguration": {

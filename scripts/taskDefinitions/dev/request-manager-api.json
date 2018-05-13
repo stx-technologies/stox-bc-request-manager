@@ -31,20 +31,12 @@
       ],
       "environment": [
         {
-          "name": "DATABASE_URL",
-          "value": "postgres://stoxappuser:wnImFeGXXurqw5NONoXu@dev-stox.cychkzdvrrri.eu-west-1.rds.amazonaws.com:5432/stoxbcrm1"
+          "name": "NODE_ENV",
+          "value": "dev"
         },
         {
-          "name": "NETWORK",
-          "value": "MAIN"
-        },
-        {
-          "name": "PORT",
-          "value": "3009"
-        },
-        {
-          "name": "WEB_3_URL",
-          "value": "http://10.240.2.224:8545/api/v1/"
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
         }
       ],
       "logConfiguration": {

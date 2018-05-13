@@ -32,20 +32,12 @@
       ],
       "environment": [
         {
+          "name": "NODE_ENV",
+          "value": "stg"
+        },
+        {
           "name": "AWS_REGION",
           "value": "eu-west-1"
-        },
-        {
-          "name": "KEYS",
-          "value": "{\"0x0fA4BE05d6C7accdeB1e59F355315Ec61C9A6dBB\": \"AQICAHhI7vNWc5qBaiBIn1/vI7zVMmqXJ/aevA9uLD/WxV8vBwFfZdJbKimGpaCMplLf/NkMAAAAojCBnwYJKoZIhvcNAQcGoIGRMIGOAgEAMIGIBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDJ5zCOLp5yh0pTZaIAIBEIBbEtDI5z2KqICygy38LLIzDsGjgxyGcj2B8GncyEbXZ9yKQt7XW3pV894EfbObs+fyKSRCHKDO/kdC5dSupOyu7KjN516GW/lBt+NIyxN3r4OuLDdRogKOfoRAnw==\", \"0x93450575F31eCa528BC74bAeba59A6950BF28Aa9\": \"AQICAHhI7vNWc5qBaiBIn1/vI7zVMmqXJ/aevA9uLD/WxV8vBwEtgFdIiVIni7l2NiG0+IfLAAAAojCBnwYJKoZIhvcNAQcGoIGRMIGOAgEAMIGIBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDAS+98u0kI2sJGenywIBEIBbf+sGL+WgIVXX14Xndm6mT940Q39K9mAmgRqNKTbDOG2J+FDPJuFQAAuAYiApJMoTqpc++Gy2iI7NfiVP8wryYmoBbdMKqb3H2oAPjUk8tWOE2oIFXMmFZDSxfg==\", \"0x05C1C64b0d19Ba38690668FF8f3Ba1B934d707d5\": \"AQICAHhI7vNWc5qBaiBIn1/vI7zVMmqXJ/aevA9uLD/WxV8vBwGr0nSQTcjLN+W+S5WdN84tAAAAojCBnwYJKoZIhvcNAQcGoIGRMIGOAgEAMIGIBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDFoFCocggCnHiJhk9gIBEIBbrEmfmxhhc8lK1gIwF3S26cmo3DSHNybC0gZ3MmsiwxSvsAXax2d8jUuhPMGTUe6jOFhi01MgfgHnvlz1vL3SJ4a5Qo7tNX1FSahvH3IJOID5sJdI08CM12JuRQ==\", \"0x1Cd8519B515807956DD42BbEe05BB807bFb4Af87\": \"AQICAHhI7vNWc5qBaiBIn1/vI7zVMmqXJ/aevA9uLD/WxV8vBwGJ8QM6OVU4ViMEPiREEx5eAAAAojCBnwYJKoZIhvcNAQcGoIGRMIGOAgEAMIGIBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDIiCy0YEd1CTummhuQIBEIBb2XQL/QoAtRqGwJa16f+hkzN5tbRJVn0yoEwMAciTAWXTzmc0TZj0JQWozkECjxdMHMLPNRSWySdVtcap1XCS9HRfc2JZZqGpL/P5OKvOLy36EHGz36AfGs0zig==\"}"
-        },
-        {
-          "name": "KMS_KEY_ID",
-          "value": "48304317-2eaa-4afc-b4df-2a63e103047f"
-        },
-        {
-          "name": "PORT",
-          "value": "3011"
         }
       ],
       "logConfiguration": {
