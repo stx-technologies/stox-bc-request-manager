@@ -25,32 +25,12 @@
       ],
       "environment": [
         {
-          "name": "DATABASE_URL",
-          "value": "postgres://stgrmuser:NvDdaV48NBkAjb584F4UuVsP6PQ9M5@stg-request-manager.cychkzdvrrri.eu-west-1.rds.amazonaws.com:5432/stoxbcrm"
+          "name": "NODE_ENV",
+          "value": "stg"
         },
         {
-          "name": "LIMIT_TRANSACTIONS",
-          "value": "10"
-        },
-        {
-          "name": "MONITOR_TRANSACTIONS_CRON",
-          "value": "*/5 * * * * *"
-        },
-        {
-          "name": "MQ_CONNECTION_URL",
-          "value": "stg-activemq.stox-stg:61613"
-        },
-        {
-          "name": "NETWORK",
-          "value": "MAIN"
-        },
-        {
-          "name": "REQUIRED_CONFIRMATIONS",
-          "value": "12"
-        },
-        {
-          "name": "WEB_3_URL",
-          "value": "http://stg-bc-proxy-api.stox-stg:8545/api/v1/"
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
         }
       ],
       "logConfiguration": {

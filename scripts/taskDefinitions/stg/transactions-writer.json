@@ -25,32 +25,12 @@
       ],
       "environment": [
         {
-          "name": "DATABASE_URL",
-          "value": "postgres://stgrmuser:NvDdaV48NBkAjb584F4UuVsP6PQ9M5@stg-request-manager.cychkzdvrrri.eu-west-1.rds.amazonaws.com:5432/stoxbcrm"
+          "name": "NODE_ENV",
+          "value": "stg"
         },
         {
-          "name": "DEFAULT_GAS_PRICE",
-          "value": "4000000000"
-        },
-        {
-          "name": "LIMIT_TRANSACTIONS",
-          "value": "10"
-        },
-        {
-          "name": "MQ_CONNECTION_URL",
-          "value": "stg-activemq.stox-stg:61613"
-        },
-        {
-          "name": "TRANSACTIONS_SIGNER_BASE_URL",
-          "value": "http://stg-signer.stox-stg:3011/api/v1"
-        },
-        {
-          "name": "WEB_3_URL",
-          "value": "http://stg-bc-proxy-api.stox-stg:8545/api/v1/"
-        },
-        {
-          "name": "WRITE_PENDING_TRANSACTIONS_CRON",
-          "value": "*/5 * * * * *"
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
         }
       ],
       "logConfiguration": {

@@ -1,32 +1,39 @@
 {
-  "family": "dev-transactions-writer",
+  "family": "prod-transactions-signer",
   "volumes": [],
   "networkMode": "awsvpc",
   "memory": "512",
   "cpu": "256",
   "placementConstraints": [],
+  "taskRoleArn": "arn:aws:iam::572502612946:role/ECS_prod_Allow_KMS",
   "requiresCompatibilities": [
     "EC2"
   ],
   "containerDefinitions": [
     {
-      "name": "dev-transactions-writer",
+      "name": "prod-transactions-signer",
       "image": "",
       "memoryReservation": 300,
       "cpu": 256,
       "essential": true,
-      "portMappings": [],
+      "portMappings": [
+        {
+          "hostPort": 3011,
+          "protocol": "tcp",
+          "containerPort": 3011
+        }
+      ],
       "command": [
         "npm",
         "run",
         "serve",
         "--prefix",
-        "packages/transactions-writer"
+        "packages/transactions-signer"
       ],
       "environment": [
         {
           "name": "NODE_ENV",
-          "value": "dev"
+          "value": "prod"
         },
         {
           "name": "AWS_REGION",
@@ -36,15 +43,15 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "dev-request-manager",
+          "awslogs-group": "prod-request-manager-logs",
           "awslogs-region": "eu-west-1",
-          "awslogs-stream-prefix": "transactions-writer"
+          "awslogs-stream-prefix": "transactions-signer"
         }
       },
       "dockerLabels": {
         "SUB-SYSTEM": "request-manager",
-        "Environment": "dev",
-        "SERVICE": "transactions-writer"
+        "Environment": "prod",
+        "SERVICE": "transactions-signer"
       }
     }
   ]

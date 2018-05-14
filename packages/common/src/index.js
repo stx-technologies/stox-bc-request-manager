@@ -6,6 +6,8 @@ const path = require('path')
 const {loggers: {logger}} = require('@welldone-software/node-toolbelt')
 const {createService, createServiceFromFileStructure, initContext} = require('stox-common')
 
+const {NODE_ENV, AWS_REGION} = process.env
+
 const services = requireAll({
   dirname: path.resolve(__dirname, 'services'),
   filter: /(.*)\.js$/,
@@ -13,7 +15,7 @@ const services = requireAll({
 
 const start = async (dirname, config) => {
   try {
-    const ctx = await createServiceFromFileStructure(dirname)
+    const ctx = await createServiceFromFileStructure(dirname, NODE_ENV, AWS_REGION)
     initContext({...ctx, config}, context)
     context.logger = ctx.logger
   } catch (e) {

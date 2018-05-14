@@ -1,5 +1,5 @@
 {
-  "family": "dev-transactions-writer",
+  "family": "prod-request-manager-api",
   "volumes": [],
   "networkMode": "awsvpc",
   "memory": "512",
@@ -10,23 +10,29 @@
   ],
   "containerDefinitions": [
     {
-      "name": "dev-transactions-writer",
+      "name": "prod-request-manager-api",
       "image": "",
       "memoryReservation": 300,
       "cpu": 256,
       "essential": true,
-      "portMappings": [],
+      "portMappings": [
+        {
+          "hostPort": 3009,
+          "protocol": "tcp",
+          "containerPort": 3009
+        }
+      ],
       "command": [
         "npm",
         "run",
         "serve",
         "--prefix",
-        "packages/transactions-writer"
+        "packages/request-manager-api"
       ],
       "environment": [
         {
           "name": "NODE_ENV",
-          "value": "dev"
+          "value": "prod"
         },
         {
           "name": "AWS_REGION",
@@ -36,15 +42,15 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "dev-request-manager",
+          "awslogs-group": "prod-request-manager-logs",
           "awslogs-region": "eu-west-1",
-          "awslogs-stream-prefix": "transactions-writer"
+          "awslogs-stream-prefix": "request-manager-api"
         }
       },
       "dockerLabels": {
         "SUB-SYSTEM": "request-manager",
-        "Environment": "dev",
-        "SERVICE": "transactions-writer"
+        "Environment": "prod",
+        "SERVICE": "request-manager-api"
       }
     }
   ]

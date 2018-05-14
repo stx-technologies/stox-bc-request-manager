@@ -25,16 +25,12 @@
       ],
       "environment": [
         {
-          "name": "DATABASE_URL",
-          "value": "postgres://stgrmuser:NvDdaV48NBkAjb584F4UuVsP6PQ9M5@stg-request-manager.cychkzdvrrri.eu-west-1.rds.amazonaws.com:5432/stoxbcrm"
+          "name": "NODE_ENV",
+          "value": "stg"
         },
         {
-          "name": "MQ_CONNECTION_URL",
-          "value": "stg-activemq.stox-stg:61613"
-        },
-        {
-          "name": "NETWORK",
-          "value": "MAIN"
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
         }
       ],
       "logConfiguration": {

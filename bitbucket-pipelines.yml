@@ -1,6 +1,7 @@
 image: docker:stable
 
 options:
+    max-time: 15
     docker: true
 
 pipelines:
@@ -23,7 +24,7 @@ pipelines:
                     # build
                     - export IMAGE_NAME=$DOCKER_REGISTRY_DEV:dev-$BITBUCKET_COMMIT-$BITBUCKET_BUILD_NUMBER
                     - echo $IMAGE_NAME
-                    - docker build -f ./docker/Dockerfile -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" .
+                    - docker build --no-cache -f ./docker/Dockerfile -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" .
 
                     # test
 #                    - npm run test
@@ -58,7 +59,7 @@ pipelines:
                     # build
                     - export IMAGE_NAME=$DOCKER_REGISTRY:stg-$BITBUCKET_COMMIT-$BITBUCKET_BUILD_NUMBER
                     - echo $IMAGE_NAME
-                    - docker build -f ./docker/Dockerfile -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" .
+                    - docker build --no-cache -f ./docker/Dockerfile -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" .
 
                     # push
                     - curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
@@ -90,7 +91,7 @@ pipelines:
                     # build
                     - export IMAGE_NAME=$DOCKER_REGISTRY:prod-$BITBUCKET_COMMIT-$BITBUCKET_BUILD_NUMBER
                     - echo $IMAGE_NAME
-                    - docker build -f ./docker/Dockerfile -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" .
+                    - docker build --no-cache -f ./docker/Dockerfile -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" .
 
                     # push
                     - curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"

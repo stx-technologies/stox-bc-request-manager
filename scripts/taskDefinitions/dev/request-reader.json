@@ -25,16 +25,12 @@
       ],
       "environment": [
         {
-          "name": "DATABASE_URL",
-          "value": "postgres://stoxappuser:wnImFeGXXurqw5NONoXu@dev-stox.cychkzdvrrri.eu-west-1.rds.amazonaws.com:5432/stoxbcrm1"
+          "name": "NODE_ENV",
+          "value": "dev"
         },
         {
-          "name": "MQ_CONNECTION_URL",
-          "value": "dev-activemq.stox-dev:61613"
-        },
-        {
-          "name": "NETWORK",
-          "value": "MAIN"
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
         }
       ],
       "logConfiguration": {
@@ -42,7 +38,6 @@
         "options": {
           "awslogs-group": "dev-request-manager",
           "awslogs-region": "eu-west-1",
-          "awslogs-create-group": "true",
           "awslogs-stream-prefix": "request-reader"
         }
       },
