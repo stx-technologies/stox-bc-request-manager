@@ -1,0 +1,57 @@
+{
+  "family": "prod-request-manager-api",
+  "volumes": [],
+  "networkMode": "awsvpc",
+  "memory": "512",
+  "cpu": "256",
+  "placementConstraints": [],
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "containerDefinitions": [
+    {
+      "name": "prod-request-manager-api",
+      "image": "",
+      "memoryReservation": 300,
+      "cpu": 256,
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 3009,
+          "protocol": "tcp",
+          "containerPort": 3009
+        }
+      ],
+      "command": [
+        "npm",
+        "run",
+        "serve",
+        "--prefix",
+        "packages/request-manager-api"
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "prod"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "prod-request-manager-logs",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "request-manager-api"
+        }
+      },
+      "dockerLabels": {
+        "SUB-SYSTEM": "request-manager",
+        "Environment": "prod",
+        "SERVICE": "request-manager-api"
+      }
+    }
+  ]
+}
