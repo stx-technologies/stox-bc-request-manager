@@ -5,6 +5,7 @@
   "memory": "512",
   "cpu": "256",
   "placementConstraints": [],
+  "taskRoleArn": "arn:aws:iam::572502612946:role/ECS_PROD_Allow_SSM_Access",
   "requiresCompatibilities": [
     "EC2"
   ],
