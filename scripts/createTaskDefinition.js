@@ -40,8 +40,8 @@ readdirSync(tasksPath).forEach(async (d) => {
 
     const res1 = await executeCommand(`${updateService} --desired-count 0 --task-definition ${family}:${revision}`)
     console.log(res1)
-    const res2 = await executeCommand(`${updateService} --desired-count 1`)
-    console.log(res2)
+    // const res2 = await executeCommand(`${updateService} --desired-count 1`)
+    // console.log(res2)
   } catch (e) {
     console.error(e)
   }

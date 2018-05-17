@@ -25,7 +25,7 @@
       "command": [
         "npm",
         "run",
-        "serve",
+        "serve:trace",
         "--prefix",
         "packages/request-manager-api"
       ],
