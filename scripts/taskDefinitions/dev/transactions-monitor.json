@@ -19,7 +19,7 @@
       "command": [
         "npm",
         "run",
-        "serve",
+        "serve:trace",
         "--prefix",
         "packages/transactions-monitor"
       ],

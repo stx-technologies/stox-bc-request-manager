@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon -e js . | pino",
+    "serve:trace": "node --stack_trace_limit=100 -r trace -r clarify .",
     "serve": "node .",
     "lint": "eslint -c ../../.eslintrc.yml .",
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src"
@@ -14,12 +15,14 @@
   "dependencies": {
     "@welldone-software/node-toolbelt": "^1.2.0",
     "app-module-path": "^2.2.0",
+    "clarify": "^2.1.0",
     "env-cmd": "^7.0.0",
     "lodash": "^4.17.5",
     "promise-serial": "^0.1.5",
     "require-all": "^2.2.0",
     "stox-bc-request-manager-common": "1.0.0",
-    "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev"
+    "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev",
+    "trace": "^3.1.0"
   },
   "devDependencies": {
     "@pact-foundation/pact": "^5.9.0",
