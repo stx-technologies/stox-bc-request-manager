@@ -17,8 +17,12 @@ const getRequestById = async (id, full) => {
 }
 
 const getRequestByTransactionHash = async (transactionHash) => {
-  const {requestId} = await getTransaction({transactionHash})
-  return getRequestById(requestId)
+  try {
+    const {requestId} = await getTransaction({transactionHash})
+    return getRequestById(requestId)
+  } catch (e) {
+    return null
+  }
 }
 
 const updateRequest = (propsToUpdate, id, transaction) =>
