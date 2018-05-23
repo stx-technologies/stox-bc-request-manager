@@ -19,7 +19,7 @@ const getRequestById = async (id, full) => {
 const getRequestByTransactionHash = async (transactionHash) => {
   try {
     const {requestId} = await getTransaction({transactionHash})
-    return getRequestById(requestId)
+    return await getRequestById(requestId)
   } catch (e) {
     return null
   }
