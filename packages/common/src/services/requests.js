@@ -21,7 +21,10 @@ const getRequestByTransactionHash = async (transactionHash) => {
     const {requestId} = await getTransaction({transactionHash})
     return await getRequestById(requestId)
   } catch (e) {
-    return null
+    if (e instanceof NotFoundError) {
+      return null
+    }
+    throw e
   }
 }
 
