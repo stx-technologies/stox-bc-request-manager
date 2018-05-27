@@ -17,6 +17,7 @@ pipelines:
                     - apk add --no-cache nodejs openssh py-pip alpine-sdk
                     - set -eu
                     - pip install --no-cache-dir docker-compose
+                    - npm config set unsafe-perm true
                     - npm install lerna rimraf cross-env env-cmd -g
                     - npm run setup
 #                    - npm run lint
@@ -53,6 +54,7 @@ pipelines:
                     - apk add --no-cache nodejs openssh py-pip alpine-sdk
                     - set -eu
                     - pip install --no-cache-dir docker-compose
+                    - npm config set unsafe-perm true
                     - npm install lerna rimraf cross-env env-cmd -g
                     - npm run setup
 
@@ -85,6 +87,7 @@ pipelines:
                     - apk add --no-cache nodejs openssh py-pip alpine-sdk
                     - set -eu
                     - pip install --no-cache-dir docker-compose
+                    - npm config set unsafe-perm true
                     - npm install lerna rimraf cross-env env-cmd -g
                     - npm run setup
 
