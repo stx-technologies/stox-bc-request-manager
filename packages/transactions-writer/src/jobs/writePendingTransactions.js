@@ -2,6 +2,8 @@ const {
   writePendingTransactionsCron,
   transactionsSignerBaseUrl,
   limitTransactions,
+  defaultGasPrice,
+  maximumGasPrice,
 } = require('../config')
 const {http, errors: {logError}} = require('stox-common')
 const promiseSerial = require('promise-serial')
