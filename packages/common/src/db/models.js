@@ -19,6 +19,7 @@ module.exports = (sequelize) => {
     {
       id: {type: UUID, primaryKey: true},
       type: oneOf(['sendPrize', 'withdraw', 'setWithdrawalAddress', 'sendToBackup', 'createWallet']),
+      priority: {type: STRING(256)},
       error: {type: JSON},
       data: {type: JSON},
       result: {type: JSON},
@@ -73,6 +74,17 @@ module.exports = (sequelize) => {
     },
     {
       indexes: indexes(['address', 'network', 'nonce', 'updatedAt']),
+    }
+  )
+
+  sequelize.define(
+    'gasPrices',
+    {
+      level: {type: INTEGER, primaryKey: true},
+      type: {type: STRING(256), unique: true},
+      network: {type: NETWORK, primaryKey: true},
+      createdAt: {type: DATE, allowNull: false},
+      price: {type: BIGINT},
     }
   )
 
