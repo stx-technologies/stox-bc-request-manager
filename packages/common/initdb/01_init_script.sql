@@ -1,6 +1,7 @@
 --drop table "transactions";
 --drop table "requests";
 --drop table "accountNonces";
+--drop table "gasPrices";
 
 CREATE EXTENSION IF NOT EXISTS CITEXT;
 
@@ -8,6 +9,7 @@ CREATE TABLE "requests"
 (
     "id" UUID PRIMARY KEY,
     "type" CHARACTER VARYING(256) NOT NULL,
+    "priority" CHARACTER VARYING(256),
     "data" json,
     "error" json,
     "result" json,
@@ -72,4 +74,14 @@ CREATE TABLE "accountNonces"
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
         "errorAt" timestamp with time zone,
     CONSTRAINT tokensBalances_pk PRIMARY KEY ("account", "network")
+);
+
+CREATE TABLE "gasPrices"
+(
+    "level" INTEGER,
+    "type" CHARACTER VARYING(256) NOT NULL UNIQUE,
+    "price" BIGINT,
+    "network" CHARACTER VARYING(256),
+    "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
+    "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL
 );
