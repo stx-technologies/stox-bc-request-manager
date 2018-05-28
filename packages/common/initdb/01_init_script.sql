@@ -76,9 +76,9 @@ CREATE TABLE "accountNonces"
     CONSTRAINT tokensBalances_pk PRIMARY KEY ("account", "network")
 );
 
-CREATE TABLE "gasPrices"
+CREATE TABLE "gasPercentiles"
 (
-    "level" INTEGER,
+    "percentile" INTEGER,
     "type" CHARACTER VARYING(256) NOT NULL UNIQUE,
     "price" BIGINT,
     "network" CHARACTER VARYING(256),
