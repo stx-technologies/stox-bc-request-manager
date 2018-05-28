@@ -3,6 +3,7 @@ const {
   transactionsSignerBaseUrl,
   limitTransactions,
   defaultGasPrice,
+  maximumGasPrice,
 } = require('../config')
 const {http, errors: {logError}} = require('stox-common')
 const promiseSerial = require('promise-serial')
@@ -11,6 +12,7 @@ const {
     accounts: {fetchNextAccountNonce, findOrCreateAccountNonce},
     requests,
     transactions: {getPendingTransactions},
+    gasPrices: {getGasPriceByPriority},
   },
   context,
   context: {db, blockchain},
@@ -31,7 +33,10 @@ const fetchBestNonce = async ({from, network}) => {
   return (nonceFromDB > nonceFromEtherNode ? nonceFromDB : nonceFromEtherNode)
 }
 
-const fetchGasPriceFromGasCalculator = async () => parseInt(defaultGasPrice, 10)
+const fetchGasPriceFromGasCalculator = async (priority) => {
+  const gasPrice = await getGasPriceByPriority(priority)
+  return gasPrice || parseInt(defaultGasPrice, 10)
+}
 
 const signTransactionInTransactionSigner = async (fromAddress, unsignedTransaction, transactionId) => {
   const signedTransaction = await clientHttp.post('/transactions/sign', {
@@ -76,12 +81,12 @@ const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
   await accountNonce.update({nonce}, {transaction: dbTransaction})
 }
 
-const createUnsignedTransaction = async (nonce, transaction) => {
+const createUnsignedTransaction = async (nonce, transaction, request) => {
   const unsignedTransaction = {
     nonce,
     to: transaction.to,
     data: transaction.transactionData.toString(),
-    gasPrice: await fetchGasPriceFromGasCalculator(),
+    gasPrice: await fetchGasPriceFromGasCalculator(request.priority),
     chainId: await blockchain.web3.eth.net.getId(),
   }
 
@@ -124,8 +129,26 @@ module.exports = {
     const promises = pendingTransactions.map(transaction => async () => {
       try {
         const nonce = await fetchBestNonce(transaction)
+        const request = await requests.getRequestById(transaction.requestId)
 
-        const unsignedTransaction = await createUnsignedTransaction(nonce, transaction)
+
+        const unsignedTransaction = await createUnsignedTransaction(nonce, transaction, request)
+        if (unsignedTransaction.gasPrice > maximumGasPrice) {
+          const lowGasPrice = await getGasPriceByPriority('low')
+          context.logger.error(
+            {
+              currentGasPrice: unsignedTransaction.gasPrice,
+              maximumGasPrice,
+              lowGasPrice,
+            },
+            'GAS_PRICE_IS_TOO_HIGH'
+          )
+          if (maximumGasPrice > lowGasPrice) {
+            unsignedTransaction.gasPrice = maximumGasPrice
+          } else {
+            return
+          }
+        }
         const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
         const requiredBalance = unsignedTransaction.gasLimit * unsignedTransaction.gasPrice
         if (fromAccountBalance < requiredBalance) {
