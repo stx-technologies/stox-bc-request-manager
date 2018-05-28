@@ -78,9 +78,9 @@ module.exports = (sequelize) => {
   )
 
   sequelize.define(
-    'gasPrices',
+    'gasPercentiles',
     {
-      level: {type: INTEGER, primaryKey: true},
+      percentile: {type: INTEGER, primaryKey: true},
       type: {type: STRING(256), unique: true},
       network: {type: NETWORK, primaryKey: true},
       createdAt: {type: DATE, allowNull: false},

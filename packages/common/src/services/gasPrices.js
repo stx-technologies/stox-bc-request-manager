@@ -1,42 +1,47 @@
 const {db, blockchain, config} = require('../context')
 
 const getGasPriceByPriority = async (priority = 'medium') => {
-  const priceLevel = await db.gasPrices.findOne({where: {type: priority}})
-  return priceLevel ? priceLevel.price : null
+  const gasPercentile = await db.gasPercentiles.findOne({where: {type: priority}})
+  return gasPercentile ? gasPercentile.price : parseInt(config.defaultGasPrice, 10)
 }
 
-const getGasLevels = () => db.gasPrices.findAll()
+const getGasPercentiles = () => db.gasPercentiles.findAll()
 
-const isBlockPassThresholdMinutes = (testBlock) => {
+const isBlockPassThresholdSeconds = (testBlock) => {
   const seconds = Date.now() / 1000
   const diff = seconds - testBlock.timestamp
-  return diff > config.refreshGasPricesPeriodSeconds
+  return diff > config.refreshGasPricesIntervalSeconds
 }
 
 const getPricesFromBlock = async block => Promise.all(block.transactions.map(async transaction =>
   (await blockchain.web3.eth.getTransaction(transaction)).gasPrice))
 
-const calculateGasPrices = async (gasLeveles) => {
-  let testBlock = await blockchain.web3.eth.getBlock('latest')
-  const gasPricesArr = []
+const calculateGasPrices = async (gasPercentiles) => {
+  let block = await blockchain.web3.eth.getBlock('latest')
+  let blocksCheckedCount = 1
+  const gasPricesArray = []
   const gasPrices = {}
-  while (!isBlockPassThresholdMinutes(testBlock)) {
-    const gasPricesFromBlock = await getPricesFromBlock(testBlock)
-    gasPricesArr.push(...gasPricesFromBlock)
-    testBlock = await blockchain.web3.eth.getBlock(testBlock.number - 1)
+
+  while (!isBlockPassThresholdSeconds(block) && config.maxNumberOfBlocksToCheck > blocksCheckedCount) {
+    const gasPricesFromBlock = await getPricesFromBlock(block)
+    gasPricesArray.push(...gasPricesFromBlock)
+    block = await blockchain.web3.eth.getBlock(block.number - 1)
+    blocksCheckedCount++
   }
-  gasPricesArr.sort((a, b) => a - b)
-  gasLeveles.forEach((gasLevel) => {
-    const levelPlace = Math.floor(gasPricesArr.length * (gasLevel.level / 100))
-    gasLevel.update({price: gasPricesArr[levelPlace]})
-    gasPrices[gasLevel.type] = gasPricesArr[levelPlace]
-  })
+
+  gasPricesArray.sort((a, b) => a - b)
+  await Promise.all(gasPercentiles.map(async (gasPercentile) => {
+    const percentileIndex = Math.floor(gasPricesArray.length * (gasPercentile.percentile / 100))
+    const price = gasPricesArray[percentileIndex]
+    gasPrices[gasPercentile.type] = price
+    await gasPercentile.update({price})
+  }))
   return gasPrices
 }
 
 
 module.exports = {
-  getGasLevels,
+  getGasPercentiles,
   calculateGasPrices,
   getGasPriceByPriority,
 }
