@@ -18,17 +18,17 @@ const {
 
 const clientHttp = http(transactionsSignerBaseUrl)
 
-const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTransactionCount(fromAccount)
+const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTransactionCount(fromAccount, 'pending')
 
-const isEtherNodeNonceSynced = async ({from, network}) => {
-  try {
-    const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
-    const nonceFromDB = await fetchNextAccountNonce(from, network)
-    return [nonceFromDB <= nonceFromEtherNode, nonceFromEtherNode, nonceFromDB]
-  } catch (e) {
-    context.logger.error(e, 'ERROR_FETCHING_NONCE')
-    return [false, null, null]
+const fetchBestNonce = async ({from, network}) => {
+  const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
+  const nonceFromDB = await fetchNextAccountNonce(from, network)
+
+  if (nonceFromDB < nonceFromEtherNode) {
+    context.logger.warn({account: from, nonceFromEtherNode, nonceFromDB}, 'NONCE_NOT_SYNCED')
   }
+
+  return (nonceFromDB > nonceFromEtherNode ? nonceFromDB : nonceFromEtherNode)
 }
 
 const fetchGasPriceFromGasCalculator = async () => parseInt(defaultGasPrice, 10)
@@ -76,9 +76,9 @@ const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
   await accountNonce.update({nonce}, {transaction: dbTransaction})
 }
 
-const createUnsignedTransaction = async (nodeNonce, transaction) => {
+const createUnsignedTransaction = async (nonce, transaction) => {
   const unsignedTransaction = {
-    nonce: nodeNonce,
+    nonce,
     to: transaction.to,
     data: transaction.transactionData.toString(),
     gasPrice: await fetchGasPriceFromGasCalculator(),
@@ -96,12 +96,12 @@ const createUnsignedTransaction = async (nodeNonce, transaction) => {
   return unsignedTransaction
 }
 
-const commitTransaction = async (transaction, unsignedTransaction, transactionHash, nodeNonce) => {
+const commitTransaction = async (transaction, unsignedTransaction, transactionHash, transactionNonce) => {
   const dbTransaction = await db.sequelize.transaction()
   try {
     await updateTransaction(transaction, unsignedTransaction, transactionHash, dbTransaction)
     await updateRequest(transaction, dbTransaction)
-    await updateAccountNonce(transaction, nodeNonce + 1, dbTransaction)
+    await updateAccountNonce(transaction, transactionNonce + 1, dbTransaction)
 
     context.logger.info(
       {
@@ -123,17 +123,13 @@ module.exports = {
     const pendingTransactions = await getPendingTransactions(limitTransactions)
     const promises = pendingTransactions.map(transaction => async () => {
       try {
-        const [isNonceSynced, nodeNonce, dbNonce] = await isEtherNodeNonceSynced(transaction)
-        if (!isNonceSynced) {
-          context.logger.warn({transactionId: transaction.id, nodeNonce, dbNonce}, 'NONCE_NOT_SYNCED')
-          return
-        }
-        
-        const unsignedTransaction = await createUnsignedTransaction(nodeNonce, transaction)
+        const nonce = await fetchBestNonce(transaction)
+
+        const unsignedTransaction = await createUnsignedTransaction(nonce, transaction)
         const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
         const requiredBalance = unsignedTransaction.gasLimit * unsignedTransaction.gasPrice
         if (fromAccountBalance < requiredBalance) {
-          context.logger.error(
+          context.logger.warning(
             {
               requestId: transaction.requestId,
               transactionId: transaction.id,
@@ -151,7 +147,7 @@ module.exports = {
           transaction.id
         )
         const transactionHash = await sendTransactionToBlockchain(signedTransaction)
-        await commitTransaction(transaction, unsignedTransaction, transactionHash, nodeNonce)
+        await commitTransaction(transaction, unsignedTransaction, transactionHash, nonce)
       } catch (e) {
         logError(e, 'TRANSACTION_FAILED')
         await requests.handleTransactionError(transaction, e)
