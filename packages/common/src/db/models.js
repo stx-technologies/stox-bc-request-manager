@@ -42,6 +42,7 @@ module.exports = (sequelize) => {
       subRequestIndex: {type: INTEGER, defaultValue: 0},
       subRequestData: {type: JSON},
       subRequestType: {type: STRING(256)},
+      originalTransactionId: {type: STRING(256)},
       transactionHash: {type: TRANSACTION_HASH},
       transactionData: {type: BLOB}, // ?
       network: {type: NETWORK, allowNull: false},
@@ -54,6 +55,8 @@ module.exports = (sequelize) => {
       receipt: {type: JSON}, // ?
       createdAt: {type: DATE, allowNull: false},
       sentAt: {type: DATE},
+      resentAt: {type: DATE},
+      canceledAt: {type: DATE},
       error: {type: JSON},
       completedAt: {type: DATE},
     },
@@ -81,7 +84,7 @@ module.exports = (sequelize) => {
     'gasPercentiles',
     {
       percentile: {type: INTEGER, primaryKey: true},
-      type: {type: STRING(256), unique: true},
+      priority: {type: STRING(256), unique: true},
       network: {type: NETWORK, primaryKey: true},
       createdAt: {type: DATE, allowNull: false},
       price: {type: BIGINT},

@@ -2,17 +2,15 @@ const {
   writePendingTransactionsCron,
   transactionsSignerBaseUrl,
   limitTransactions,
-  maximumGasPrice,
 } = require('../config')
 const {http, errors: {logError}} = require('stox-common')
 const promiseSerial = require('promise-serial')
-const {Big} = require('big.js')
 const {
   services: {
     accounts: {fetchNextAccountNonce, findOrCreateAccountNonce},
     requests,
-    transactions: {getPendingTransactions},
-    gasPrices: {getGasPriceByPriority},
+    transactions: {getPendingTransactions, isResendTransaction},
+    gasPrices: {calculateGasPrice},
   },
   context,
   context: {db, blockchain},
@@ -22,35 +20,18 @@ const clientHttp = http(transactionsSignerBaseUrl)
 
 const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTransactionCount(fromAccount, 'pending')
 
-const fetchBestNonce = async ({from, network}) => {
+const fetchBestNonce = async (transaction) => {
+  if (isResendTransaction(transaction.dataValues)) {
+    return Number(transaction.nonce)
+  }
+  const {from, network} = transaction
   const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
   const nonceFromDB = await fetchNextAccountNonce(from, network)
 
   if (nonceFromDB < nonceFromEtherNode) {
     context.logger.warn({account: from, nonceFromEtherNode, nonceFromDB}, 'NONCE_NOT_SYNCED')
   }
-
-  return (nonceFromDB > nonceFromEtherNode ? nonceFromDB : nonceFromEtherNode)
-}
-
-const calculateGasPrice = async (priority) => {
-  const gasPrice = await getGasPriceByPriority(priority)
-  if (Big(gasPrice).gt(maximumGasPrice)) {
-    const lowGasPrice = await getGasPriceByPriority('low')
-    context.logger.error(
-      {
-        gasPrice,
-        maximumGasPrice,
-        lowGasPrice,
-      },
-      'GAS_PRICE_IS_TOO_HIGH'
-    )
-    if (Big(maximumGasPrice).gt(lowGasPrice)) {
-      return maximumGasPrice
-    }
-    return null
-  }
-  return gasPrice
+  return Number((nonceFromDB > nonceFromEtherNode ? nonceFromDB : nonceFromEtherNode))
 }
 
 const signTransactionInTransactionSigner = async (fromAddress, unsignedTransaction, transactionId) => {
@@ -121,7 +102,9 @@ const commitTransaction = async (transaction, unsignedTransaction, transactionHa
   try {
     await updateTransaction(transaction, unsignedTransaction, transactionHash, dbTransaction)
     await updateRequest(transaction, dbTransaction)
-    await updateAccountNonce(transaction, transactionNonce + 1, dbTransaction)
+    if (!isResendTransaction(transaction.dataValues)) {
+      await updateAccountNonce(transaction, transactionNonce + 1, dbTransaction)
+    }
 
     context.logger.info(
       {

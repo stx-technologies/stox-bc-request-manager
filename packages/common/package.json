@@ -17,6 +17,7 @@
     "sequelize": "^4.35.2",
     "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev",
     "trace": "^3.1.0",
+    "big.js": "^5.0.3",
     "uuid4": "^1.0.0",
     "web3": "^1.0.0-beta.34"
   },
