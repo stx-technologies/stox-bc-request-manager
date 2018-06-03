@@ -16,13 +16,14 @@ const calcGasPriceForResend = async (sentGasPrice) => {
   if (Big(sentGasPrice).gte(config.maximumGasPrice)) {
     return 0
   }
+  const gasPricePlusTenPercent = Big(sentGasPrice).times(1.1)
   const {low, medium, high} = await fetchGasPrices()
   switch (true) {
-    case (Big(low).gt(sentGasPrice)):
+    case (Big(low).gt(gasPricePlusTenPercent)):
       return low
-    case (Big(medium).gt(sentGasPrice)):
+    case (Big(medium).gt(gasPricePlusTenPercent)):
       return medium
-    case (Big(high).gt(sentGasPrice)):
+    case (Big(high).gt(gasPricePlusTenPercent)):
       return high
     default:
       return config.maximumGasPrice
@@ -30,7 +31,7 @@ const calcGasPriceForResend = async (sentGasPrice) => {
 }
 
 const getGasPriceByPriority = async (priority) => {
-  const gasPercentile = await db.gasPercentiles.findOne({where: {priority: priority || 'medium'}})
+  const gasPercentile = await db.gasPercentiles.findOne({where: {priority: priority || 'low'}})
   return gasPercentile ? gasPercentile.price : parseInt(config.defaultGasPrice, 10)
 }
 
