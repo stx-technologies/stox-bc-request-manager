@@ -88,3 +88,6 @@ CREATE TABLE "gasPercentiles"
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL
 );
+INSERT INTO "gasPercentiles" ("percentile", "priority", "price", "network") VALUES ('10', 'low', '0', 'MAIN');
+INSERT INTO "gasPercentiles" ("percentile", "priority", "price", "network") VALUES ('30', 'medium', '0', 'MAIN');
+INSERT INTO "gasPercentiles" ("percentile", "priority", "price", "network") VALUES ('60', 'high', '0', 'MAIN');
