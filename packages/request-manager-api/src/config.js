@@ -4,4 +4,6 @@ module.exports = mapEnv({
   port: '',
   databaseUrl: '',
   web3Url: '',
+  maximumGasPrice: '',
+
 })

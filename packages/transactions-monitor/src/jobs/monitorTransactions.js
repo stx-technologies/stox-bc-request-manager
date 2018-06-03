@@ -17,10 +17,14 @@ module.exports = {
 
     const funcs = uncompletedTransactions.map(transaction => async () => {
       const {transactionHash} = transaction.dataValues
-
       try {
         const completedTransaction = await getCompletedTransaction(transactionHash)
-        if (completedTransaction && completedTransaction.confirmations >= requiredConfirmations) {
+
+        if (!completedTransaction) {
+          return
+        }
+
+        if (completedTransaction.confirmations >= requiredConfirmations) {
           const {requestId} = await transactions.updateCompletedTransaction(transaction, completedTransaction)
           await requests.updateRequestCompleted(
             requestId,

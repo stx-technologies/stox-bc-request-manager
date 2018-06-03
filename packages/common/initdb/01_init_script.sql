@@ -35,6 +35,7 @@ CREATE TABLE "transactions"
     "subRequestData" json,
     "subRequestType" CHARACTER VARYING(256),
     "transactionHash" CHARACTER VARYING(66),
+    "originalTransactionId" CHARACTER VARYING(66),
     "transactionData" bytea,
     "network" CHARACTER VARYING(256) NOT NULL,
     "from" CITEXT,
@@ -47,6 +48,8 @@ CREATE TABLE "transactions"
     "receipt" json,
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
     "sentAt" timestamp with time zone,
+    "resentAt" timestamp with time zone,
+    "canceledAt" timestamp with time zone,
     "completedAt" timestamp with time zone,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     CONSTRAINT transactions_requestId_fk FOREIGN KEY ("requestId")
@@ -79,7 +82,7 @@ CREATE TABLE "accountNonces"
 CREATE TABLE "gasPercentiles"
 (
     "percentile" INTEGER,
-    "type" CHARACTER VARYING(256) NOT NULL UNIQUE,
+    "priority" CHARACTER VARYING(256) NOT NULL UNIQUE,
     "price" BIGINT,
     "network" CHARACTER VARYING(256),
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
