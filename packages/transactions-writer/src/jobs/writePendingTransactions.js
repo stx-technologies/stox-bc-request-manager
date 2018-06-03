@@ -18,7 +18,7 @@ const {
 
 const clientHttp = http(transactionsSignerBaseUrl)
 
-const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTransactionCount(fromAccount, 'pending')
+const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTransactionCount(fromAccount)
 
 const fetchBestNonce = async (transaction) => {
   if (isResendTransaction(transaction.dataValues)) {
@@ -77,12 +77,17 @@ const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
   await accountNonce.update({nonce}, {transaction: dbTransaction})
 }
 
+const getGasPrice = async (request, transaction) => {
+  const gasPrice = isResendTransaction(transaction) ? transaction.gasPrice : await calculateGasPrice(request.priority)
+  return parseInt(gasPrice, 10)
+}
+
 const createUnsignedTransaction = async (nonce, transaction, request) => {
   const unsignedTransaction = {
     nonce,
     to: transaction.to,
     data: transaction.transactionData.toString(),
-    gasPrice: await calculateGasPrice(request.priority),
+    gasPrice: await getGasPrice(request, transaction),
     chainId: await blockchain.web3.eth.net.getId(),
   }
 
