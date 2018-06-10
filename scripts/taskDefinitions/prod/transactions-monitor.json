@@ -13,7 +13,7 @@
     {
       "name": "prod-transactions-monitor",
       "image": "",
-      "memoryReservation": 300,
+      "memoryReservation": 512,
       "cpu": 256,
       "essential": true,
       "portMappings": [],
