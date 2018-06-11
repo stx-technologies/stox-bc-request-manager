@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk')
-const {kmsKeyId, transactionSignerKeys} = require('config')
+const {kmsKeyId} = require('config')
 
 const kms = new AWS.KMS()
 
@@ -30,14 +30,7 @@ const encrypt = privateKey => new Promise((resolve, reject) => {
   })
 })
 
-const getPrivateKey = async (address) => {
-  const privateKey = JSON.parse(transactionSignerKeys)[address]
-  const decrypted = await decrypt(privateKey)
-  return decrypted
-}
-
 module.exports = {
   encrypt,
   decrypt,
-  getPrivateKey,
 }
