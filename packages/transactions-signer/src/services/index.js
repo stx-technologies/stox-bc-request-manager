@@ -1,8 +1,9 @@
 const {signTransaction} = require('./signer')
-const {encrypt} = require('./kms')
+const {encrypt, getPrivateKey} = require('./kms')
 
 module.exports = {
   signTransaction,
   encrypt,
+  getPrivateKey,
 }
 

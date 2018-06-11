@@ -1,5 +1,5 @@
 const {port} = require('config')
-const {signTransaction, encrypt} = require('./services')
+const {signTransaction, encrypt, getPrivateKey} = require('./services')
 
 module.exports = {
   port,
@@ -11,6 +11,9 @@ module.exports = {
 
     router.post('/encrypt', _(({body: {privateKey}}) =>
       encrypt(privateKey)))
+
+    router.post('/getPrivateKey', _(({body: {address}}) =>
+      getPrivateKey(address)))
   },
 }
 
