@@ -18,7 +18,7 @@ const {
 
 const clientHttp = http(transactionsSignerBaseUrl)
 
-const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTransactionCount(fromAccount)
+const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTransactionCount(fromAccount, 'pending')
 
 const fetchBestNonce = async (transaction) => {
   if (isResendTransaction(transaction.dataValues)) {
