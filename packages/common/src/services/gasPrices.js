@@ -37,9 +37,8 @@ const getGasPriceByPriority = async (priority) => {
 
 
 const isBlockPassThresholdSeconds = (testBlock) => {
-  const seconds = Date.now() / 1000
-  const diff = seconds - testBlock.timestamp
-  return diff > config.refreshGasPricesIntervalSeconds
+  const secondsPassed = (Date.now() / 1000) - testBlock.timestamp
+  return secondsPassed > config.refreshGasPricesIntervalSeconds
 }
 
 const getPricesFromBlock = async block => Promise.all(block.transactions.map(async transaction =>
@@ -72,17 +71,17 @@ const calculateGasPrice = async (priority) => {
   const gasPrice = await getGasPriceByPriority(priority)
   if (Big(gasPrice).gt(config.maximumGasPrice)) {
     const lowGasPrice = await getGasPriceByPriority('low')
+    if (Big(config.maximumGasPrice).gt(lowGasPrice)) {
+      return config.maximumGasPrice
+    }
     logger.error(
       {
         gasPrice,
         maximumGasPrice: config.maximumGasPrice,
         lowGasPrice,
       },
-      'GAS_PRICE_IS_TOO_HIGH'
+      'GAS_PRICE_OVER_THE_MAXIMUM'
     )
-    if (Big(config.maximumGasPrice).gt(lowGasPrice)) {
-      return config.maximumGasPrice
-    }
     return null
   }
   return gasPrice
