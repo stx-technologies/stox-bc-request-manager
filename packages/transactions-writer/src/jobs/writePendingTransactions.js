@@ -22,7 +22,7 @@ const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTran
 
 const fetchBestNonce = async ({from, network}) => {
   const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
-  const nonceFromDB = await fetchNextAccountNonce(from, network)
+  const nonceFromDB = Number(await fetchNextAccountNonce(from, network))
 
   if (nonceFromDB < nonceFromEtherNode) {
     context.logger.warn({account: from, nonceFromEtherNode, nonceFromDB}, 'NONCE_NOT_SYNCED')
