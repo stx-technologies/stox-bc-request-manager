@@ -7,9 +7,9 @@ const {http, errors: {logError}} = require('stox-common')
 const promiseSerial = require('promise-serial')
 const {
   services: {
-    accounts: {fetchBestNonce, findOrCreateAccountNonce},
+    accounts: {fetchNextAccountNonce, findOrCreateAccountNonce},
     requests,
-    transactions: {getPendingTransactions},
+    transactions: {getPendingTransactions, isResendTransaction},
     gasPrices: {calculateGasPrice},
   },
   context,
@@ -18,6 +18,21 @@ const {
 
 const clientHttp = http(transactionsSignerBaseUrl)
 
+const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTransactionCount(fromAccount, 'pending')
+
+const fetchBestNonce = async (transaction) => {
+  if (isResendTransaction(transaction.dataValues)) {
+    return Number(transaction.nonce)
+  }
+  const {from, network} = transaction
+  const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
+  const nonceFromDB = await fetchNextAccountNonce(from, network)
+
+  if (nonceFromDB < nonceFromEtherNode) {
+    context.logger.warn({account: from, nonceFromEtherNode, nonceFromDB}, 'NONCE_NOT_SYNCED')
+  }
+  return Number((nonceFromDB > nonceFromEtherNode ? nonceFromDB : nonceFromEtherNode))
+}
 
 const signTransactionInTransactionSigner = async (fromAddress, unsignedTransaction, transactionId) => {
   const signedTransaction = await clientHttp.post('/transactions/sign', {
