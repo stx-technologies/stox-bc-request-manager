@@ -11,7 +11,7 @@ const {
   services: {
     accounts: {fetchNextAccountNonce, findOrCreateAccountNonce},
     requests,
-    transactions: {getPendingTransactions, isResendTransaction},
+    transactions: {getPendingTransactions, isResendTransaction, alreadySentWithSameGasPrice},
     gasPrices: {getGasPriceByPriority, fetchLowestPrice, getNextGasPrice},
   },
   context,
@@ -144,6 +144,15 @@ const validateGasPrice = async (unsignedTransaction) => {
       )
       return false
     }
+  }
+  if (await alreadySentWithSameGasPrice(unsignedTransaction)) {
+    context.logger.error(
+      {
+        gasPrice: unsignedTransaction.gasPrice,
+      },
+      'ALREADY_SENT_WITH_THIS_GAS_PRICE'
+    )
+    return false
   }
   return true
 }
