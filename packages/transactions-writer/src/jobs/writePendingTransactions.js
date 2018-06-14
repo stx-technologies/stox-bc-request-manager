@@ -1,8 +1,8 @@
+const {Big} = require('big.js')
 const {
   writePendingTransactionsCron,
   transactionsSignerBaseUrl,
   limitTransactions,
-  defaultGasPrice,
   maximumGasPrice,
 } = require('../config')
 const {http, errors: {logError}} = require('stox-common')
@@ -11,8 +11,8 @@ const {
   services: {
     accounts: {fetchNextAccountNonce, findOrCreateAccountNonce},
     requests,
-    transactions: {getPendingTransactions, isResendTransaction},
-    gasPrices: {calculateGasPrice},
+    transactions: {getPendingTransactions, isResendTransaction, alreadySentWithSameGasPrice},
+    gasPrices: {getGasPriceByPriority, fetchLowestPrice, getNextGasPrice},
   },
   context,
   context: {db, blockchain},
@@ -28,7 +28,7 @@ const fetchBestNonce = async (transaction) => {
   }
   const {from, network} = transaction
   const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
-  const nonceFromDB = Number(await fetchNextAccountNonce(from, network))
+  const nonceFromDB = await fetchNextAccountNonce(from, network)
 
   if (nonceFromDB < nonceFromEtherNode) {
     context.logger.warn({account: from, nonceFromEtherNode, nonceFromDB}, 'NONCE_NOT_SYNCED')
@@ -80,8 +80,10 @@ const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
 }
 
 const getGasPrice = async (request, transaction) => {
-  const gasPrice = isResendTransaction(transaction) ? transaction.gasPrice : await calculateGasPrice(request.priority)
-  return parseInt(gasPrice, 10)
+  const gasPrice = isResendTransaction(transaction) ?
+    await getNextGasPrice(transaction.gasPrice) :
+    await getGasPriceByPriority(request.priority)
+  return Big(gasPrice).toFixed()
 }
 
 const createUnsignedTransaction = async (nonce, transaction, request) => {
@@ -143,6 +145,15 @@ const validateGasPrice = async (unsignedTransaction) => {
       return false
     }
   }
+  if (await alreadySentWithSameGasPrice(unsignedTransaction)) {
+    context.logger.error(
+      {
+        gasPrice: unsignedTransaction.gasPrice,
+      },
+      'ALREADY_SENT_WITH_THIS_GAS_PRICE'
+    )
+    return false
+  }
   return true
 }
 
@@ -164,7 +175,7 @@ module.exports = {
         const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
         const requiredBalance = unsignedTransaction.gasLimit * unsignedTransaction.gasPrice
         if (fromAccountBalance < requiredBalance) {
-          context.logger.warn(
+          context.logger.warning(
             {
               requestId: transaction.requestId,
               transactionId: transaction.id,

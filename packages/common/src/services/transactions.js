@@ -82,6 +82,9 @@ const rejectRelatedTransactions = async ({id, transactionHash, nonce, from}, dbT
   dbTransaction
 )
 
+const alreadySentWithSameGasPrice = ({nonce, from, gasPrice}) =>
+  db.transactions.findOne({where: {nonce, from, gasPrice}})
+
 const updateCompletedTransaction = async (transactionInstance, {isSuccessful, blockTime, receipt}) => {
   const dbTransaction = await db.sequelize.transaction()
   try {
@@ -140,5 +143,6 @@ module.exports = {
   updateTransactionError,
   isTransactionComplete,
   isResendTransaction,
+  alreadySentWithSameGasPrice,
 
 }
