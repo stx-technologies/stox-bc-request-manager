@@ -13,7 +13,7 @@ module.exports = {
   job: async () => {
     const gasPercentiles = await getGasPercentiles()
     if (!gasPercentiles.length) {
-      context.logger.error('NO_GAS_LEVELS')
+      context.logger.error('NO_GAS_PERCENTILES')
     } else {
       try {
         const gasPrices = await calculateGasPrices(gasPercentiles)

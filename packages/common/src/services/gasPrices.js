@@ -1,48 +1,32 @@
-const {db, blockchain, config, logger} = require('../context')
+const {db, blockchain, config} = require('../context')
 const {Big} = require('big.js')
+const {exceptions: {InvalidStateError}} = require('@welldone-software/node-toolbelt')
 
 const getGasPercentiles = () => db.gasPercentiles.findAll()
 
-const fetchGasPrices = async () => {
-  const gasPercentiles = await getGasPercentiles()
-  const gasPricesByPriority = {}
-  gasPercentiles.forEach((gasPercentile) => {
-    gasPricesByPriority[gasPercentile.dataValues.priority] = gasPercentile.dataValues.price
-  })
-  return gasPricesByPriority
-}
-
-const calcGasPriceForResend = async (sentGasPrice) => {
-  if (Big(sentGasPrice).gte(config.maximumGasPrice)) {
-    return 0
-  }
+const getNextGasPrice = async (sentGasPrice) => {
   const gasPricePlusTenPercent = Big(sentGasPrice).times(1.1)
-  const {low, medium, high} = await fetchGasPrices()
-  switch (true) {
-    case (Big(low).gt(gasPricePlusTenPercent)):
-      return low
-    case (Big(medium).gt(gasPricePlusTenPercent)):
-      return medium
-    case (Big(high).gt(gasPricePlusTenPercent)):
-      return high
-    default:
-      return config.maximumGasPrice
-  }
+  const nextGasPrice = await db.gasPercentiles.findOne({where:
+      {price: {$gt: gasPricePlusTenPercent.toFixed(0)}},
+  order: [['price']]})
+  return nextGasPrice ? nextGasPrice.price : gasPricePlusTenPercent.toFixed()
 }
 
-const getGasPriceByPriority = async (priority) => {
-  const gasPercentile = await db.gasPercentiles.findOne({where: {priority: priority || 'low'}})
-  return gasPercentile ? gasPercentile.price : parseInt(config.defaultGasPrice, 10)
+const fetchLowestPrice = async () => (await db.gasPercentiles.findOne({order: [['price']]})).price
+
+const getGasPriceByPriority = async priority =>
+  (await db.gasPercentiles.findOne({where: {priority: (priority || config.defaultGasPriority)}})).price
+
+const shouldCheckBlock = (block, blocksCheckedCount) => {
+  const secondsPassed = (Date.now() / 1000) - block.timestamp
+  return (secondsPassed < Number(config.refreshGasPricesIntervalSeconds)
+    && blocksCheckedCount < Number(config.maxNumberOfBlocksToCheck))
 }
 
-
-const isBlockPassThresholdSeconds = (testBlock) => {
-  const secondsPassed = (Date.now() / 1000) - testBlock.timestamp
-  return secondsPassed > config.refreshGasPricesIntervalSeconds
-}
-
-const getPricesFromBlock = async block => Promise.all(block.transactions.map(async transaction =>
-  (await blockchain.web3.eth.getTransaction(transaction)).gasPrice))
+const getPricesFromBlock = async block => Promise.all(block.transactions.map(async (transactionHash) => {
+  const transaction = await blockchain.web3.eth.getTransaction(transactionHash)
+  return transaction.gasPrice
+}))
 
 const calculateGasPrices = async (gasPercentiles) => {
   let block = await blockchain.web3.eth.getBlock('latest')
@@ -50,46 +34,29 @@ const calculateGasPrices = async (gasPercentiles) => {
   const gasPricesArray = []
   const gasPrices = {}
 
-  while (!isBlockPassThresholdSeconds(block) && config.maxNumberOfBlocksToCheck > blocksCheckedCount) {
+  while (shouldCheckBlock(block, blocksCheckedCount)) {
     const gasPricesFromBlock = await getPricesFromBlock(block)
     gasPricesArray.push(...gasPricesFromBlock)
     block = await blockchain.web3.eth.getBlock(block.number - 1)
     blocksCheckedCount++
   }
-
+  if (gasPricesArray.length < 1000) {
+    throw new InvalidStateError('NOT_ENOUGH_GAS_PRICES_FOR_CALCULATION', {gasPricesLength: gasPricesArray.length})
+  }
   gasPricesArray.sort((a, b) => a - b)
   await Promise.all(gasPercentiles.map(async (gasPercentile) => {
     const percentileIndex = Math.floor(gasPricesArray.length * (gasPercentile.percentile / 100))
     const price = gasPricesArray[percentileIndex]
     gasPrices[gasPercentile.priority] = price
-    await gasPercentile.update({price})
+    await gasPercentile.update({price, updatedAt: new Date()})
   }))
   return gasPrices
-}
-
-const calculateGasPrice = async (priority) => {
-  const gasPrice = await getGasPriceByPriority(priority)
-  if (Big(gasPrice).gt(config.maximumGasPrice)) {
-    const lowGasPrice = await getGasPriceByPriority('low')
-    if (Big(config.maximumGasPrice).gt(lowGasPrice)) {
-      return config.maximumGasPrice
-    }
-    logger.error(
-      {
-        gasPrice,
-        maximumGasPrice: config.maximumGasPrice,
-        lowGasPrice,
-      },
-      'GAS_PRICE_OVER_THE_MAXIMUM'
-    )
-    return null
-  }
-  return gasPrice
 }
 
 module.exports = {
   getGasPercentiles,
   calculateGasPrices,
-  calcGasPriceForResend,
-  calculateGasPrice,
+  getNextGasPrice,
+  getGasPriceByPriority,
+  fetchLowestPrice,
 }

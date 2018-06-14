@@ -1,4 +1,4 @@
-const {monitorTransactionsCron, requiredConfirmations} = require('../config')
+const {monitorTransactionsCron} = require('../config')
 const promiseSerial = require('promise-serial')
 const {
   context,
@@ -20,11 +20,7 @@ module.exports = {
       try {
         const completedTransaction = await getCompletedTransaction(transactionHash)
 
-        if (!completedTransaction) {
-          return
-        }
-
-        if (completedTransaction.confirmations >= requiredConfirmations) {
+        if (transactions.isTransactionComplete(completedTransaction)) {
           const {requestId} = await transactions.updateCompletedTransaction(transaction, completedTransaction)
           await requests.updateRequestCompleted(
             requestId,

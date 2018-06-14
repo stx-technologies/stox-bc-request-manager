@@ -1,8 +1,6 @@
-const {db} = require('../context')
+const {db, config} = require('../context')
 const {exceptions: {NotFoundError, InvalidStateError}} = require('@welldone-software/node-toolbelt')
 const {errors: {errSerializer}} = require('stox-common')
-const {calcGasPriceForResend} = require('./gasPrices')
-
 
 const createTransaction = ({id, type, from}) => db.transactions.create({id, type, from})
 
@@ -34,10 +32,6 @@ const resendTransaction = async (transactionHash) => {
   const dbTransaction = await db.sequelize.transaction()
   const {requestId, type, subRequestIndex, subRequestData, subRequestType,
     transactionData, network, from, to, nonce, gasPrice, originalTransactionId, id} = transaction.dataValues
-  const newGasPrice = await calcGasPriceForResend(gasPrice)
-  if (!newGasPrice) {
-    throw new InvalidStateError('MAXIMUM_GAS_PRICE')
-  }
   try {
     await transaction.update({resentAt: Date.now()}, {transaction: dbTransaction})
     await db.transactions.create(
@@ -51,7 +45,7 @@ const resendTransaction = async (transactionHash) => {
         from,
         to,
         nonce,
-        gasPrice: newGasPrice,
+        gasPrice,
         originalTransactionId: originalTransactionId || id},
       {transaction: dbTransaction}
     )
@@ -76,7 +70,7 @@ const getUnconfirmedTransactions = limit =>
     limit,
   })
 
-const rejectRelatedTransactions = async ({id, transactionHash, nonce, from}, transaction) => db.transactions.update(
+const rejectRelatedTransactions = async ({id, transactionHash, nonce, from}, dbTransaction) => db.transactions.update(
   {error: {reason: 'transaction override', transactionId: id, transactionHash}, completedAt: Date.now()},
   {
     where: {
@@ -85,13 +79,13 @@ const rejectRelatedTransactions = async ({id, transactionHash, nonce, from}, tra
       from,
     },
   },
-  transaction
+  dbTransaction
 )
 
 const updateCompletedTransaction = async (transactionInstance, {isSuccessful, blockTime, receipt}) => {
-  const transaction = await db.sequelize.transaction()
+  const dbTransaction = await db.sequelize.transaction()
   try {
-    await rejectRelatedTransactions(transactionInstance, transaction)
+    await rejectRelatedTransactions(transactionInstance, dbTransaction)
     await transactionInstance.updateAttributes(
       {
         completedAt: Date.now(),
@@ -101,40 +95,39 @@ const updateCompletedTransaction = async (transactionInstance, {isSuccessful, bl
         error: isSuccessful ? null : {message: 'error in blockchain transaction'},
       },
       {
-        transaction,
+        transaction: dbTransaction,
       }
     )
-    await transaction.commit()
+    await dbTransaction.commit()
 
     return transactionInstance.dataValues
   } catch (e) {
-    transaction.rollback()
+    dbTransaction.rollback()
     throw e
   }
 }
 
 const addTransactions = async (requestId, transactions) => {
-  const transaction = await db.sequelize.transaction()
+  const dbTransaction = await db.sequelize.transaction()
 
   try {
-    await db.transactions.bulkCreate(transactions, {transaction})
-    await db.requests.update({transactionPreparedAt: Date.now()}, {where: {id: requestId}}, {transaction})
-    await transaction.commit()
+    await db.transactions.bulkCreate(transactions, {transaction: dbTransaction})
+    await db.requests.update(
+      {transactionPreparedAt: Date.now()},
+      {where: {id: requestId}}, {transaction: dbTransaction}
+    )
+    await dbTransaction.commit()
   } catch (error) {
-    transaction.rollback()
+    dbTransaction.rollback()
     throw error
   }
 }
 
-const minutesFromSent = (transaction) => {
-  const now = new Date()
-  const sendAt = new Date(transaction.dataValues.sentAt)
-  const diff = now.getTime() - sendAt.getTime()
-  return (diff / 60000)
-}
-
 const updateTransactionError = (id, error) =>
   db.transactions.update({error: errSerializer(error), completedAt: Date.now()}, {where: {id}})
+
+const isTransactionComplete = completedTransaction =>
+  completedTransaction && completedTransaction.confirmations >= Number(config.requiredConfirmations)
 
 module.exports = {
   getTransaction,
@@ -143,9 +136,9 @@ module.exports = {
   getUnconfirmedTransactions,
   updateCompletedTransaction,
   addTransactions,
-  minutesFromSent,
   resendTransaction,
   updateTransactionError,
+  isTransactionComplete,
   isResendTransaction,
 
 }
