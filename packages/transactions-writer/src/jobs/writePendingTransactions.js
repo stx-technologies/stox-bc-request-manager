@@ -129,7 +129,7 @@ module.exports = {
         const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
         const requiredBalance = unsignedTransaction.gasLimit * unsignedTransaction.gasPrice
         if (fromAccountBalance < requiredBalance) {
-          context.logger.warning(
+          context.logger.warn(
             {
               requestId: transaction.requestId,
               transactionId: transaction.id,
