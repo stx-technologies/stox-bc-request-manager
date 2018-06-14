@@ -126,6 +126,26 @@ const commitTransaction = async (transaction, unsignedTransaction, transactionHa
     throw (e)
   }
 }
+const validateGasPrice = async (unsignedTransaction) => {
+  if (Big(unsignedTransaction.gasPrice).gt(maximumGasPrice)) {
+    const lowestGasPrice = await fetchLowestPrice()
+    if (Big(maximumGasPrice).gt(lowestGasPrice)) {
+      unsignedTransaction.gasPrice = Big(maximumGasPrice).toFixed()
+    } else {
+      context.logger.error(
+        {
+          gasPrice: unsignedTransaction.gasPrice,
+          maximumGasPrice,
+          lowestGasPrice,
+        },
+        'MAXIMUM_GAS_PRICE_EXCEEDED'
+      )
+      return false
+    }
+  }
+  return true
+}
+
 
 module.exports = {
   cron: writePendingTransactionsCron,
@@ -137,7 +157,7 @@ module.exports = {
         const request = await requests.getRequestById(transaction.requestId)
 
         const unsignedTransaction = await createUnsignedTransaction(nonce, transaction, request)
-        if (!unsignedTransaction.gasPrice) {
+        if (!validateGasPrice(unsignedTransaction)) {
           return
         }
 
