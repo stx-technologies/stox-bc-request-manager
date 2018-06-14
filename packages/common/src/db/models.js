@@ -42,7 +42,7 @@ module.exports = (sequelize) => {
       subRequestIndex: {type: INTEGER, defaultValue: 0},
       subRequestData: {type: JSON},
       subRequestType: {type: STRING(256)},
-      originalTransactionId: {type: STRING(256)},
+      originalTransactionId: {type: UUID},
       transactionHash: {type: TRANSACTION_HASH},
       transactionData: {type: BLOB}, // ?
       network: {type: NETWORK, allowNull: false},
@@ -83,11 +83,12 @@ module.exports = (sequelize) => {
   sequelize.define(
     'gasPercentiles',
     {
-      percentile: {type: INTEGER, primaryKey: true},
-      priority: {type: STRING(256), unique: true},
-      network: {type: NETWORK, primaryKey: true},
+      priority: {type: STRING(256), primaryKey: true, unique: true},
+      percentile: {type: INTEGER, allowNull: false},
+      price: {type: BIGINT, allowNull: false},
+      network: {type: NETWORK, allowNull: false},
       createdAt: {type: DATE, allowNull: false},
-      price: {type: BIGINT},
+      updatedAt: {type: DATE, allowNull: false},
     }
   )
 

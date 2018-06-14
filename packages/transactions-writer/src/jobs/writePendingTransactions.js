@@ -1,7 +1,9 @@
+const {Big} = require('big.js')
 const {
   writePendingTransactionsCron,
   transactionsSignerBaseUrl,
   limitTransactions,
+  maximumGasPrice,
 } = require('../config')
 const {http, errors: {logError}} = require('stox-common')
 const promiseSerial = require('promise-serial')
@@ -10,7 +12,7 @@ const {
     accounts: {fetchNextAccountNonce, findOrCreateAccountNonce},
     requests,
     transactions: {getPendingTransactions, isResendTransaction},
-    gasPrices: {calculateGasPrice},
+    gasPrices: {getGasPriceByPriority, fetchLowestPrice, getNextGasPrice},
   },
   context,
   context: {db, blockchain},
@@ -78,8 +80,10 @@ const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
 }
 
 const getGasPrice = async (request, transaction) => {
-  const gasPrice = isResendTransaction(transaction) ? transaction.gasPrice : await calculateGasPrice(request.priority)
-  return parseInt(gasPrice, 10)
+  const gasPrice = isResendTransaction(transaction) ?
+    await getNextGasPrice(transaction.gasPrice) :
+    await getGasPriceByPriority(request.priority)
+  return Big(gasPrice).toFixed()
 }
 
 const createUnsignedTransaction = async (nonce, transaction, request) => {
@@ -135,8 +139,21 @@ module.exports = {
         const request = await requests.getRequestById(transaction.requestId)
 
         const unsignedTransaction = await createUnsignedTransaction(nonce, transaction, request)
-        if (!unsignedTransaction.gasPrice) {
-          return
+        if (Big(unsignedTransaction.gasPrice).gt(maximumGasPrice)) {
+          const lowestGasPrice = await fetchLowestPrice()
+          if (Big(maximumGasPrice).gt(lowestGasPrice)) {
+            unsignedTransaction.gasPrice = Big(maximumGasPrice).toFixed()
+          } else {
+            context.logger.error(
+              {
+                gasPrice: unsignedTransaction.gasPrice,
+                maximumGasPrice,
+                lowestGasPrice,
+              },
+              'MAXIMUM_GAS_PRICE_EXCEEDED'
+            )
+            return
+          }
         }
 
         const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
