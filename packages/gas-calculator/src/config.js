@@ -5,5 +5,6 @@ module.exports = mapEnv({
   gasCalculatorCron: '',
   web3Url: '',
   refreshGasPricesIntervalSeconds: '',
-  maxNumberOfBlocksToCheck: '',
+  maximumNumberOfBlocksToCheck: '',
+  minimumTransactionsForGasCalculation: '',
 })

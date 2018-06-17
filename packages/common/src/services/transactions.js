@@ -4,7 +4,7 @@ const {errors: {errSerializer}} = require('stox-common')
 
 const createTransaction = ({id, type, from}) => db.transactions.create({id, type, from})
 
-const isResendTransaction = transaction => transaction.originalTransactionId || transaction.resentAt
+const isResendTransaction = transaction => transaction.originalTransactionId
 
 const getTransaction = async (query) => {
   const transaction = await db.transactions.findOne({where: query})
