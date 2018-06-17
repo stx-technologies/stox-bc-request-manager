@@ -35,7 +35,7 @@ CREATE TABLE "transactions"
     "subRequestData" json,
     "subRequestType" CHARACTER VARYING(256),
     "transactionHash" CHARACTER VARYING(66),
-    "originalTransactionId" CHARACTER VARYING(66),
+    "originalTransactionId" UUID,
     "transactionData" bytea,
     "network" CHARACTER VARYING(256) NOT NULL,
     "from" CITEXT,
