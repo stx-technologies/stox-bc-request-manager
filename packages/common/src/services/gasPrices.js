@@ -5,11 +5,11 @@ const {exceptions: {InvalidStateError}} = require('@welldone-software/node-toolb
 const getGasPercentiles = () => db.gasPercentiles.findAll()
 
 const getNextGasPrice = async (sentGasPrice) => {
-  const gasPricePlusTenPercent = Big(sentGasPrice).times(1.1)
+  const gasPricePlusTenPercent = Big(sentGasPrice).times(1.1).round(0, 3).toString()
   const nextGasPrice = await db.gasPercentiles.findOne({where:
-      {price: {$gt: gasPricePlusTenPercent.toFixed(0)}},
+      {price: {$gt: gasPricePlusTenPercent}},
   order: [['price']]})
-  return nextGasPrice ? nextGasPrice.price : gasPricePlusTenPercent.toFixed()
+  return nextGasPrice ? nextGasPrice.price : gasPricePlusTenPercent
 }
 
 const fetchLowestPrice = async () => (await db.gasPercentiles.findOne({order: [['price']]})).price
@@ -53,10 +53,11 @@ const calculateGasPrices = async (gasPercentiles) => {
   return gasPrices
 }
 
-const isMaximumGasPriceGreatThanLowest = async() =>{
+const isMaximumGasPriceGreatThanLowest = async () => {
   const lowestGasPrice = await fetchLowestPrice()
   Big(config.maximumGasPrice).gte(lowestGasPrice)
 }
+
 module.exports = {
   getGasPercentiles,
   calculateGasPrices,
