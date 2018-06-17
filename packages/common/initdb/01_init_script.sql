@@ -81,10 +81,10 @@ CREATE TABLE "accountNonces"
 
 CREATE TABLE "gasPercentiles"
 (
-    "percentile" INTEGER,
+    "percentile" INTEGER NOT NULL,
     "priority" CHARACTER VARYING(256) NOT NULL UNIQUE,
-    "price" BIGINT,
-    "network" CHARACTER VARYING(256),
+    "price" BIGINT NOT NULL,
+    "network" CHARACTER VARYING(256) NOT NULL,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL
 );
