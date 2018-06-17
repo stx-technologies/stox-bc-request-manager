@@ -81,14 +81,14 @@ CREATE TABLE "accountNonces"
 
 CREATE TABLE "gasPercentiles"
 (
-    "percentile" INTEGER NOT NULL,
     "priority" CHARACTER VARYING(256) NOT NULL UNIQUE,
+    "percentile" INTEGER NOT NULL,
     "price" BIGINT NOT NULL,
     "network" CHARACTER VARYING(256) NOT NULL,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL
 );
-INSERT INTO "gasPercentiles" ("percentile", "priority", "price", "network") VALUES ('10', 'low', '0', 'MAIN');
-INSERT INTO "gasPercentiles" ("percentile", "priority", "price", "network") VALUES ('20', 'medium', '0', 'MAIN');
-INSERT INTO "gasPercentiles" ("percentile", "priority", "price", "network") VALUES ('50', 'high', '0', 'MAIN');
-INSERT INTO "gasPercentiles" ("percentile", "priority", "price", "network") VALUES ('70', 'vip', '0', 'MAIN');
+INSERT INTO "gasPercentiles" ("priority", "percentile", "price", "network") VALUES ('low','10', '0', 'MAIN');
+INSERT INTO "gasPercentiles" ("priority", "percentile", "price", "network") VALUES ('medium', '20', '0', 'MAIN');
+INSERT INTO "gasPercentiles" ("priority", "percentile", "price", "network") VALUES ('high', '50', '0', 'MAIN');
+INSERT INTO "gasPercentiles" ("priority", "percentile", "price", "network") VALUES ('vip', '70', '0', 'MAIN');
