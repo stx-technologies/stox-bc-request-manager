@@ -20,7 +20,7 @@ const getGasPriceByPriority = async priority =>
 const shouldCheckBlock = (block, blocksCheckedCount) => {
   const secondsPassed = (Date.now() / 1000) - block.timestamp
   return (secondsPassed < Number(config.refreshGasPricesIntervalSeconds)
-    && blocksCheckedCount < Number(config.maxNumberOfBlocksToCheck))
+    && blocksCheckedCount < Number(config.maximumNumberOfBlocksToCheck))
 }
 
 const getPricesFromBlock = async block => Promise.all(block.transactions.map(async (transactionHash) => {
@@ -40,7 +40,7 @@ const calculateGasPrices = async (gasPercentiles) => {
     block = await blockchain.web3.eth.getBlock(block.number - 1)
     blocksCheckedCount++
   }
-  if (gasPricesArray.length < 1000) {
+  if (gasPricesArray.length < Number(config.minimumTransactionsForGasCalculation)) {
     throw new InvalidStateError('NOT_ENOUGH_GAS_PRICES_FOR_CALCULATION', {gasPricesLength: gasPricesArray.length})
   }
   gasPricesArray.sort((a, b) => a - b)
@@ -53,10 +53,14 @@ const calculateGasPrices = async (gasPercentiles) => {
   return gasPrices
 }
 
+const isMaximumGasPriceGreatThanLowest = async() =>{
+  const lowestGasPrice = await fetchLowestPrice()
+  Big(config.maximumGasPrice).gte(lowestGasPrice)
+}
 module.exports = {
   getGasPercentiles,
   calculateGasPrices,
   getNextGasPrice,
   getGasPriceByPriority,
-  fetchLowestPrice,
+  isMaximumGasPriceGreatThanLowest,
 }

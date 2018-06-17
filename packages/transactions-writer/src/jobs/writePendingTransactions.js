@@ -12,7 +12,7 @@ const {
     accounts: {fetchNextAccountNonce, findOrCreateAccountNonce},
     requests,
     transactions: {getPendingTransactions, isResendTransaction, alreadySentWithSameGasPrice},
-    gasPrices: {getGasPriceByPriority, fetchLowestPrice, getNextGasPrice},
+    gasPrices: {getGasPriceByPriority, isMaximumGasPriceGreatThanLowest, getNextGasPrice},
   },
   context,
   context: {db, blockchain},
@@ -128,24 +128,22 @@ const commitTransaction = async (transaction, unsignedTransaction, transactionHa
     throw (e)
   }
 }
-const validateGasPrice = async (unsignedTransaction) => {
+const validateGasPrice = async (transaction, unsignedTransaction) => {
   if (Big(unsignedTransaction.gasPrice).gt(maximumGasPrice)) {
-    const lowestGasPrice = await fetchLowestPrice()
-    if (Big(maximumGasPrice).gt(lowestGasPrice)) {
+    if (isMaximumGasPriceGreatThanLowest()) {
       unsignedTransaction.gasPrice = Big(maximumGasPrice).toFixed()
     } else {
       context.logger.error(
         {
           gasPrice: unsignedTransaction.gasPrice,
           maximumGasPrice,
-          lowestGasPrice,
         },
         'MAXIMUM_GAS_PRICE_EXCEEDED'
       )
       return false
     }
   }
-  if (await alreadySentWithSameGasPrice(unsignedTransaction)) {
+  if (isResendTransaction(transaction) && await alreadySentWithSameGasPrice(unsignedTransaction)) {
     context.logger.error(
       {
         gasPrice: unsignedTransaction.gasPrice,
@@ -168,7 +166,7 @@ module.exports = {
         const request = await requests.getRequestById(transaction.requestId)
 
         const unsignedTransaction = await createUnsignedTransaction(nonce, transaction, request)
-        if (!validateGasPrice(unsignedTransaction)) {
+        if (!validateGasPrice(transaction, unsignedTransaction)) {
           return
         }
 
