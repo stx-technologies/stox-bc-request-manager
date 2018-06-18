@@ -11,8 +11,8 @@ const {
   services: {
     accounts: {fetchNextAccountNonce, findOrCreateAccountNonce},
     requests,
-    transactions: {getPendingTransactions, isResendTransaction, alreadySentWithSameGasPrice},
-    gasPrices: {getGasPriceByPriority, isMaximumGasPriceGreatThanLowest, getNextGasPrice},
+    transactions: {getPendingTransactions, isResendTransaction, isSentWithGasPrice},
+    gasPrices: {getGasPriceByPriority, isMaximumGasPriceGreatThanLowest, getGasPriceForResend},
   },
   context,
   context: {db, blockchain},
@@ -81,9 +81,9 @@ const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
 
 const getGasPrice = async (request, transaction) => {
   const gasPrice = isResendTransaction(transaction) ?
-    await getNextGasPrice(transaction.gasPrice) :
+    await getGasPriceForResend(transaction.gasPrice) :
     await getGasPriceByPriority(request.priority)
-  return Big(gasPrice).toFixed()
+  return parseInt(gasPrice, 10)
 }
 
 const createUnsignedTransaction = async (nonce, transaction, request) => {
@@ -133,7 +133,7 @@ const validateGasPrice = async (transaction, unsignedTransaction) => {
     if (isMaximumGasPriceGreatThanLowest()) {
       unsignedTransaction.gasPrice = Big(maximumGasPrice).toFixed()
     } else {
-      context.logger.error(
+      context.logger.warn(
         {
           gasPrice: unsignedTransaction.gasPrice,
           maximumGasPrice,
@@ -143,8 +143,8 @@ const validateGasPrice = async (transaction, unsignedTransaction) => {
       return false
     }
   }
-  if (isResendTransaction(transaction) && await alreadySentWithSameGasPrice(unsignedTransaction)) {
-    context.logger.error(
+  if (isResendTransaction(transaction) && await isSentWithGasPrice(unsignedTransaction)) {
+    context.logger.warn(
       {
         gasPrice: unsignedTransaction.gasPrice,
       },

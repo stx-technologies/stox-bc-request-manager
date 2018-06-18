@@ -82,7 +82,7 @@ const rejectRelatedTransactions = async ({id, transactionHash, nonce, from}, dbT
   dbTransaction
 )
 
-const alreadySentWithSameGasPrice = ({nonce, from, gasPrice}) =>
+const isSentWithGasPrice = ({nonce, from, gasPrice}) =>
   db.transactions.findOne({where: {nonce, from, gasPrice}})
 
 const updateCompletedTransaction = async (transactionInstance, {isSuccessful, blockTime, receipt}) => {
@@ -129,7 +129,7 @@ const addTransactions = async (requestId, transactions) => {
 const updateTransactionError = (id, error) =>
   db.transactions.update({error: errSerializer(error), completedAt: Date.now()}, {where: {id}})
 
-const isTransactionComplete = completedTransaction =>
+const isTransactionConfirmed = completedTransaction =>
   completedTransaction && completedTransaction.confirmations >= Number(config.requiredConfirmations)
 
 module.exports = {
@@ -141,8 +141,8 @@ module.exports = {
   addTransactions,
   resendTransaction,
   updateTransactionError,
-  isTransactionComplete,
+  isTransactionConfirmed,
   isResendTransaction,
-  alreadySentWithSameGasPrice,
+  isSentWithGasPrice,
 
 }

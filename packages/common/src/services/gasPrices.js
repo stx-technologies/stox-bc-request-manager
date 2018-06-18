@@ -4,7 +4,7 @@ const {exceptions: {InvalidStateError}} = require('@welldone-software/node-toolb
 
 const getGasPercentiles = () => db.gasPercentiles.findAll()
 
-const getNextGasPrice = async (sentGasPrice) => {
+const getGasPriceForResend = async (sentGasPrice) => {
   const gasPricePlusTenPercent = Big(sentGasPrice).times(1.1).round(0, 3).toString()
   const nextGasPrice = await db.gasPercentiles.findOne({where:
       {price: {$gt: gasPricePlusTenPercent}},
@@ -12,7 +12,7 @@ const getNextGasPrice = async (sentGasPrice) => {
   return nextGasPrice ? nextGasPrice.price : gasPricePlusTenPercent
 }
 
-const fetchLowestPrice = async () => (await db.gasPercentiles.findOne({order: [['price']]})).price
+const fetchLowestGasPrice = async () => (await db.gasPercentiles.findOne({order: [['price']]})).price
 
 const getGasPriceByPriority = async priority =>
   (await db.gasPercentiles.findOne({where: {priority: (priority || config.defaultGasPriority)}})).price
@@ -23,7 +23,7 @@ const shouldCheckBlock = (block, blocksCheckedCount) => {
     && blocksCheckedCount < Number(config.maximumNumberOfBlocksToCheck))
 }
 
-const getPricesFromBlock = async block => Promise.all(block.transactions.map(async (transactionHash) => {
+const getGasPricesFromBlock = async block => Promise.all(block.transactions.map(async (transactionHash) => {
   const transaction = await blockchain.web3.eth.getTransaction(transactionHash)
   return transaction.gasPrice
 }))
@@ -35,11 +35,12 @@ const calculateGasPrices = async (gasPercentiles) => {
   const gasPrices = {}
 
   while (shouldCheckBlock(block, blocksCheckedCount)) {
-    const gasPricesFromBlock = await getPricesFromBlock(block)
+    const gasPricesFromBlock = await getGasPricesFromBlock(block)
     gasPricesArray.push(...gasPricesFromBlock)
     block = await blockchain.web3.eth.getBlock(block.number - 1)
     blocksCheckedCount++
   }
+
   if (gasPricesArray.length < Number(config.minimumTransactionsForGasCalculation)) {
     throw new InvalidStateError('NOT_ENOUGH_GAS_PRICES_FOR_CALCULATION', {gasPricesLength: gasPricesArray.length})
   }
@@ -54,14 +55,14 @@ const calculateGasPrices = async (gasPercentiles) => {
 }
 
 const isMaximumGasPriceGreatThanLowest = async () => {
-  const lowestGasPrice = await fetchLowestPrice()
+  const lowestGasPrice = await fetchLowestGasPrice()
   Big(config.maximumGasPrice).gte(lowestGasPrice)
 }
 
 module.exports = {
   getGasPercentiles,
   calculateGasPrices,
-  getNextGasPrice,
+  getGasPriceForResend,
   getGasPriceByPriority,
   isMaximumGasPriceGreatThanLowest,
 }

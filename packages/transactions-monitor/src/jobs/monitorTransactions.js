@@ -20,7 +20,7 @@ module.exports = {
       try {
         const completedTransaction = await getCompletedTransaction(transactionHash)
 
-        if (transactions.isTransactionComplete(completedTransaction)) {
+        if (transactions.isTransactionConfirmed(completedTransaction)) {
           const {requestId} = await transactions.updateCompletedTransaction(transaction, completedTransaction)
           await requests.updateRequestCompleted(
             requestId,
