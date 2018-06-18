@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon -e js . | pino",
-    "serve:trace": "node --stack_trace_limit=50 -r trace -r clarify .",
+    "serve:trace": "node --stack_trace_limit=25 -r trace -r clarify .",
     "serve": "node .",
     "lint": "eslint -c ../../.eslintrc.yml .",
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src",
