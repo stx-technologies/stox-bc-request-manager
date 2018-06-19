@@ -4,7 +4,7 @@ module.exports = mapEnv({
   databaseUrl: '',
   gasCalculatorCron: '',
   web3Url: '',
-  refreshGasPricesIntervalSeconds: '',
+  refreshGasPricesPeriodSeconds: '',
   maximumNumberOfBlocksToCheck: '',
   minimumTransactionsForGasCalculation: '',
 })

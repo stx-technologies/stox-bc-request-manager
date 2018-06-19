@@ -19,7 +19,7 @@ const getGasPriceByPriority = async priority =>
 
 const shouldCheckBlock = (block, blocksCheckedCount) => {
   const secondsPassed = (Date.now() / 1000) - block.timestamp
-  return (secondsPassed < Number(config.refreshGasPricesIntervalSeconds)
+  return (secondsPassed < Number(config.refreshGasPricesPeriodSeconds)
     && blocksCheckedCount < Number(config.maximumNumberOfBlocksToCheck))
 }
 
