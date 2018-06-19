@@ -9,7 +9,6 @@ CREATE TABLE "requests"
 (
     "id" UUID PRIMARY KEY,
     "type" CHARACTER VARYING(256) NOT NULL,
-    "priority" CHARACTER VARYING(256),
     "data" json,
     "error" json,
     "result" json,
@@ -35,7 +34,6 @@ CREATE TABLE "transactions"
     "subRequestData" json,
     "subRequestType" CHARACTER VARYING(256),
     "transactionHash" CHARACTER VARYING(66),
-    "originalTransactionId" UUID,
     "transactionData" bytea,
     "network" CHARACTER VARYING(256) NOT NULL,
     "from" CITEXT,
@@ -48,8 +46,6 @@ CREATE TABLE "transactions"
     "receipt" json,
     "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL,
     "sentAt" timestamp with time zone,
-    "resentAt" timestamp with time zone,
-    "canceledAt" timestamp with time zone,
     "completedAt" timestamp with time zone,
     "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
     CONSTRAINT transactions_requestId_fk FOREIGN KEY ("requestId")
@@ -78,17 +74,3 @@ CREATE TABLE "accountNonces"
         "errorAt" timestamp with time zone,
     CONSTRAINT tokensBalances_pk PRIMARY KEY ("account", "network")
 );
-
-CREATE TABLE "gasPercentiles"
-(
-    "priority" CHARACTER VARYING(256) NOT NULL UNIQUE,
-    "percentile" INTEGER NOT NULL,
-    "price" BIGINT NOT NULL,
-    "network" CHARACTER VARYING(256) NOT NULL,
-    "updatedAt" timestamp with time zone DEFAULT CURRENT_DATE NOT NULL,
-    "createdAt" timestamp with time zone default CURRENT_DATE NOT NULL
-);
-INSERT INTO "gasPercentiles" ("priority", "percentile", "price", "network") VALUES ('low','10', '0', 'MAIN');
-INSERT INTO "gasPercentiles" ("priority", "percentile", "price", "network") VALUES ('medium', '20', '0', 'MAIN');
-INSERT INTO "gasPercentiles" ("priority", "percentile", "price", "network") VALUES ('high', '50', '0', 'MAIN');
-INSERT INTO "gasPercentiles" ("priority", "percentile", "price", "network") VALUES ('vip', '70', '0', 'MAIN');
