@@ -47,7 +47,7 @@ readdirSync(tasksPath).forEach(async (d) => {
     const res1 = await executeCommand(`${updateService} --task-definition ${family}:${revision}`)
     console.log(res1)
 
-    if (env !== 'prod') {
+    if (env === 'dev') {
       const runningTasks = await executeCommand(`${getRunningTasks}`)
       console.log(runningTasks)
 
