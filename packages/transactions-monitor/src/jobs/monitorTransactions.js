@@ -31,7 +31,6 @@ module.exports = {
       } catch (e) {
         logger.error({transactionId: transaction.Id}, 'MONITOR_TRANSACTION_ERROR')
         logError(e)
-        await requests.handleTransactionError(transaction, e)
       }
     })
 
