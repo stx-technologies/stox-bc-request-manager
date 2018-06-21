@@ -1,4 +1,4 @@
-const {monitorTransactionsCron, requiredConfirmations} = require('../config')
+const {monitorTransactionsCron} = require('../config')
 const promiseSerial = require('promise-serial')
 const {
   context,
@@ -17,10 +17,10 @@ module.exports = {
 
     const funcs = uncompletedTransactions.map(transaction => async () => {
       const {transactionHash} = transaction.dataValues
-
       try {
         const completedTransaction = await getCompletedTransaction(transactionHash)
-        if (completedTransaction && completedTransaction.confirmations >= requiredConfirmations) {
+
+        if (transactions.isTransactionConfirmed(completedTransaction)) {
           const {requestId} = await transactions.updateCompletedTransaction(transaction, completedTransaction)
           await requests.updateRequestCompleted(
             requestId,
@@ -31,7 +31,6 @@ module.exports = {
       } catch (e) {
         logger.error({transactionId: transaction.Id}, 'MONITOR_TRANSACTION_ERROR')
         logError(e)
-        await requests.handleTransactionError(transaction, e)
       }
     })
 

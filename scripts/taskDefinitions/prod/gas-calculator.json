@@ -1,39 +1,33 @@
 {
-  "family": "stg-transactions-signer",
+  "family": "prod-gas-calculator",
   "volumes": [],
   "networkMode": "awsvpc",
   "memory": "512",
   "cpu": "256",
   "placementConstraints": [],
-  "taskRoleArn": "arn:aws:iam::572502612946:role/ECS_STG_Allow_KMS",
+  "taskRoleArn": "arn:aws:iam::572502612946:role/ECS_PROD_Allow_SSM_Access",
   "requiresCompatibilities": [
     "EC2"
   ],
   "containerDefinitions": [
     {
-      "name": "stg-transactions-signer",
+      "name": "prod-gas-calculator",
       "image": "",
       "memoryReservation": 512,
       "cpu": 256,
       "essential": true,
-      "portMappings": [
-        {
-          "hostPort": 3011,
-          "protocol": "tcp",
-          "containerPort": 3011
-        }
-      ],
+      "portMappings": [],
       "command": [
         "npm",
         "run",
         "serve",
         "--prefix",
-        "packages/transactions-signer"
+        "packages/gas-calculator"
       ],
       "environment": [
         {
           "name": "NODE_ENV",
-          "value": "stg"
+          "value": "prod"
         },
         {
           "name": "AWS_REGION",
@@ -43,15 +37,15 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "stg-request-manager-logs",
+          "awslogs-group": "prod-request-manager-logs",
           "awslogs-region": "eu-west-1",
-          "awslogs-stream-prefix": "transactions-signer"
+          "awslogs-stream-prefix": "gas-calculator"
         }
       },
       "dockerLabels": {
         "SUB-SYSTEM": "request-manager",
-        "Environment": "stg",
-        "SERVICE": "transactions-signer"
+        "Environment": "prod",
+        "SERVICE": "gas-calculator"
       }
     }
   ]

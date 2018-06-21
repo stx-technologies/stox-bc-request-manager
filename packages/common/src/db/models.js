@@ -19,6 +19,7 @@ module.exports = (sequelize) => {
     {
       id: {type: UUID, primaryKey: true},
       type: oneOf(['sendPrize', 'withdraw', 'setWithdrawalAddress', 'sendToBackup', 'createWallet']),
+      priority: {type: STRING(256)},
       error: {type: JSON},
       data: {type: JSON},
       result: {type: JSON},
@@ -41,6 +42,7 @@ module.exports = (sequelize) => {
       subRequestIndex: {type: INTEGER, defaultValue: 0},
       subRequestData: {type: JSON},
       subRequestType: {type: STRING(256)},
+      originalTransactionId: {type: UUID},
       transactionHash: {type: TRANSACTION_HASH},
       transactionData: {type: BLOB}, // ?
       network: {type: NETWORK, allowNull: false},
@@ -53,6 +55,8 @@ module.exports = (sequelize) => {
       receipt: {type: JSON}, // ?
       createdAt: {type: DATE, allowNull: false},
       sentAt: {type: DATE},
+      resentAt: {type: DATE},
+      canceledAt: {type: DATE},
       error: {type: JSON},
       completedAt: {type: DATE},
     },
@@ -73,6 +77,18 @@ module.exports = (sequelize) => {
     },
     {
       indexes: indexes(['address', 'network', 'nonce', 'updatedAt']),
+    }
+  )
+
+  sequelize.define(
+    'gasPercentiles',
+    {
+      priority: {type: STRING(256), primaryKey: true, unique: true},
+      percentile: {type: INTEGER, allowNull: false},
+      price: {type: BIGINT, allowNull: false},
+      network: {type: NETWORK, allowNull: false},
+      createdAt: {type: DATE, allowNull: false},
+      updatedAt: {type: DATE, allowNull: false},
     }
   )
 

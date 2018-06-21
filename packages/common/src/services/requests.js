@@ -24,7 +24,8 @@ const getRequestByTransactionHash = async (transactionHash) => {
 const updateRequest = (propsToUpdate, id, transaction) =>
   db.requests.update(propsToUpdate, {where: {id}}, {...(transaction ? {transaction} : {})})
 
-const createRequest = ({id, type, data}) => db.requests.create({id, type, data, createdAt: new Date()})
+const createRequest = ({id, type, priority, data}) =>
+  db.requests.create({id, type, priority, data, createdAt: new Date()})
 
 const updateRequestCompleted = async (id, error = null) =>
   updateRequest({error: errSerializer(error), completedAt: Date.now()}, id)

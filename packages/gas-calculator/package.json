@@ -1,11 +1,11 @@
 {
-  "name": "transactions-writer",
+  "name": "gas-calculator",
   "version": "1.0.0",
-  "description": "reads pending transactions, calculates Gas and signer, send to parity node",
+  "description": "reads last few blocks from blockchain and calculate the gas price",
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon $NODE_DEBUG_OPTION -e js . | pino",
-    "serve:trace": "node --stack_trace_limit=25 -r trace -r clarify .",
+    "serve:trace": "node --stack_trace_limit=100 -r trace -r clarify .",
     "serve": "node .",
     "lint": "eslint -c ../../.eslintrc.yml .",
     "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src"
@@ -19,7 +19,6 @@
     "env-cmd": "^7.0.0",
     "promise-serial": "^0.1.5",
     "require-all": "^2.2.0",
-    "big.js": "^5.0.3",
     "stox-bc-request-manager-common": "1.0.0",
     "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev",
     "trace": "^3.1.0"
