@@ -49,7 +49,9 @@ const calculateGasPrices = async (gasPercentiles) => {
     const percentileIndex = Math.floor(gasPricesArray.length * (gasPercentile.percentile / 100))
     const price = gasPricesArray[percentileIndex]
     gasPrices[gasPercentile.priority] = price
-    await gasPercentile.update({price, updatedAt: new Date()})
+    gasPercentile.changed('updatedAt', true)
+    gasPercentile.price = price
+    await gasPercentile.save()
   }))
   return gasPrices
 }
