@@ -1,6 +1,7 @@
-const {db, config} = require('../context')
+const {db, config, blockchain} = require('../context')
 const {exceptions: {NotFoundError, InvalidStateError}} = require('@welldone-software/node-toolbelt')
 const {errors: {errSerializer}} = require('stox-common')
+const {Big} = require('big.js')
 
 const createTransaction = ({id, type, from}) => db.transactions.create({id, type, from})
 
@@ -82,8 +83,8 @@ const rejectRelatedTransactions = async ({id, transactionHash, nonce, from}, dbT
   dbTransaction
 )
 
-const isSentWithGasPrice = ({nonce, from, gasPrice}) =>
-  db.transactions.findOne({where: {nonce, from, gasPrice}})
+const isSentWithGasPriceHigherThan = (from, nonce, gasPrice) =>
+  db.transactions.findOne({where: {nonce, from, gasPrice: {$gt: gasPrice}}})
 
 const updateCompletedTransaction = async (transactionInstance, {isSuccessful, blockTime, receipt}) => {
   const dbTransaction = await db.sequelize.transaction()
@@ -132,6 +133,18 @@ const updateTransactionError = (id, error) =>
 const isTransactionConfirmed = completedTransaction =>
   completedTransaction && completedTransaction.confirmations >= Number(config.requiredConfirmations)
 
+const isMinedTransactionInDb = async ({requestId, from, nonce}) => {
+  const relatedTransaction = await db.transactions.findAll({where: {requestId, from, nonce}})
+  return (await Promise.all(relatedTransaction.map(async transaction =>
+    transaction.transactionHash && blockchain.web3.eth.getTransactionReceipt(transaction.transactionHash))))
+    .filter(transaction => transaction)
+}
+
+const isAlreadyMined = async ({from, nonce}) => {
+  const transactionsCount = await blockchain.web3.eth.getTransactionCount(from)
+  return Big(transactionsCount).gt(nonce)
+}
+
 module.exports = {
   getTransaction,
   createTransaction,
@@ -143,6 +156,8 @@ module.exports = {
   updateTransactionError,
   isTransactionConfirmed,
   isResendTransaction,
-  isSentWithGasPrice,
+  isSentWithGasPriceHigherThan,
+  isAlreadyMined,
+  isMinedTransactionInDb,
 
 }

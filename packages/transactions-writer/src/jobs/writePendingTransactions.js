@@ -11,7 +11,8 @@ const {
   services: {
     accounts: {fetchNextAccountNonce, findOrCreateAccountNonce},
     requests,
-    transactions: {getPendingTransactions, isResendTransaction, isSentWithGasPrice},
+    transactions: {getPendingTransactions, isResendTransaction, isSentWithGasPriceHigherThan, isAlreadyMined,
+      isMinedTransactionInDb, updateTransactionError},
     gasPrices: {getGasPriceByPriority, isMaximumGasPriceGreatThanLowest, getGasPriceForResend},
   },
   context,
@@ -128,10 +129,10 @@ const commitTransaction = async (transaction, unsignedTransaction, transactionHa
     throw (e)
   }
 }
-const validateGasPrice = async (transaction, unsignedTransaction) => {
+const validateGasPrice = async ({originalTransactionId, from, nonce}, unsignedTransaction) => {
   if (Big(unsignedTransaction.gasPrice).gt(maximumGasPrice)) {
-    if (isMaximumGasPriceGreatThanLowest()) {
-      unsignedTransaction.gasPrice = Big(maximumGasPrice).toFixed()
+    if (await isMaximumGasPriceGreatThanLowest()) {
+      unsignedTransaction.gasPrice = parseInt(maximumGasPrice, 10)
     } else {
       context.logger.warn(
         {
@@ -143,7 +144,9 @@ const validateGasPrice = async (transaction, unsignedTransaction) => {
       return false
     }
   }
-  if (isResendTransaction(transaction) && await isSentWithGasPrice(unsignedTransaction)) {
+
+  if (isResendTransaction({originalTransactionId}) &&
+   await isSentWithGasPriceHigherThan(from, nonce, Big(unsignedTransaction.gasPrice).div(1.1).round(0, 1).toString())) {
     context.logger.warn(
       {
         gasPrice: unsignedTransaction.gasPrice,
@@ -155,6 +158,16 @@ const validateGasPrice = async (transaction, unsignedTransaction) => {
   return true
 }
 
+const failMinedTransaction = async ({id, requestId, from, nonce}) => {
+  if (await isMinedTransactionInDb({requestId, from, nonce})) {
+    updateTransactionError(id, 'transaction already mined')
+  } else {
+    requests.failRequestTransaction(
+      {id, requestId},
+      'transaction already mined but not from the system'
+    )
+  }
+}
 
 module.exports = {
   cron: writePendingTransactionsCron,
@@ -166,7 +179,7 @@ module.exports = {
         const request = await requests.getRequestById(transaction.requestId)
 
         const unsignedTransaction = await createUnsignedTransaction(nonce, transaction, request)
-        if (!validateGasPrice(transaction, unsignedTransaction)) {
+        if (!(await validateGasPrice(transaction, unsignedTransaction))) {
           return
         }
 
@@ -190,11 +203,17 @@ module.exports = {
           unsignedTransaction,
           transaction.id
         )
+
+        if (isResendTransaction(transaction) && await isAlreadyMined(transaction)) {
+          await failMinedTransaction(transaction)
+          return
+        }
+
         const transactionHash = await sendTransactionToBlockchain(signedTransaction)
         await commitTransaction(transaction, unsignedTransaction, transactionHash, nonce)
       } catch (e) {
         logError(e, 'TRANSACTION_FAILED')
-        await requests.handleTransactionError(transaction, e)
+        await requests.failRequestTransaction(transaction, e)
       }
     })
     await promiseSerial(promises)

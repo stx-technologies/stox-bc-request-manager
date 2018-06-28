@@ -59,7 +59,7 @@ const publishCompletedRequest = async (request) => {
   mq.publish(`completed-${kebabCase(request.type)}-requests`, {...request, transactions})
 }
 
-const handleTransactionError = async ({id, requestId}, error) => {
+const failRequestTransaction = async ({id, requestId}, error) => {
   await updateRequestCompleted(requestId, error)
   await updateTransactionError(id, error)
   await publishCompletedRequest(await getRequestById(requestId, true))
@@ -77,5 +77,5 @@ module.exports = {
   updateRequestCompleted,
   publishCompletedRequest,
   countPendingRequestByType,
-  handleTransactionError,
+  failRequestTransaction,
 }
