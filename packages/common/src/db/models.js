@@ -27,6 +27,7 @@ module.exports = (sequelize) => {
       sentAt: {type: DATE},
       completedAt: {type: DATE},
       transactionPreparedAt: {type: DATE},
+      canceledAt: {type: DATE},
     },
     {
       indexes: indexes(['id', 'type', 'createdAt', 'completedAt', 'sentAt']),
@@ -38,13 +39,18 @@ module.exports = (sequelize) => {
     {
       id: {type: UUID, primaryKey: true, defaultValue: () => uuid()},
       requestId: {type: UUID, allowNull: false, references: {model: 'requests', key: 'id'}},
-      type: oneOf(['send', 'deploy']),
+      type: oneOf(['send', 'deploy', 'cancellation']),
       subRequestIndex: {type: INTEGER, defaultValue: 0},
       subRequestData: {type: JSON},
       subRequestType: {type: STRING(256)},
       originalTransactionId: {type: UUID},
       transactionHash: {type: TRANSACTION_HASH},
-      transactionData: {type: BLOB}, // ?
+      transactionData: {
+        type: BLOB,
+        get() {
+          return this.getDataValue('transactionData') && this.getDataValue('transactionData').toString()
+        },
+      },
       network: {type: NETWORK, allowNull: false},
       from: {type: ADDRESS},
       to: {type: ADDRESS},
@@ -92,6 +98,9 @@ module.exports = (sequelize) => {
       network: {type: NETWORK, allowNull: false},
       createdAt: {type: DATE, allowNull: false},
       updatedAt: {type: DATE, allowNull: false},
+    },
+    {
+      indexes: indexes(['priority', 'percentile', 'network']),
     }
   )
   Request.belongsTo(GasPercentile, {foreignKey: 'priority'})

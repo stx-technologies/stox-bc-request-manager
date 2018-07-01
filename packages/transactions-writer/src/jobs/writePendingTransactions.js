@@ -74,7 +74,7 @@ const createUnsignedTransaction = async (nonce, transaction) => {
   const unsignedTransaction = {
     nonce: Number(nonce),
     to: transaction.to,
-    data: transaction.transactionData.toString(),
+    data: transaction.transactionData,
     gasPrice: await getGasPrice(transaction),
     chainId: await blockchain.web3.eth.net.getId(),
   }
@@ -156,9 +156,9 @@ const validateGasPrice = async ({originalTransactionId, from, nonce}, unsignedTr
       return false
     }
   }
-
+  const minimumAllowedGasPrice = Big(unsignedTransaction.gasPrice).div(1.1).round(0, 1).toString()
   if (isResendTransaction({originalTransactionId}) &&
-   await isSentWithGasPriceHigherThan(from, nonce, Big(unsignedTransaction.gasPrice).div(1.1).round(0, 1).toString())) {
+   await isSentWithGasPriceHigherThan(from, nonce, minimumAllowedGasPrice)) {
     context.logger.warn(
       {
         from,

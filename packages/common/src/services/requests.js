@@ -1,5 +1,5 @@
 const {db, mq, config} = require('../context')
-const {getTransaction, updateTransactionError} = require('./transactions')
+const {getTransaction, updateTransactionError, cancelTransaction} = require('./transactions')
 const {Op} = require('sequelize')
 const {loggers: {logger}, exceptions: {NotFoundError, InvalidStateError}} = require('@welldone-software/node-toolbelt')
 const {camelCase, kebabCase} = require('lodash')
@@ -108,6 +108,42 @@ const failRequestTransaction = async ({id, requestId}, error) => {
   await publishCompletedRequest(await getRequestById(requestId, {withTransactions: true}))
 }
 
+const validateRequestBeforeCanceled = (request) => {
+  const throwError = (msg) => {
+    throw new InvalidStateError(msg)
+  }
+  return request.error ? throwError('requestError')
+    : request.completedAt ? throwError('requestCompleted')
+      : request.canceledAt ? throwError('requestCanceled') : true
+}
+
+
+const cancelRequest = async (requestId, transactionHash) => {
+  const id = requestId || (await getTransaction({transactionHash})).requestId
+  const request = await getRequestById(id)
+  validateRequestBeforeCanceled(request)
+  const dbTransaction = await db.sequelize.transaction()
+  try {
+    request.update({canceledAt: new Date()}, {transaction: dbTransaction})
+    const transactions = await request.getTransactions({where: {resentAt: null}})
+    await Promise.all(transactions.map(transaction => cancelTransaction(transaction, dbTransaction)))
+    if (!request.sentAt) {
+      const isUpdated = await db.requests.update(
+        {error: errSerializer('requestCanceled'), completedAt: Date.now()},
+        {where: {id, sentAt: null}, transaction: dbTransaction}
+      )
+      if (!isUpdated[0]) {
+        throw new InvalidStateError('transaction already sent')
+      }
+      await publishCompletedRequest(request)
+    }
+    await dbTransaction.commit()
+  } catch (e) {
+    await dbTransaction.rollback
+    throw e
+  }
+}
+
 module.exports = {
   createRequest,
   increasePriority,
@@ -122,4 +158,5 @@ module.exports = {
   publishCompletedRequest,
   countPendingRequestByType,
   failRequestTransaction,
+  cancelRequest,
 }

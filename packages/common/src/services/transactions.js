@@ -4,16 +4,18 @@ const {errors: {errSerializer}} = require('stox-common')
 const {Big} = require('big.js')
 const {pick} = require('lodash')
 
-const createTransaction = ({id, type, from}) => db.transactions.create({id, type, from})
-
 const isResendTransaction = transaction => transaction.originalTransactionId
+
+const isCancellationTransaction = transaction => transaction.type === 'cancellation'
+
+const updateTransactionError = (id, error) =>
+  db.transactions.update({error: errSerializer(error), completedAt: Date.now()}, {where: {id}})
 
 const getTransaction = async (query) => {
   const transaction = await db.transactions.findOne({where: query})
   if (!transaction) {
     throw new NotFoundError('transactionNotFound', query)
   }
-
   return transaction
 }
 
@@ -23,19 +25,54 @@ const validateTransactionForResend = (transaction) => {
   }
   return transaction.error ? throwError('transactionError')
     : transaction.completedAt ? throwError('transactionCompleted')
-      : !transaction.sentAt ? throwError('transactionNotSentYet')
-        : transaction.resentAt ? throwError('transactionAlreadyResent')
-          : transaction.canceledAt ? throwError('transactionCanceled') : true
+      : transaction.resentAt ? throwError('transactionAlreadyResent')
+        : transaction.canceledAt ? throwError('transactionCanceled') : true
+}
+
+const cancelTransaction = async (transaction, dbTransaction) => {
+  validateTransactionForResend(transaction)
+
+  const {requestId, subRequestIndex, subRequestData, subRequestType, network, from,
+    nonce, gasPrice, originalTransactionId, id} = transaction
+
+  await transaction.update({canceledAt: new Date()}, {transaction: dbTransaction})
+
+  if (!transaction.sentAt) {
+    transaction.update(
+      {error: errSerializer('transactionCanceled'), completedAt: Date.now()},
+      {where: {sentAt: {$ne: null}}, transaction: dbTransaction}
+    )
+  } else {
+    await db.transactions.create(
+      {
+        requestId,
+        type: 'cancellation',
+        subRequestIndex,
+        subRequestData,
+        subRequestType,
+        network,
+        from,
+        to: from,
+        nonce,
+        gasPrice,
+        originalTransactionId: originalTransactionId || id,
+      },
+      {transaction: dbTransaction}
+    )
+  }
 }
 
 const resendTransaction = async (transactionHash) => {
   const transaction = await getTransaction({transactionHash})
-  validateTransactionForResend(transaction.dataValues)
+  validateTransactionForResend(transaction)
   const dbTransaction = await db.sequelize.transaction()
   const {requestId, type, subRequestIndex, subRequestData, subRequestType,
-    transactionData, network, from, to, nonce, gasPrice, originalTransactionId, id} = transaction.dataValues
+    transactionData, network, from, to, nonce, gasPrice, originalTransactionId, id} = transaction
+  if (!transaction.sentAt) {
+    throw new InvalidStateError('transactionNotSentYet')
+  }
   try {
-    await transaction.update({resentAt: Date.now()}, {transaction: dbTransaction})
+    await transaction.update({resentAt: new Date()}, {transaction: dbTransaction})
     const resentTransaction = await db.transactions.create(
       {requestId,
         type,
@@ -140,9 +177,6 @@ const addTransactions = async (requestId, transactions) => {
   }
 }
 
-const updateTransactionError = (id, error) =>
-  db.transactions.update({error: errSerializer(error), completedAt: Date.now()}, {where: {id}})
-
 const isTransactionConfirmed = completedTransaction =>
   completedTransaction && completedTransaction.confirmations >= Number(config.requiredConfirmations)
 
@@ -160,7 +194,6 @@ const isAlreadyMined = async ({from, nonce}) => {
 
 module.exports = {
   getTransaction,
-  createTransaction,
   getPendingTransactions,
   getUnconfirmedTransactions,
   updateCompletedTransaction,
@@ -172,5 +205,7 @@ module.exports = {
   isSentWithGasPriceHigherThan,
   isAlreadyMined,
   isMinedTransactionInDb,
+  isCancellationTransaction,
+  cancelTransaction,
   getPendingTransactionsGasPrice,
 }
