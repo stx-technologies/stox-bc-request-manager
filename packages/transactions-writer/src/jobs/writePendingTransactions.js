@@ -129,6 +129,7 @@ const commitTransaction = async (transaction, unsignedTransaction, transactionHa
     throw (e)
   }
 }
+
 const validateGasPrice = async ({originalTransactionId, from, nonce}, unsignedTransaction) => {
   if (Big(unsignedTransaction.gasPrice).gt(maximumGasPrice)) {
     if (await isMaximumGasPriceGreatThanLowest()) {
@@ -212,8 +213,12 @@ module.exports = {
         const transactionHash = await sendTransactionToBlockchain(signedTransaction)
         await commitTransaction(transaction, unsignedTransaction, transactionHash, nonce)
       } catch (e) {
-        logError(e, 'TRANSACTION_FAILED')
-        await requests.failRequestTransaction(transaction, e)
+        if (e.code === 502 || e.reason === 'bcNodeError') {
+          logError(e, 'CONNECTION_ERROR')
+        } else {
+          logError(e, 'TRANSACTION_FAILED')
+          await requests.failRequestTransaction(transaction, e)
+        }
       }
     })
     await promiseSerial(promises)

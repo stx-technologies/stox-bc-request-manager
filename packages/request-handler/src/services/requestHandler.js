@@ -1,4 +1,4 @@
-const {services: {requests, transactions}} = require('stox-bc-request-manager-common')
+const {services: {transactions}} = require('stox-bc-request-manager-common')
 const requireAll = require('require-all')
 const path = require('path')
 
@@ -10,14 +10,8 @@ const prepareTransactions = async (request) => {
 }
 
 const createRequestTransactions = async (request) => {
-  const {id} = request
-  try {
-    const pendingTransactions = await prepareTransactions(request)
-    await transactions.addTransactions(request.id, pendingTransactions)
-  } catch (error) {
-    await requests.updateRequestCompleted(id, error)
-    throw error
-  }
+  const pendingTransactions = await prepareTransactions(request)
+  await transactions.addTransactions(request.id, pendingTransactions)
 }
 
 const handleRequest = request => createRequestTransactions(request)
