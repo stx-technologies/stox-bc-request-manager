@@ -58,7 +58,7 @@ const calculateGasPrices = async (gasPercentiles) => {
 
 const isMaximumGasPriceGreatThanLowest = async () => {
   const lowestGasPrice = await fetchLowestGasPrice()
-  Big(config.maximumGasPrice).gte(lowestGasPrice)
+  return Big(config.maximumGasPrice).gte(lowestGasPrice)
 }
 
 module.exports = {
