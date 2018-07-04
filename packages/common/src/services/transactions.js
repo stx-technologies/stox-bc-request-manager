@@ -2,6 +2,7 @@ const {db, config, blockchain} = require('../context')
 const {exceptions: {NotFoundError, InvalidStateError}} = require('@welldone-software/node-toolbelt')
 const {errors: {errSerializer}} = require('stox-common')
 const {Big} = require('big.js')
+const {pick} = require('lodash')
 
 const createTransaction = ({id, type, from}) => db.transactions.create({id, type, from})
 
@@ -35,7 +36,7 @@ const resendTransaction = async (transactionHash) => {
     transactionData, network, from, to, nonce, gasPrice, originalTransactionId, id} = transaction.dataValues
   try {
     await transaction.update({resentAt: Date.now()}, {transaction: dbTransaction})
-    await db.transactions.create(
+    const resentTransaction = await db.transactions.create(
       {requestId,
         type,
         subRequestIndex,
@@ -51,6 +52,7 @@ const resendTransaction = async (transactionHash) => {
       {transaction: dbTransaction}
     )
     await dbTransaction.commit()
+    return pick(resentTransaction, ['id', 'requestId'])
   } catch (e) {
     dbTransaction.rollback()
     throw e
