@@ -12,9 +12,10 @@ const {
     accounts: {fetchBestNonce, incrementAccountNonce},
     requests,
     transactions: {getPendingTransactions, isResendTransaction, isSentWithGasPriceHigherThan, isAlreadyMined,
-      isMinedTransactionInDb, updateTransactionError},
-    gasPrices: {getGasPriceByPriority, isMaximumGasPriceGreatThanLowest, getGasPriceForResend},
+      isMinedTransactionInDb, updateTransactionError, getPendingTransactionsGasPrice},
+    gasPrices: {getGasPriceByPriority, isMaximumGasPriceGreaterThanLowest, getGasPriceForResend},
   },
+  utils: {calculateGasCost},
   context,
   context: {db, blockchain},
 } = require('stox-bc-request-manager-common')
@@ -50,6 +51,8 @@ const updateTransaction = async (transaction, unsignedTransaction, transactionHa
     {
       transactionHash,
       gasPrice: unsignedTransaction.gasPrice,
+      estimatedGas: unsignedTransaction.gasLimit,
+      estimatedGasCost: calculateGasCost(unsignedTransaction),
       nonce: unsignedTransaction.nonce,
       sentAt: Date.now(),
     },
@@ -109,9 +112,29 @@ const commitTransaction = async (transaction, unsignedTransaction, transactionHa
   }
 }
 
+const validateSufficientBalance = async (transaction, unsignedTransaction) => {
+  const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
+  const requiredBalance = calculateGasCost(unsignedTransaction)
+  const pendingTransactionsGasPrice = await getPendingTransactionsGasPrice(transaction.from)
+  if (Big(fromAccountBalance).minus(pendingTransactionsGasPrice).lt(requiredBalance)) {
+    context.logger.warn(
+      {
+        requestId: transaction.requestId,
+        transactionId: transaction.id,
+        fromAccount: transaction.from,
+        fromAccountBalance,
+        requiredBalance,
+      },
+      'INSUFFICIENT_FUNDS_FOR_TRANSACTION'
+    )
+    return false
+  }
+  return true
+}
+
 const validateGasPrice = async ({originalTransactionId, from, nonce}, unsignedTransaction) => {
   if (Big(unsignedTransaction.gasPrice).gt(maximumGasPrice)) {
-    if (await isMaximumGasPriceGreatThanLowest()) {
+    if (await isMaximumGasPriceGreaterThanLowest()) {
       unsignedTransaction.gasPrice = parseInt(maximumGasPrice, 10)
     } else {
       context.logger.warn(
@@ -142,12 +165,29 @@ const failMinedTransaction = async ({id, requestId, from, nonce}) => {
   if (await isMinedTransactionInDb({requestId, from, nonce})) {
     updateTransactionError(id, 'transaction already mined')
   } else {
-    requests.failRequestTransaction(
+    await requests.failRequestTransaction(
       {id, requestId},
       'transaction already mined but not from the system'
     )
   }
 }
+
+const validateBeforeSend = async (transaction, unsignedTransaction) => {
+  if (!(await validateGasPrice(transaction, unsignedTransaction))) {
+    return false
+  }
+
+  if (!(await validateSufficientBalance(transaction, unsignedTransaction))) {
+    return false
+  }
+
+  if (isResendTransaction(transaction) && await isAlreadyMined(transaction)) {
+    await failMinedTransaction(transaction)
+    return false
+  }
+  return true
+}
+
 
 module.exports = {
   cron: writePendingTransactionsCron,
@@ -159,33 +199,14 @@ module.exports = {
         const request = await requests.getRequestById(transaction.requestId)
 
         const unsignedTransaction = await createUnsignedTransaction(nonce, transaction, request)
-        if (!(await validateGasPrice(transaction, unsignedTransaction))) {
-          return
-        }
 
-        const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
-        const requiredBalance = unsignedTransaction.gasLimit * unsignedTransaction.gasPrice
-        if (fromAccountBalance < requiredBalance) {
-          context.logger.warn(
-            {
-              requestId: transaction.requestId,
-              transactionId: transaction.id,
-              fromAccount: transaction.from,
-              fromAccountBalance,
-              requiredBalance,
-            },
-            'INSUFFICIENT_FUNDS_FOR_TRANSACTION'
-          )
-          return
-        }
         const signedTransaction = await signTransactionInTransactionSigner(
           transaction.from,
           unsignedTransaction,
           transaction.id
         )
 
-        if (isResendTransaction(transaction) && await isAlreadyMined(transaction)) {
-          await failMinedTransaction(transaction)
+        if (!(await validateBeforeSend(transaction, unsignedTransaction))) {
           return
         }
 

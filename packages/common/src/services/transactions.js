@@ -57,6 +57,10 @@ const resendTransaction = async (transactionHash) => {
   }
 }
 
+const getPendingTransactionsGasPrice = async () => (await db.transactions.sum(
+  'estimatedGasCost',
+  {where: {estimatedGasCost: {$ne: null}, sentAt: {$ne: null}, resentAt: null, completedAt: null}}
+)) || 0
 
 const getPendingTransactions = limit => db.transactions.findAll({where: {sentAt: null, completedAt: null}, limit})
 
@@ -95,6 +99,7 @@ const updateCompletedTransaction = async (transactionInstance, {isSuccessful, bl
         completedAt: Date.now(),
         receipt,
         currentBlockTime: blockTime,
+        gasUsed: receipt.gasUsed,
         blockNumber: receipt.blockNumber,
         error: isSuccessful ? null : {message: 'error in blockchain transaction'},
       },
@@ -159,5 +164,5 @@ module.exports = {
   isSentWithGasPriceHigherThan,
   isAlreadyMined,
   isMinedTransactionInDb,
-
+  getPendingTransactionsGasPrice,
 }
