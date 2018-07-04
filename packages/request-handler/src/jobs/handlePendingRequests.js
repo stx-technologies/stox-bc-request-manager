@@ -18,9 +18,14 @@ module.exports = {
         try {
           await handleRequest(request)
           context.logger.info({request: request.dataValues}, loggerFormatText(type))
-        } catch (error) {
-          context.logger.error(error, `${loggerFormatText(type)}_HANDLER_ERROR`)
-          await requests.publishCompletedRequest(await requests.getRequestById(id, true))
+        } catch (e) {
+          if (e.code === 502 || e.reason === 'bcNodeError') {
+            logError(e, 'CONNECTION_ERROR')
+          } else {
+            logError(e, `${loggerFormatText(type)}_HANDLER_ERROR`)
+            await requests.updateRequestCompleted(id, e)
+            await requests.publishCompletedRequest(await requests.getRequestById(id, true))
+          }
         }
       })
       await promiseSerial(funcs)
