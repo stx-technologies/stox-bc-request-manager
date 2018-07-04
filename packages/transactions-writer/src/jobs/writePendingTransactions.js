@@ -9,7 +9,7 @@ const {http, errors: {logError}} = require('stox-common')
 const promiseSerial = require('promise-serial')
 const {
   services: {
-    accounts: {fetchNextAccountNonce, findOrCreateAccountNonce},
+    accounts: {fetchBestNonce, incrementAccountNonce},
     requests,
     transactions: {getPendingTransactions, isResendTransaction, isSentWithGasPriceHigherThan, isAlreadyMined,
       isMinedTransactionInDb, updateTransactionError},
@@ -18,24 +18,9 @@ const {
   context,
   context: {db, blockchain},
 } = require('stox-bc-request-manager-common')
+const {exceptions: {InvalidArgumentError}} = require('@welldone-software/node-toolbelt')
 
 const clientHttp = http(transactionsSignerBaseUrl)
-
-const fetchNonceFromEtherNode = async fromAccount => blockchain.web3.eth.getTransactionCount(fromAccount, 'pending')
-
-const fetchBestNonce = async (transaction) => {
-  if (isResendTransaction(transaction.dataValues)) {
-    return Number(transaction.nonce)
-  }
-  const {from, network} = transaction
-  const nonceFromEtherNode = await fetchNonceFromEtherNode(from)
-  const nonceFromDB = await fetchNextAccountNonce(from, network)
-
-  if (nonceFromDB < nonceFromEtherNode) {
-    context.logger.warn({account: from, nonceFromEtherNode, nonceFromDB}, 'NONCE_NOT_SYNCED')
-  }
-  return Number((nonceFromDB > nonceFromEtherNode ? nonceFromDB : nonceFromEtherNode))
-}
 
 const signTransactionInTransactionSigner = async (fromAddress, unsignedTransaction, transactionId) => {
   const signedTransaction = await clientHttp.post('/transactions/sign', {
@@ -72,14 +57,6 @@ const updateTransaction = async (transaction, unsignedTransaction, transactionHa
   )
 }
 
-const updateRequest = async ({requestId}, dbTransaction) =>
-  requests.updateRequest({sentAt: Date.now()}, requestId, dbTransaction)
-
-const updateAccountNonce = async ({from, network}, nonce, dbTransaction) => {
-  const accountNonce = await findOrCreateAccountNonce(from, network, dbTransaction)
-  await accountNonce.update({nonce}, {transaction: dbTransaction})
-}
-
 const getGasPrice = async (request, transaction) => {
   const gasPrice = isResendTransaction(transaction) ?
     await getGasPriceForResend(transaction.gasPrice) :
@@ -88,8 +65,11 @@ const getGasPrice = async (request, transaction) => {
 }
 
 const createUnsignedTransaction = async (nonce, transaction, request) => {
+  if (Number.isNaN(parseInt(nonce, 10))) {
+    throw new InvalidArgumentError('invalidNonce', {nonce})
+  }
   const unsignedTransaction = {
-    nonce,
+    nonce: Number(nonce),
     to: transaction.to,
     data: transaction.transactionData.toString(),
     gasPrice: await getGasPrice(request, transaction),
@@ -111,11 +91,10 @@ const commitTransaction = async (transaction, unsignedTransaction, transactionHa
   const dbTransaction = await db.sequelize.transaction()
   try {
     await updateTransaction(transaction, unsignedTransaction, transactionHash, dbTransaction)
-    await updateRequest(transaction, dbTransaction)
-    if (!isResendTransaction(transaction.dataValues)) {
-      await updateAccountNonce(transaction, transactionNonce + 1, dbTransaction)
+    await requests.updateRequest({sentAt: Date.now()}, transaction.requestId, dbTransaction)
+    if (!isResendTransaction(transaction)) {
+      await incrementAccountNonce(transaction, transactionNonce)
     }
-
     context.logger.info(
       {
         id: transaction.id,
@@ -175,7 +154,7 @@ module.exports = {
     const pendingTransactions = await getPendingTransactions(limitTransactions)
     const promises = pendingTransactions.map(transaction => async () => {
       try {
-        const nonce = await fetchBestNonce(transaction)
+        const nonce = isResendTransaction(transaction) ? transaction.nonce : await fetchBestNonce(transaction)
         const request = await requests.getRequestById(transaction.requestId)
 
         const unsignedTransaction = await createUnsignedTransaction(nonce, transaction, request)
