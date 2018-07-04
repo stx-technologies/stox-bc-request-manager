@@ -1,6 +1,7 @@
 const {Op} = require('sequelize')
 const {snakeCase} = require('lodash')
 const {blockchain} = require('../context')
+const {Big} = require('big.js')
 
 const updateSentRecords = (table, ids, transaction) =>
   table.update({sentAt: Date.now()}, {where: {id: {[Op.in]: ids}}}, {transaction})
@@ -8,6 +9,8 @@ const updateSentRecords = (table, ids, transaction) =>
 const loggerFormatText = text => snakeCase(text).toUpperCase()
 
 const secondsToDate = date => new Date(date * 1000)
+
+const calculateGasCost = ({gasLimit, gasPrice}) => Big(gasLimit).times(gasPrice).toString()
 
 const getCompletedTransaction = async (transactionHash, currentBlockNumber) => {
   if (!currentBlockNumber) {
@@ -46,4 +49,5 @@ module.exports = {
   updateSentRecords,
   loggerFormatText,
   getCompletedTransaction,
+  calculateGasCost,
 }

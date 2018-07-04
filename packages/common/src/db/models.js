@@ -59,6 +59,9 @@ module.exports = (sequelize) => {
       canceledAt: {type: DATE},
       error: {type: JSON},
       completedAt: {type: DATE},
+      estimatedGas: {type: BIGINT},
+      estimatedGasCost: {type: BIGINT},
+      gasUsed: {type: BIGINT},
     },
     {
       indexes: indexes(['requestId', 'type', 'transactionHash', 'createdAt', 'completedAt', 'sentAt', 'from', 'to']),
