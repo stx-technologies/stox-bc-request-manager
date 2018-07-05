@@ -83,7 +83,7 @@ module.exports = (sequelize) => {
     }
   )
 
-  sequelize.define(
+  const GasPercentile = sequelize.define(
     'gasPercentiles',
     {
       priority: {type: STRING(256), primaryKey: true, unique: true},
@@ -94,6 +94,7 @@ module.exports = (sequelize) => {
       updatedAt: {type: DATE, allowNull: false},
     }
   )
+  Request.belongsTo(GasPercentile, {foreignKey: 'priority'})
 
   return sequelize
 }

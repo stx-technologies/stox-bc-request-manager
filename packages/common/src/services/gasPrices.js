@@ -14,9 +14,6 @@ const getGasPriceForResend = async (sentGasPrice) => {
 
 const fetchLowestGasPrice = async () => (await db.gasPercentiles.findOne({order: [['price']]})).price
 
-const getGasPriceByPriority = async priority =>
-  (await db.gasPercentiles.findOne({where: {priority: (priority || config.defaultGasPriority)}})).price
-
 const shouldCheckBlock = (block, blocksCheckedCount) => {
   const secondsPassed = (Date.now() / 1000) - block.timestamp
   return (secondsPassed < Number(config.refreshGasPricesPeriodSeconds)
@@ -65,6 +62,5 @@ module.exports = {
   getGasPercentiles,
   calculateGasPrices,
   getGasPriceForResend,
-  getGasPriceByPriority,
   isMaximumGasPriceGreaterThanLowest,
 }

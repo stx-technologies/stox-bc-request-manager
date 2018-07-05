@@ -64,7 +64,13 @@ const getPendingTransactionsGasPrice = async () => (await db.transactions.sum(
   {where: {estimatedGasCost: {$ne: null}, sentAt: {$ne: null}, resentAt: null, completedAt: null}}
 )) || 0
 
-const getPendingTransactions = limit => db.transactions.findAll({where: {sentAt: null, completedAt: null}, limit})
+const getPendingTransactions = limit =>
+  db.transactions.findAll({
+    include: [{model: db.requests, include: {model: db.gasPercentiles}}],
+    where: {sentAt: null, completedAt: null},
+    order: [['originalTransactionId'], [db.requests, db.gasPercentiles, 'percentile', 'DESC'], ['createdAt', 'DESC']],
+    limit,
+  })
 
 const getUnconfirmedTransactions = limit =>
   db.transactions.findAll({

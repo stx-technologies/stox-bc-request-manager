@@ -8,6 +8,5 @@ module.exports = mapEnv({
   transactionsSignerBaseUrl: '',
   limitTransactions: '',
   defaultGasPrice: '',
-  defaultGasPriority: '',
   maximumGasPrice: '',
 })
