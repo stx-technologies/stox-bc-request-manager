@@ -13,7 +13,7 @@ const {
     requests,
     transactions: {getPendingTransactions, isResendTransaction, isSentWithGasPriceHigherThan, isAlreadyMined,
       isMinedTransactionInDb, updateTransactionError, getPendingTransactionsGasPrice},
-    gasPrices: {getGasPriceByPriority, isMaximumGasPriceGreaterThanLowest, getGasPriceForResend},
+    gasPrices: {isMaximumGasPriceGreaterThanLowest, getGasPriceForResend},
   },
   utils: {calculateGasCost},
   context,
@@ -60,14 +60,14 @@ const updateTransaction = async (transaction, unsignedTransaction, transactionHa
   )
 }
 
-const getGasPrice = async (request, transaction) => {
+const getGasPrice = async (transaction) => {
   const gasPrice = isResendTransaction(transaction) ?
     await getGasPriceForResend(transaction.gasPrice) :
-    await getGasPriceByPriority(request.priority)
+    transaction.request.gasPercentile.price
   return parseInt(gasPrice, 10)
 }
 
-const createUnsignedTransaction = async (nonce, transaction, request) => {
+const createUnsignedTransaction = async (nonce, transaction) => {
   if (Number.isNaN(parseInt(nonce, 10))) {
     throw new InvalidArgumentError('invalidNonce', {nonce})
   }
@@ -75,7 +75,7 @@ const createUnsignedTransaction = async (nonce, transaction, request) => {
     nonce: Number(nonce),
     to: transaction.to,
     data: transaction.transactionData.toString(),
-    gasPrice: await getGasPrice(request, transaction),
+    gasPrice: await getGasPrice(transaction),
     chainId: await blockchain.web3.eth.net.getId(),
   }
 
@@ -196,9 +196,8 @@ module.exports = {
     const promises = pendingTransactions.map(transaction => async () => {
       try {
         const nonce = isResendTransaction(transaction) ? transaction.nonce : await fetchBestNonce(transaction)
-        const request = await requests.getRequestById(transaction.requestId)
 
-        const unsignedTransaction = await createUnsignedTransaction(nonce, transaction, request)
+        const unsignedTransaction = await createUnsignedTransaction(nonce, transaction)
 
         const signedTransaction = await signTransactionInTransactionSigner(
           transaction.from,

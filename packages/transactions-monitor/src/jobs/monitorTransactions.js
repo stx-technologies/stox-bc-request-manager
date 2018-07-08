@@ -26,7 +26,7 @@ module.exports = {
             requestId,
             completedTransaction.isSuccessful ? undefined : `transaction ${transaction.id} failed`
           )
-          await requests.publishCompletedRequest(await requests.getRequestById(requestId, true))
+          await requests.publishCompletedRequest(await requests.getRequestById(requestId, {withTransactions: true}))
         }
       } catch (e) {
         logger.error({transactionId: transaction.Id}, 'MONITOR_TRANSACTION_ERROR')

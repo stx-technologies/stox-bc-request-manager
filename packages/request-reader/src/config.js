@@ -4,4 +4,6 @@ module.exports = mapEnv({
   databaseUrl: '',
   mqConnectionUrl: '',
   network: '',
+  defaultGasPriority: '',
+
 })
