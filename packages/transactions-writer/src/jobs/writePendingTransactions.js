@@ -116,7 +116,11 @@ const validateSufficientBalance = async (transaction, unsignedTransaction) => {
   const fromAccountBalance = await blockchain.web3.eth.getBalance(transaction.from)
   const requiredBalance = calculateGasCost(unsignedTransaction)
   const pendingTransactionsGasPrice = await getPendingTransactionsGasPrice(transaction.from)
-  if (Big(fromAccountBalance).minus(pendingTransactionsGasPrice).lt(requiredBalance)) {
+  const haveSufficientBalance = isResendTransaction(transaction) ?
+    Big(fromAccountBalance).gte(requiredBalance) :
+    Big(fromAccountBalance).minus(pendingTransactionsGasPrice).gte(requiredBalance)
+
+  if (!haveSufficientBalance) {
     context.logger.warn(
       {
         requestId: transaction.requestId,
