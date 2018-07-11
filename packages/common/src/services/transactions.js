@@ -68,7 +68,7 @@ const getPendingTransactions = limit =>
   db.transactions.findAll({
     include: [{model: db.requests, include: {model: db.gasPercentiles}}],
     where: {sentAt: null, completedAt: null},
-    order: [['originalTransactionId'], [db.requests, db.gasPercentiles, 'percentile', 'DESC'], ['createdAt', 'DESC']],
+    order: [['originalTransactionId'], [db.requests, db.gasPercentiles, 'percentile', 'DESC'], ['createdAt']],
     limit,
   })
 
