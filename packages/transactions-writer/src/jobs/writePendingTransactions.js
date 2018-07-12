@@ -203,15 +203,15 @@ module.exports = {
 
         const unsignedTransaction = await createUnsignedTransaction(nonce, transaction)
 
+        if (!(await validateBeforeSend(transaction, unsignedTransaction))) {
+          return
+        }
+
         const signedTransaction = await signTransactionInTransactionSigner(
           transaction.from,
           unsignedTransaction,
           transaction.id
         )
-
-        if (!(await validateBeforeSend(transaction, unsignedTransaction))) {
-          return
-        }
 
         const transactionHash = await sendTransactionToBlockchain(signedTransaction)
         await commitTransaction(transaction, unsignedTransaction, transactionHash, nonce)

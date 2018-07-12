@@ -10,7 +10,6 @@ const {errors: {logError}} = require('stox-common')
 module.exports = {
   cron: monitorTransactionsCron,
   job: async () => {
-    const {logger} = context
     const uncompletedTransactions = await transactions.getUnconfirmedTransactions()
 
     context.logger.info({count: uncompletedTransactions.length}, 'UNCOMPLETED_TRANSACTIONS')
@@ -29,8 +28,7 @@ module.exports = {
           await requests.publishCompletedRequest(await requests.getRequestById(requestId, {withTransactions: true}))
         }
       } catch (e) {
-        logger.error({transactionId: transaction.Id}, 'MONITOR_TRANSACTION_ERROR')
-        logError(e)
+        logError(e, 'MONITOR_TRANSACTION_ERROR')
       }
     })
 
