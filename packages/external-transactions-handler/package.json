@@ -1,0 +1,41 @@
+{
+  "name": "external-transactions-handler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "nodemon $NODE_DEBUG_OPTION -e js . | pino",
+    "serve:trace": "node --stack_trace_limit=25 -r trace -r clarify .",
+    "serve": "node .",
+    "lint": "eslint -c ../../.eslintrc.yml .",
+    "lint:fix": "prettier-eslint --write \"src/**/*.js\" && eslint src"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@welldone-software/node-toolbelt": "^1.2.0",
+    "app-module-path": "^2.2.0",
+    "clarify": "^2.1.0",
+    "env-cmd": "^7.0.0",
+    "require-all": "^2.2.0",
+    "stox-bc-request-manager-common": "1.0.0",
+    "stox-common": "git@bitbucket.org:stx_site/stox-common.git#dev",
+    "trace": "^3.1.0"
+  },
+  "devDependencies": {
+    "@pact-foundation/pact": "^5.9.0",
+    "chai": "^4.1.2",
+    "chai-jest-diff": "^1.0.2",
+    "chai-shallow-deep-equal": "^1.4.6",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.9.0",
+    "jest": "^22.4.3",
+    "jest-cli": "^22.4.3",
+    "nodemon": "^1.12.1",
+    "pino": "^4.15.3",
+    "prettier": "^1.7.4",
+    "prettier-eslint": "^8.2.1",
+    "prettier-eslint-cli": "^4.4.0"
+  }
+}
