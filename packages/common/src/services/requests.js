@@ -30,7 +30,9 @@ const updateRequest = (propsToUpdate, id, transaction) =>
 
 const createRequest = async ({id, type, priority, data}) => {
   if ((await db.gasPercentiles.count({where: {priority}})) === 0) {
-    logger.warn(`no '${priority}' priority`)
+    if (priority) {
+      logger.warn(`no '${priority}' priority`)
+    }
     priority = config.defaultGasPriority
   }
   return db.requests.create({id, type, priority, data, createdAt: new Date()})
