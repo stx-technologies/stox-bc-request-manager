@@ -61,6 +61,18 @@ const updateTransaction = async (transaction, unsignedTransaction, transactionHa
 }
 
 const getGasPrice = async (transaction) => {
+  if (!transaction.request.gasPercentile) {
+    context.logger.error(
+      {
+        id: transaction.id,
+        requestId: transaction.requestId,
+        priority: transaction.request.priority,
+      },
+      'PRIORITY_DOES_NOT_EXIST'
+    )
+    return 0
+  }
+
   const gasPrice = isResendTransaction(transaction) ?
     await getGasPriceForResend(transaction.gasPrice) :
     transaction.request.gasPercentile.price
@@ -138,6 +150,10 @@ const validateSufficientBalance = async (transaction, unsignedTransaction) => {
 }
 
 const validateGasPrice = async ({ignoreMaxGasPrice, originalTransactionId, from, nonce}, unsignedTransaction) => {
+  if (!unsignedTransaction.gasPrice) {
+    return false
+  }
+
   if (!ignoreMaxGasPrice && Big(unsignedTransaction.gasPrice).gt(maximumGasPrice)) {
     if (await isMaximumGasPriceGreaterThanLowest()) {
       unsignedTransaction.gasPrice = parseInt(maximumGasPrice, 10)
@@ -156,6 +172,7 @@ const validateGasPrice = async ({ignoreMaxGasPrice, originalTransactionId, from,
       return false
     }
   }
+
   const minimumAllowedGasPrice = Big(unsignedTransaction.gasPrice).div(1.1).round(0, 1).toString()
   if (isResendTransaction({originalTransactionId}) &&
    await isSentWithGasPriceHigherThan(from, nonce, minimumAllowedGasPrice)) {
