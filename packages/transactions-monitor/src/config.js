@@ -7,4 +7,5 @@ module.exports = mapEnv({
   requiredConfirmations: '',
   limitTransactions: '',
   web3Url: '',
+  pendingHoursForResend: '',
 })

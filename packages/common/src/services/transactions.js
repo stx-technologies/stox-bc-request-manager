@@ -3,6 +3,7 @@ const {exceptions: {NotFoundError, InvalidStateError}} = require('@welldone-soft
 const {errors: {errSerializer}} = require('stox-common')
 const {Big} = require('big.js')
 const {pick} = require('lodash')
+const moment = require('moment')
 
 const isResendTransaction = transaction => transaction.originalTransactionId
 
@@ -192,6 +193,12 @@ const isAlreadyMined = async ({from, nonce}) => {
   return Big(transactionsCount).gt(nonce)
 }
 
+const isTimeForResend = (transaction) => {
+  const dateForResend = moment(transaction.sentAt).add(Number(config.pendingHoursForResend), 'hours')
+  return moment().isAfter(dateForResend)
+}
+
+
 module.exports = {
   getTransaction,
   getPendingTransactions,
@@ -208,4 +215,5 @@ module.exports = {
   isCancellationTransaction,
   cancelTransaction,
   getPendingTransactionsGasPrice,
+  isTimeForResend,
 }

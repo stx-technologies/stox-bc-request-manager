@@ -22,7 +22,7 @@ module.exports = {
     router.get('/requests/transactions/:id', _(({params: {id}}) => requests.getRequestByTransactionId(id)))
     router.get('/requests/:type/count', _(({params: {type}}) => requests.countRequestByType(type)))
     router.get('/requests/:type/count/pending', _(({params: {type}}) => requests.countPendingRequestByType(type)))
-    router.post('/transactions/resend', _(({body: {transactionHash}}) =>
+    router.post('/transactions/resend', _(async ({body: {transactionHash}}) =>
       transactions.resendTransaction(transactionHash)))
     router.get('/requestsByTransactionHash/:transactionHash', _(({params: {transactionHash}}) =>
       requests.getRequestByTransactionHash(transactionHash)))
