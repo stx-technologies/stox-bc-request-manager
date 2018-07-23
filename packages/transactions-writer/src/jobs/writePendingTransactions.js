@@ -137,8 +137,8 @@ const validateSufficientBalance = async (transaction, unsignedTransaction) => {
   return true
 }
 
-const validateGasPrice = async ({originalTransactionId, from, nonce}, unsignedTransaction) => {
-  if (Big(unsignedTransaction.gasPrice).gt(maximumGasPrice)) {
+const validateGasPrice = async ({ignoreMaxGasPrice, originalTransactionId, from, nonce}, unsignedTransaction) => {
+  if (!ignoreMaxGasPrice && Big(unsignedTransaction.gasPrice).gt(maximumGasPrice)) {
     if (await isMaximumGasPriceGreaterThanLowest()) {
       unsignedTransaction.gasPrice = parseInt(maximumGasPrice, 10)
     } else {

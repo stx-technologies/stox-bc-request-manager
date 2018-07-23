@@ -63,7 +63,8 @@ const cancelTransaction = async (transaction, dbTransaction) => {
   }
 }
 
-const resendTransaction = async (transactionHash) => {
+const resendTransaction = async (transactionHash, ignoreMaxGasPrice) => {
+  ignoreMaxGasPrice = ignoreMaxGasPrice === true
   const transaction = await getTransaction({transactionHash})
   validateTransactionForResend(transaction)
   const dbTransaction = await db.sequelize.transaction()
@@ -75,7 +76,8 @@ const resendTransaction = async (transactionHash) => {
   try {
     await transaction.update({resentAt: new Date()}, {transaction: dbTransaction})
     const resentTransaction = await db.transactions.create(
-      {requestId,
+      {
+        requestId,
         type,
         subRequestIndex,
         subRequestData,
@@ -86,7 +88,9 @@ const resendTransaction = async (transactionHash) => {
         to,
         nonce,
         gasPrice,
-        originalTransactionId: originalTransactionId || id},
+        originalTransactionId: originalTransactionId || id,
+        ignoreMaxGasPrice,
+      },
       {transaction: dbTransaction}
     )
     await dbTransaction.commit()

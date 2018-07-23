@@ -1,7 +1,7 @@
 const uuid = require('uuid4')
 const {DataTypes} = require('sequelize')
 
-const {STRING, DATE, JSON, UUID, INTEGER, BLOB, BIGINT} = DataTypes
+const {STRING, DATE, JSON, UUID, INTEGER, BLOB, BIGINT, BOOLEAN} = DataTypes
 const ADDRESS = STRING(42)
 const TRANSACTION_HASH = STRING(66)
 const NETWORK = STRING(256)
@@ -68,6 +68,7 @@ module.exports = (sequelize) => {
       estimatedGas: {type: BIGINT},
       estimatedGasCost: {type: BIGINT},
       gasUsed: {type: BIGINT},
+      ignoreMaxGasPrice: {type: BOOLEAN},
     },
     {
       indexes: indexes(['requestId', 'type', 'transactionHash', 'createdAt', 'completedAt', 'sentAt', 'from', 'to']),
