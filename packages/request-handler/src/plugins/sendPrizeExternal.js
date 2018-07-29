@@ -1,15 +1,15 @@
-const {network, walletsApiBaseUrl, prizeDistributionAccountAddress} = require('../config')
+const {network, walletsApiBaseUrl} = require('../config')
 const {http} = require('stox-common')
 
 const clientHttp = http(walletsApiBaseUrl)
 
 module.exports = {
-  prepareTransactions: async ({id, data: {userStoxWalletAddress, amount, tokenAddress}}) => {
+  prepareTransactions: async ({id, data: {userStoxWalletAddress, amount, tokenAddress, prizeDistributorAddress}}) => {
     const {encodedAbi, fromAccount} = await clientHttp.get('/abi/sendPrizeExternal', {
       userStoxWalletAddress,
       tokenAddress,
       amount,
-      prizeDistributorAddress: prizeDistributionAccountAddress,
+      prizeDistributorAddress,
     })
     return [
       {
