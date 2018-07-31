@@ -24,7 +24,6 @@ module.exports = {
           } else {
             logError(e, `${loggerFormatText(type)}_HANDLER_ERROR`)
             await requests.updateRequestCompleted(id, e)
-            await requests.publishCompletedRequest(await requests.getRequestById(id, {withTransactions: true}))
           }
         }
       })

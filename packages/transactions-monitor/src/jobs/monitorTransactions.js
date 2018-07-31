@@ -8,7 +8,7 @@ const {
       isTimeForResend, resendTransaction,
     },
     requests: {
-      updateRequestCompleted, publishCompletedRequest, getRequestById,
+      updateRequestCompleted,
     },
   },
   utils: {getCompletedTransaction},
@@ -40,7 +40,6 @@ module.exports = {
             requestId,
             getRequestError(transaction, completedTransaction.isSuccessful)
           )
-          await publishCompletedRequest(await getRequestById(requestId, {withTransactions: true}))
         } else if (!transaction.resentAt && isTimeForResend(transaction)) {
           await resendTransaction(transaction.transactionHash)
         }

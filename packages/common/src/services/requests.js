@@ -25,7 +25,7 @@ const getRequestByTransactionHash = async (transactionHash) => {
 }
 
 const updateRequest = (propsToUpdate, id, transaction) =>
-  db.requests.update(propsToUpdate, {where: {id}}, {...(transaction ? {transaction} : {})})
+  db.requests.update(propsToUpdate, {where: {id}, ...(transaction ? {transaction} : {})})
 
 
 const createRequest = async ({id, type, priority, data}) => {
@@ -69,8 +69,21 @@ const increasePriority = async ({id, priority}) => {
   }
 }
 
-const updateRequestCompleted = async (id, error = null) =>
-  updateRequest({error: errSerializer(error), completedAt: Date.now()}, id)
+const publishCompletedRequest = async (request) => {
+  const type = kebabCase(request.type)
+  const transactions = request.transactions &&
+    request.transactions.map(transaction => ({...transaction.dataValues, transactionData: undefined}))
+
+  mq.publish(`completed-${type}-requests`, {...request, type, transactions})
+}
+
+const updateRequestCompleted = async (id, error = null) => {
+  const request = await getRequestById(id, {withTransactions: true})
+  if (!request.completedAt) {
+    await updateRequest({error: errSerializer(error), completedAt: Date.now()}, id)
+    publishCompletedRequest(request)
+  }
+}
 
 const countRequestByType = async type => ({
   count: await db.requests.count({where: {type}}),
@@ -94,18 +107,10 @@ const getCorrespondingRequests = async transactions =>
     },
   })
 
-const publishCompletedRequest = async (request) => {
-  const type = kebabCase(request.type)
-  const transactions = request.transactions &&
-  request.transactions.map(transaction => ({...transaction.dataValues, transactionData: undefined}))
-
-  mq.publish(`completed-${type}-requests`, {...request, type, transactions})
-}
 
 const failRequestTransaction = async ({id, requestId}, error) => {
-  await updateRequestCompleted(requestId, error)
   await updateTransactionError(id, error)
-  await publishCompletedRequest(await getRequestById(requestId, {withTransactions: true}))
+  await updateRequestCompleted(requestId, error)
 }
 
 const validateRequestBeforeCanceled = (request) => {
