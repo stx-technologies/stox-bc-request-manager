@@ -2,7 +2,7 @@ const {db, mq, config} = require('../context')
 const {getTransaction, updateTransactionError} = require('./transactions')
 const {Op} = require('sequelize')
 const {loggers: {logger}, exceptions: {NotFoundError, InvalidStateError}} = require('@welldone-software/node-toolbelt')
-const {kebabCase} = require('lodash')
+const {camelCase, kebabCase} = require('lodash')
 const {errors: {errSerializer}} = require('stox-common')
 
 const getRequestById = async (id, options) => {
@@ -35,6 +35,7 @@ const createRequest = async ({id, type, priority, data}) => {
     }
     priority = config.defaultGasPriority
   }
+  type = camelCase(type)
   return db.requests.create({id, type, priority, data, createdAt: new Date()})
 }
 
@@ -94,10 +95,11 @@ const getCorrespondingRequests = async transactions =>
   })
 
 const publishCompletedRequest = async (request) => {
+  const type = kebabCase(request.type)
   const transactions = request.transactions &&
   request.transactions.map(transaction => ({...transaction.dataValues, transactionData: undefined}))
 
-  mq.publish(`completed-${kebabCase(request.type)}-requests`, {...request, transactions})
+  mq.publish(`completed-${type}-requests`, {...request, type, transactions})
 }
 
 const failRequestTransaction = async ({id, requestId}, error) => {
