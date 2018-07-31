@@ -202,22 +202,6 @@ const failMinedTransaction = async ({id, requestId, from, nonce}) => {
   }
 }
 
-const validateBeforeSend = async (transaction, unsignedTransaction) => {
-  if (!(await validateGasPrice(transaction, unsignedTransaction))) {
-    return false
-  }
-
-  if (!(await validateSufficientBalance(transaction, unsignedTransaction))) {
-    return false
-  }
-
-  if (isResendTransaction(transaction) && await isAlreadyMined(transaction)) {
-    await failMinedTransaction(transaction)
-    return false
-  }
-  return true
-}
-
 
 module.exports = {
   cron: writePendingTransactionsCron,
@@ -227,9 +211,13 @@ module.exports = {
       try {
         const nonce = isResendTransaction(transaction) ? transaction.nonce : await fetchBestNonce(transaction)
 
-        const unsignedTransaction = await createUnsignedTransaction(nonce, transaction)
+        if (isResendTransaction(transaction) && await isAlreadyMined(transaction)) {
+          await failMinedTransaction(transaction)
+          return
+        }
 
-        if (!(await validateBeforeSend(transaction, unsignedTransaction))) {
+        const unsignedTransaction = await createUnsignedTransaction(nonce, transaction)
+        if (!(await validateGasPrice(transaction, unsignedTransaction))) {
           return
         }
 
@@ -238,6 +226,9 @@ module.exports = {
           unsignedTransaction,
           transaction.id
         )
+        if (!(await validateSufficientBalance(transaction, unsignedTransaction))) {
+          return
+        }
 
         const transactionHash = await sendTransactionToBlockchain(signedTransaction)
         await commitTransaction(transaction, unsignedTransaction, transactionHash, nonce)
