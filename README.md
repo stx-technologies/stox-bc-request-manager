@@ -46,7 +46,3 @@ Register all services tasks to aws ecs by image name after login locally to aws,
 node scripts/createTasksDefition.js <image_name>:<tag>
 ```
 
-
-
-## Docs
-[Blockchain Writer Architecture](https://docs.google.com/document/d/1eXrxDFgjDl-2No22om8vesqGhU7iGtw8iDSuN3VoHJ4/edit#heading=h.jsy3plhn9pv8)
