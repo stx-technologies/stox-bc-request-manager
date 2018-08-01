@@ -6,7 +6,7 @@ const getType = (to, message, transactionFromDb) => {
     case message.feesAccount: return 'withdraw-fee'
     case message.userWithdrawalAccount: return 'withdraw-completed'
     case message.walletAddress:
-      return (transactionFromDb && transactionFromDb.request.type === 'sendPrize') ? 'prize' : 'deposit'
+      return (transactionFromDb && transactionFromDb.request.type === 'prize') ? 'prize' : 'deposit'
     default: return ''
   }
 }
