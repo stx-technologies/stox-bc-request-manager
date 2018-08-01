@@ -1,0 +1,14 @@
+{
+  "roots": [
+    "<rootDir>/src"
+  ],
+  "moduleDirectories": ["node_modules", "../../node_modules"],
+  "modulePaths": [
+    "<rootDir>/src"
+  ],
+  "setupTestFrameworkScriptFile": "<rootDir>/../jest/jestSetup.js",
+  "cacheDirectory": "<rootDir>/../jest/cache",
+  "testEnvironment": "node",
+  "verbose": true,
+  "collectCoverage": false
+}

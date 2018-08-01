@@ -1,0 +1,48 @@
+# Request Manager
+
+The Request Manager holds the data of all pending and confirmed requests related to the
+blockchain. It acts as a manager service that sends and tracks the status of requests across all
+microservices and handles their resolution process.
+
+## Setup
+install global packages
+```
+npm install lerna rimraf cross-env env-cmd -g
+```
+Installs all of the packages dependencies and links any cross-dependencies
+```
+npm run setup
+```
+
+## Build
+To build a sub-system base image, you will need an id_rsa located at the root of the repository
+```
+docker build --no-cache -f ./docker/Dockerfile -t request-manager --build-arg SSH_PRIVATE_KEY="$(cat ./id_rsa)" .
+```
+
+## Run
+To run a docker container for a service:
+```
+docker run -d --name <service-name> request-manager npm start --prefix=packages/<service-name>
+```
+To run service containers:
+```
+npm run containers
+```
+
+## Test
+To run all unit test
+```
+npm run test 
+```
+To run all integration tests in one container, first build the base image and then run:
+```
+npm run test:local
+```
+
+## Register all tasks
+Register all services tasks to aws ecs by image name after login locally to aws, e.g.
+```
+node scripts/createTasksDefition.js <image_name>:<tag>
+```
+

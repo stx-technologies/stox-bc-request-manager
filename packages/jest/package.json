@@ -1,0 +1,16 @@
+{
+  "name": "jest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "jestSetup.js",
+  "dependencies": {
+    "chai": "^4.1.2",
+    "chai-jest-diff": "^1.0.2",
+    "chai-shallow-deep-equal": "^1.4.6",
+    "clarify": "^2.1.0",
+    "env-cmd": "^7.0.0",
+    "trace": "^3.1.0"
+  },
+  "author": "",
+  "license": "ISC"
+}

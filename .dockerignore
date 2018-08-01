@@ -1,0 +1,13 @@
+node_modules
+packages/*/node_modules
+packages/*/package-lock.json
+package-lock.json
+.idea
+.vscode
+
+
+.editorconfig
+
+Dockerfile
+.env
+id_rsa
