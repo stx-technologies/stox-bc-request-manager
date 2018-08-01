@@ -10,6 +10,8 @@ module.exports = {
   cors: false,
   routes: (router, _) => {
     router.get('/gasPrices', _(() => gasPrices.getGasPercentilesInGwei()))
+    router.get('/gasPriceByPriority', _(({query: {priority}}) =>
+      gasPrices.gasPriceByPriority(priority)))
     router.post('/requests', _(({body}) => requests.createRequest(body)))
     router.post('/requests/increasePriority', _(({body}) => requests.increasePriority(body)))
     router.get('/requests/:id', _(({params: {id}}) => requests.getRequestById(id)))
