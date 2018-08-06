@@ -2,10 +2,10 @@ const {context: {db, mq}} = require('stox-bc-request-manager-common')
 const {errors: {logError}} = require('stox-common')
 
 const getType = (to, message, transactionFromDb) => {
-  switch (to) {
-    case message.feesAccount: return 'withdraw-fee'
-    case message.userWithdrawalAccount: return 'withdraw-completed'
-    case message.walletAddress:
+  switch (to.toLowerCase()) {
+    case message.feesAccount.toLowerCase(): return 'withdraw-fee'
+    case message.userWithdrawalAccount.toLowerCase(): return 'withdraw-completed'
+    case message.walletAddress.toLowerCase():
       return (transactionFromDb && transactionFromDb.request.type === 'prize') ? 'prize' : 'deposit'
     default: return ''
   }
