@@ -173,7 +173,7 @@ const validateGasPrice = async ({ignoreMaxGasPrice, originalTransactionId, from,
     }
   }
 
-  const minimumAllowedGasPrice = Big(unsignedTransaction.gasPrice).div(1.1).round(0, 1).toString()
+  const minimumAllowedGasPrice = Big(unsignedTransaction.gasPrice).div(1.125).round(0, 1).toString()
   if (isResendTransaction({originalTransactionId}) &&
    await isSentWithGasPriceHigherThan(from, nonce, minimumAllowedGasPrice)) {
     context.logger.warn(
