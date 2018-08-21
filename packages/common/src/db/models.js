@@ -97,6 +97,8 @@ module.exports = (sequelize) => {
       percentile: {type: INTEGER, allowNull: false},
       price: {type: BIGINT, allowNull: false},
       network: {type: NETWORK, allowNull: false},
+      autoResendAfter: {type: INTEGER, allowNull: false},
+      maxGasPrice: {type: BIGINT, allowNull: false},
       createdAt: {type: DATE, allowNull: false},
       updatedAt: {type: DATE, allowNull: false},
     },

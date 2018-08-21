@@ -116,12 +116,8 @@ const getPendingTransactions = limit =>
 
 const getUnconfirmedTransactions = limit =>
   db.transactions.findAll({
-    where: {
-      sentAt: {
-        $ne: null,
-      },
-      completedAt: null,
-    },
+    include: [{model: db.requests, include: {model: db.gasPercentiles}}],
+    where: {sentAt: {$ne: null}, completedAt: null},
     limit,
   })
 
@@ -198,8 +194,11 @@ const isAlreadyMined = async ({from, nonce}) => {
 }
 
 const isTimeForResend = (transaction) => {
-  const dateForResend = moment(transaction.sentAt).add(Number(config.pendingHoursForResend), 'hours')
-  return moment().isAfter(dateForResend)
+  const {gasPercentile} = transaction.request
+  const isCurrentPriceGreaterThanSentPrice = Big(gasPercentile.price).gt(transaction.gasPrice)
+  const isCurrentPriceLowerThanMaxPrice = Big(gasPercentile.price).lt(gasPercentile.maxGasPrice)
+  const dateForResend = moment(transaction.sentAt).add(Number(gasPercentile.autoResendAfter), 'minutes')
+  return moment().isAfter(dateForResend) && isCurrentPriceGreaterThanSentPrice && isCurrentPriceLowerThanMaxPrice
 }
 
 

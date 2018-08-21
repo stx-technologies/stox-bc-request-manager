@@ -3,7 +3,6 @@ const {
   writePendingTransactionsCron,
   transactionsSignerBaseUrl,
   limitTransactions,
-  maximumGasPrice,
 } = require('../config')
 const {http, errors: {logError}} = require('stox-common')
 const promiseSerial = require('promise-serial')
@@ -13,7 +12,7 @@ const {
     requests,
     transactions: {getPendingTransactions, isResendTransaction, isSentWithGasPriceHigherThan, isAlreadyMined,
       isMinedTransactionInDb, updateTransactionError, getPendingTransactionsGasPrice},
-    gasPrices: {isMaximumGasPriceGreaterThanLowest, getGasPriceForResend},
+    gasPrices: {isGasPriceGreaterThanLowest, getGasPriceForResend},
   },
   utils: {calculateGasCost},
   context,
@@ -149,14 +148,16 @@ const validateSufficientBalance = async (transaction, unsignedTransaction) => {
   return true
 }
 
-const validateGasPrice = async ({ignoreMaxGasPrice, originalTransactionId, from, nonce}, unsignedTransaction) => {
+const validateGasPrice = async (transaction, unsignedTransaction) => {
+  const {request, ignoreMaxGasPrice, originalTransactionId, from, nonce} = transaction
   if (!unsignedTransaction.gasPrice) {
     return false
   }
 
-  if (!ignoreMaxGasPrice && Big(unsignedTransaction.gasPrice).gt(maximumGasPrice)) {
-    if (await isMaximumGasPriceGreaterThanLowest()) {
-      unsignedTransaction.gasPrice = parseInt(maximumGasPrice, 10)
+  const {maxGasPrice} = request.gasPercentile
+  if (!ignoreMaxGasPrice && Big(unsignedTransaction.gasPrice).gt(maxGasPrice)) {
+    if (await isGasPriceGreaterThanLowest(maxGasPrice)) {
+      unsignedTransaction.gasPrice = parseInt(maxGasPrice, 10)
     } else {
       context.logger.warn(
         {
@@ -165,7 +166,7 @@ const validateGasPrice = async ({ignoreMaxGasPrice, originalTransactionId, from,
           originalTransactionId,
           unsignedTransaction,
           gasPrice: unsignedTransaction.gasPrice,
-          maximumGasPrice,
+          maxGasPrice,
         },
         'MAXIMUM_GAS_PRICE_EXCEEDED'
       )

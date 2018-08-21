@@ -67,9 +67,9 @@ const calculateGasPrices = async (gasPercentiles) => {
   return gasPrices
 }
 
-const isMaximumGasPriceGreaterThanLowest = async () => {
+const isGasPriceGreaterThanLowest = async (gasPrice) => {
   const lowestGasPrice = await fetchLowestGasPrice()
-  return Big(config.maximumGasPrice).gte(lowestGasPrice)
+  return Big(gasPrice).gte(lowestGasPrice)
 }
 
 module.exports = {
@@ -77,6 +77,6 @@ module.exports = {
   getGasPercentilesInGwei,
   calculateGasPrices,
   getGasPriceForResend,
-  isMaximumGasPriceGreaterThanLowest,
+  isGasPriceGreaterThanLowest,
   gasPriceByPriority,
 }
