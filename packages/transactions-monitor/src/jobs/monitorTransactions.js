@@ -41,7 +41,7 @@ module.exports = {
             getRequestError(transaction, completedTransaction.isSuccessful)
           )
         } else if (!transaction.resentAt && isTimeForResend(transaction)) {
-          await resendTransaction(transaction.transactionHash)
+          await resendTransaction(transaction)
         }
       } catch (e) {
         logError(e, 'MONITOR_TRANSACTION_ERROR')

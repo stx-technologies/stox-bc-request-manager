@@ -63,9 +63,8 @@ const cancelTransaction = async (transaction, dbTransaction) => {
   }
 }
 
-const resendTransaction = async (transactionHash, ignoreMaxGasPrice) => {
+const resendTransaction = async (transaction, ignoreMaxGasPrice) => {
   ignoreMaxGasPrice = ignoreMaxGasPrice === true
-  const transaction = await getTransaction({transactionHash})
   validateTransactionForResend(transaction)
   const dbTransaction = await db.sequelize.transaction()
   const {requestId, type, subRequestIndex, subRequestData, subRequestType,
@@ -99,6 +98,18 @@ const resendTransaction = async (transactionHash, ignoreMaxGasPrice) => {
     dbTransaction.rollback()
     throw e
   }
+}
+
+const resendTransactions = async (body) => {
+  const query = pick(body, ['account', 'nonce', 'gasPrice', 'transactionHash'])
+  const transactions = await db.transactions.findAll({where: {...query, resentAt: null}})
+  return Promise.all(transactions.map(async (transaction) => {
+    try {
+      return await resendTransaction(transaction, body.ignoreMaxGasPrice)
+    } catch (e) {
+      return e
+    }
+  }))
 }
 
 const getPendingTransactionsGasPrice = async from => (await db.transactions.sum(
@@ -219,4 +230,5 @@ module.exports = {
   cancelTransaction,
   getPendingTransactionsGasPrice,
   isTimeForResend,
+  resendTransactions,
 }
