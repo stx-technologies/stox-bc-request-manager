@@ -11,7 +11,7 @@ const {
     accounts: {fetchBestNonce, incrementAccountNonce},
     requests,
     transactions: {getPendingTransactions, isResendTransaction, isSentWithGasPriceHigherThan, isAlreadyMined,
-      isMinedTransactionInDb, updateTransactionError, getPendingTransactionsGasPrice},
+      getInsufficientAccounts, isMinedTransactionInDb, updateTransactionError, getPendingTransactionsGasPrice},
     gasPrices: {isGasPriceGreaterThanLowest, getGasPriceForResend},
   },
   utils: {calculateGasCost},
@@ -207,7 +207,11 @@ const failMinedTransaction = async ({id, requestId, from, nonce}) => {
 module.exports = {
   cron: writePendingTransactionsCron,
   job: async () => {
-    const pendingTransactions = await getPendingTransactions(limitTransactions)
+    const insufficientAccounts = await getInsufficientAccounts()
+    if (insufficientAccounts.length) {
+      context.logger.warn('insufficientFundsForAccounts', insufficientAccounts)
+    }
+    const pendingTransactions = await getPendingTransactions(insufficientAccounts, limitTransactions)
     const promises = pendingTransactions.map(transaction => async () => {
       try {
         const nonce = isResendTransaction(transaction) ? transaction.nonce : await fetchBestNonce(transaction)

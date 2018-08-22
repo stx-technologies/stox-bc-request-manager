@@ -4,6 +4,7 @@ const {errors: {errSerializer}} = require('stox-common')
 const {Big} = require('big.js')
 const {pick} = require('lodash')
 const moment = require('moment')
+const {literal} = require('sequelize')
 
 const isResendTransaction = transaction => transaction.originalTransactionId
 
@@ -117,14 +118,26 @@ const getPendingTransactionsGasPrice = async from => (await db.transactions.sum(
   {where: {estimatedGasCost: {$ne: null}, sentAt: {$ne: null}, resentAt: null, completedAt: null, from}}
 )) || 0
 
-const getPendingTransactions = limit =>
+const getPendingAccounts = () =>
   db.transactions.findAll({
-    include: [{model: db.requests, include: {model: db.gasPercentiles}}],
+    attributes: [[literal('distinct "from"'), 'from']],
     where: {sentAt: null, completedAt: null},
-    order: [['originalTransactionId'], [db.requests, db.gasPercentiles, 'percentile', 'DESC'], ['createdAt']],
-    limit,
   })
 
+const getInsufficientAccounts = async () => {
+  const pendingAccounts = await getPendingAccounts()
+  return (await Promise.all(pendingAccounts.map(async (pendingAccount) => {
+    const balance = await blockchain.web3.eth.getBalance(pendingAccount.from)
+    return Big(balance).lte(config.minimumAccountBalance) ? pendingAccount.from : null
+  }))).filter(account => account)
+}
+
+const getPendingTransactions = async (insufficientAccounts, limit) => db.transactions.findAll({
+  include: [{model: db.requests, include: {model: db.gasPercentiles}}],
+  where: {from: {$notIn: insufficientAccounts}, sentAt: null, completedAt: null},
+  order: [['originalTransactionId'], [db.requests, db.gasPercentiles, 'percentile', 'DESC'], ['createdAt']],
+  limit,
+})
 const getUnconfirmedTransactions = limit =>
   db.transactions.findAll({
     include: [{model: db.requests, include: {model: db.gasPercentiles}}],
@@ -231,4 +244,5 @@ module.exports = {
   getPendingTransactionsGasPrice,
   isTimeForResend,
   resendTransactions,
+  getInsufficientAccounts,
 }
