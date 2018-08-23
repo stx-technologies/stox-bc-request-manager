@@ -221,7 +221,7 @@ const isTimeForResend = (transaction) => {
   const {gasPercentile} = transaction.request
   const isCurrentPriceGreaterThanSentPrice = Big(gasPercentile.price).gt(transaction.gasPrice)
   const isCurrentPriceLowerThanMaxPrice = Big(gasPercentile.price).lt(gasPercentile.maxGasPrice)
-  const dateForResend = moment(transaction.sentAt).add(Number(gasPercentile.autoResendAfter), 'minutes')
+  const dateForResend = moment(transaction.sentAt).add(Number(gasPercentile.autoResendAfterMinutes), 'minutes')
   return moment().isAfter(dateForResend) && isCurrentPriceGreaterThanSentPrice && isCurrentPriceLowerThanMaxPrice
 }
 

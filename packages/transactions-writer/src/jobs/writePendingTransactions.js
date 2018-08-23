@@ -85,18 +85,20 @@ const createUnsignedTransaction = async (nonce, transaction) => {
   const unsignedTransaction = {
     nonce: Number(nonce),
     to: transaction.to,
+    value: Number(transaction.value),
     data: transaction.transactionData,
     gasPrice: await getGasPrice(transaction),
     chainId: await blockchain.web3.eth.net.getId(),
   }
 
-  unsignedTransaction.gasLimit = await blockchain.web3.eth.estimateGas({
+  unsignedTransaction.gasLimit = Math.round((await blockchain.web3.eth.estimateGas({
     from: transaction.from,
     to: unsignedTransaction.to,
+    value: unsignedTransaction.value,
     gasPrice: unsignedTransaction.gasPrice,
     nonce: unsignedTransaction.nonce,
     data: unsignedTransaction.data,
-  })
+  })) * 1.1)
 
   return unsignedTransaction
 }

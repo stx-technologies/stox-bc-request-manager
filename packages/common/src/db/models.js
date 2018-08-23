@@ -18,7 +18,8 @@ module.exports = (sequelize) => {
     'requests',
     {
       id: {type: UUID, primaryKey: true},
-      type: oneOf(['prize', 'externalPrize', 'withdraw', 'setWithdrawalAddress', 'sendToBackup', 'createWallet']),
+      type: oneOf(['prize', 'externalPrize', 'withdraw', 'withdrawEther',
+        'setWithdrawalAddress', 'sendToBackup', 'createWallet']),
       priority: {type: STRING(256)},
       error: {type: JSON},
       data: {type: JSON},
@@ -54,6 +55,7 @@ module.exports = (sequelize) => {
       network: {type: NETWORK, allowNull: false},
       from: {type: ADDRESS},
       to: {type: ADDRESS},
+      value: {type: BIGINT},
       currentBlockTime: {type: DATE},
       blockNumber: {type: BIGINT},
       nonce: {type: BIGINT}, // ?
@@ -97,7 +99,7 @@ module.exports = (sequelize) => {
       percentile: {type: INTEGER, allowNull: false},
       price: {type: BIGINT, allowNull: false},
       network: {type: NETWORK, allowNull: false},
-      autoResendAfter: {type: INTEGER, allowNull: false},
+      autoResendAfterMinutes: {type: INTEGER, allowNull: false},
       maxGasPrice: {type: BIGINT, allowNull: false},
       createdAt: {type: DATE, allowNull: false},
       updatedAt: {type: DATE, allowNull: false},

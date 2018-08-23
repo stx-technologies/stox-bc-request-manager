@@ -19,3 +19,14 @@ services:
         ports:
             - 61613:61613
             - 8161:8161
+
+    dev-blockchain:
+        image: trufflesuite/ganache-cli:v6.1.8
+        container_name: ganache-cli
+        command: ["--account=0x4be15e88376cb3e89d7780373d3857e435121a4278c3f4835e931a91830b885b,1000000000000000000000",
+                  "--account=0xe3075c314733641654b13fc16f2d4e6b0d00c8b3c5843c7a54f699333ff1d578,1000000000000000000000",
+                  "--account=0x8d8ab4f163eeeeda3f34716668f94dffaec22914387ebb521113a4e049534a80,1000000000000000000000",
+                  "--account=0x63b535ce24b9a5e4fa9e4dfd2932d2dbec3e617ca1255abb52e2562cb816c6c4,1000000000000000000000",
+                  "--account=0x5f90ddeae3547b81f116254ec86b5bff1251642d4faaf9a47cb173be79600b7b,1000000000000000000000"]
+        ports:
+            - 8545:8545
