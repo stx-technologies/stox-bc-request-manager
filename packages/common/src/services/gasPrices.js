@@ -2,7 +2,21 @@ const {db, blockchain, config} = require('../context')
 const {Big} = require('big.js')
 const {exceptions: {InvalidStateError}} = require('@welldone-software/node-toolbelt')
 
-const getGasPercentiles = () => db.gasPercentiles.findAll()
+const getGasPercentiles = () => db.gasPercentiles.findAll({order: [['percentile']]})
+
+const getGasPercentilesInGwei = async () => {
+  const gasPercentiles = await getGasPercentiles()
+  return gasPercentiles.map((gasPercentile) => {
+    const price = blockchain.web3.utils.fromWei(gasPercentile.price, 'Gwei')
+    const {priority, percentile} = gasPercentile
+    return {priority, percentile, price}
+  })
+}
+
+const gasPriceByPriority = async (priority = config.defaultGasPriority) => {
+  const gasPercentile = await db.gasPercentiles.findOne({where: {priority}})
+  return {price: gasPercentile.price}
+}
 
 const getGasPriceForResend = async (sentGasPrice) => {
   const gasPricePlusTenPercent = Big(sentGasPrice).times(1.1).round(0, 3).toString()
@@ -60,7 +74,9 @@ const isMaximumGasPriceGreaterThanLowest = async () => {
 
 module.exports = {
   getGasPercentiles,
+  getGasPercentilesInGwei,
   calculateGasPrices,
   getGasPriceForResend,
   isMaximumGasPriceGreaterThanLowest,
+  gasPriceByPriority,
 }

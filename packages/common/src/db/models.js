@@ -18,7 +18,7 @@ module.exports = (sequelize) => {
     'requests',
     {
       id: {type: UUID, primaryKey: true},
-      type: oneOf(['sendPrize', 'withdraw', 'setWithdrawalAddress', 'sendToBackup', 'createWallet']),
+      type: oneOf(['prize', 'externalPrize', 'withdraw', 'setWithdrawalAddress', 'sendToBackup', 'createWallet']),
       priority: {type: STRING(256)},
       error: {type: JSON},
       data: {type: JSON},

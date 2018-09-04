@@ -6,8 +6,5 @@ module.exports = mapEnv({
   walletsApiBaseUrl: '',
   network: '',
   handlePendingRequestCron: '',
-  walletOperatorAccountAddress: '',
-  walletCreationAccountAddress: '',
-  prizeDistributionAccountAddress: '',
   limitPendingRequest: '',
 })
