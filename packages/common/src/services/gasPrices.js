@@ -19,7 +19,7 @@ const gasPriceByPriority = async (priority = config.defaultGasPriority) => {
 }
 
 const getGasPriceForResend = async (sentGasPrice) => {
-  const gasPricePlusTenPercent = Big(sentGasPrice).times(1.1).round(0, 3).toString()
+  const gasPricePlusTenPercent = Big(sentGasPrice).times(1.3).round(0, 3).toString()
   const nextGasPrice = await db.gasPercentiles.findOne({where:
       {price: {$gt: gasPricePlusTenPercent}},
   order: [['price']]})

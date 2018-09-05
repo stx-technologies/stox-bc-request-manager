@@ -96,7 +96,7 @@ const rejectRelatedTransactions = async ({id, transactionHash, nonce, from}, dbT
 )
 
 const isSentWithGasPriceHigherThan = (from, nonce, gasPrice) =>
-  db.transactions.findOne({where: {nonce, from, gasPrice: {$gte: gasPrice}}})
+  db.transactions.findOne({where: {nonce, from, gasPrice: {$gt: gasPrice}}})
 
 const updateCompletedTransaction = async (transactionInstance, {isSuccessful, blockTime, receipt}) => {
   const dbTransaction = await db.sequelize.transaction()
