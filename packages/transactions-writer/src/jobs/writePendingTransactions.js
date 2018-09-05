@@ -144,6 +144,10 @@ const validateGasPrice = async ({originalTransactionId, from, nonce}, unsignedTr
     } else {
       context.logger.warn(
         {
+          from,
+          nonce,
+          originalTransactionId,
+          unsignedTransaction,
           gasPrice: unsignedTransaction.gasPrice,
           maximumGasPrice,
         },
@@ -157,9 +161,13 @@ const validateGasPrice = async ({originalTransactionId, from, nonce}, unsignedTr
    await isSentWithGasPriceHigherThan(from, nonce, Big(unsignedTransaction.gasPrice).div(1.1).round(0, 1).toString())) {
     context.logger.warn(
       {
+        from,
+        nonce,
+        originalTransactionId,
+        unsignedTransaction,
         gasPrice: unsignedTransaction.gasPrice,
       },
-      'ALREADY_SENT_WITH_THIS_GAS_PRICE'
+      'ALREADY_SENT_WITH_HIGHER_GAS_PRICE'
     )
     return false
   }
