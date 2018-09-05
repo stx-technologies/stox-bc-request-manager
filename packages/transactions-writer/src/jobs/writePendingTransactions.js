@@ -126,6 +126,7 @@ const validateSufficientBalance = async (transaction, unsignedTransaction) => {
         requestId: transaction.requestId,
         transactionId: transaction.id,
         fromAccount: transaction.from,
+        pendingTransactionsGasPrice,
         fromAccountBalance,
         requiredBalance,
       },
