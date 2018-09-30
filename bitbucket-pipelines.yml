@@ -35,6 +35,8 @@ pipelines:
                     - unzip awscli-bundle.zip
                     - ./awscli-bundle/install -b ~/bin/aws
                     - export PATH=~/bin:$PATH#
+                    - export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
+                    - export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
                     - LOGIN=$(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
                     - echo $LOGIN
                     - $LOGIN
