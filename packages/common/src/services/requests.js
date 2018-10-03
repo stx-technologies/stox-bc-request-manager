@@ -77,10 +77,10 @@ const publishCompletedRequest = async (request) => {
   mq.publish(`completed-${type}-requests`, {...request, type, transactions})
 }
 
-const updateRequestCompleted = async (id, error = null) => {
+const updateRequestCompleted = async (id, error, dbTransaction) => {
   const request = await getRequestById(id, {withTransactions: true})
   if (!request.completedAt) {
-    await updateRequest({error: errSerializer(error), completedAt: Date.now()}, id)
+    await updateRequest({error: errSerializer(error), completedAt: Date.now()}, id, dbTransaction)
     publishCompletedRequest(request)
   }
 }
@@ -109,8 +109,15 @@ const getCorrespondingRequests = async transactions =>
 
 
 const failRequestTransaction = async ({id, requestId}, error) => {
-  await updateTransactionError(id, error)
-  await updateRequestCompleted(requestId, error)
+  const dbTransaction = await db.sequelize.transaction()
+  try {
+    await updateTransactionError(id, error, dbTransaction)
+    await updateRequestCompleted(requestId, error, dbTransaction)
+    await dbTransaction.commit()
+  } catch (e) {
+    await dbTransaction.rollback
+    throw e
+  }
 }
 
 const validateRequestBeforeCanceled = (request) => {

@@ -21,7 +21,7 @@ const getRequestError = (transaction, isSuccessful) => {
   } else if (isSuccessful && isCancellationTransaction(transaction)) {
     return `request ${transaction.requestId} canceled`
   }
-  return undefined
+  return null
 }
 
 

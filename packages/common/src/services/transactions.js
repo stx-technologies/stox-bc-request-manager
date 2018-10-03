@@ -10,8 +10,8 @@ const isResendTransaction = transaction => transaction.originalTransactionId
 
 const isCancellationTransaction = transaction => transaction.type === 'cancellation'
 
-const updateTransactionError = (id, error) =>
-  db.transactions.update({error: errSerializer(error), completedAt: Date.now()}, {where: {id}})
+const updateTransactionError = (id, error, dbTransaction) =>
+  db.transactions.update({error: errSerializer(error), completedAt: Date.now()}, {where: {id}, transaction: dbTransaction})
 
 const getTransaction = async (query) => {
   const transaction = await db.transactions.findOne({where: query})
