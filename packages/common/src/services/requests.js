@@ -71,8 +71,12 @@ const increasePriority = async ({id, priority}) => {
 
 const publishCompletedRequest = async (request) => {
   const type = kebabCase(request.type)
-  const transactions = request.transactions &&
+  const allTransactions = request.transactions &&
     request.transactions.map(transaction => ({...transaction.dataValues, transactionData: undefined}))
+
+  const transactions = request.error
+    ? allTransactions
+    : allTransactions.filter(transaction => !transaction.error)
 
   mq.publish(`completed-${type}-requests`, {...request, type, transactions})
 }
