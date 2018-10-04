@@ -59,9 +59,9 @@ const resendTransaction = async (transactionHash) => {
   }
 }
 
-const getPendingTransactionsGasPrice = async () => (await db.transactions.sum(
+const getPendingTransactionsGasPrice = async from => (await db.transactions.sum(
   'estimatedGasCost',
-  {where: {estimatedGasCost: {$ne: null}, sentAt: {$ne: null}, resentAt: null, completedAt: null}}
+  {where: {estimatedGasCost: {$ne: null}, sentAt: {$ne: null}, resentAt: null, completedAt: null, from}}
 )) || 0
 
 const getPendingTransactions = limit =>
