@@ -7,6 +7,5 @@ module.exports = mapEnv({
   web3Url: '',
   transactionsSignerBaseUrl: '',
   limitTransactions: '',
-  defaultGasPrice: '',
-  maximumGasPrice: '',
+  minimumAccountBalance: '',
 })
