@@ -18,8 +18,9 @@ const gasPriceByPriority = async (priority = config.defaultGasPriority) => {
   return {price: gasPercentile.price}
 }
 
-const getGasPriceForResend = async (sentGasPrice) => {
-  const allowedGasPrice = Big(sentGasPrice).times(1.126).round(0, 3).toString()
+const getGasPriceForResend = async ({nonce, from}) => {
+  const sentGasPrice = await db.transactions.max('gasPrice', {where: {nonce, from}})
+  const allowedGasPrice = Big(sentGasPrice).times(1.125).round(0, 3).toString()
   const nextGasPrice = await db.gasPercentiles.findOne({where:
       {price: {$gt: allowedGasPrice}},
   order: [['price']]})

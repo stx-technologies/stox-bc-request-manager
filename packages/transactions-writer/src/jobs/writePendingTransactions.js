@@ -73,7 +73,7 @@ const getGasPrice = async (transaction) => {
   }
 
   const gasPrice = isResendTransaction(transaction) ?
-    await getGasPriceForResend(transaction.gasPrice) :
+    (transaction.ignoreMaxGasPrice ? transaction.gasPrice : await getGasPriceForResend(transaction)) :
     transaction.request.gasPercentile.price
   return parseInt(gasPrice, 10)
 }
@@ -151,13 +151,13 @@ const validateSufficientBalance = async (transaction, unsignedTransaction) => {
 }
 
 const validateGasPrice = async (transaction, unsignedTransaction) => {
-  const {request, ignoreMaxGasPrice, originalTransactionId, from, nonce} = transaction
+  const {request, originalTransactionId, from, nonce} = transaction
   if (!unsignedTransaction.gasPrice) {
     return false
   }
 
   const {maxGasPrice} = request.gasPercentile
-  if (!ignoreMaxGasPrice && Big(unsignedTransaction.gasPrice).gt(maxGasPrice)) {
+  if (Big(unsignedTransaction.gasPrice).gt(maxGasPrice)) {
     if (await isGasPriceGreaterThanLowest(maxGasPrice)) {
       unsignedTransaction.gasPrice = parseInt(maxGasPrice, 10)
     } else {
@@ -224,7 +224,7 @@ module.exports = {
         }
 
         const unsignedTransaction = await createUnsignedTransaction(nonce, transaction)
-        if (!(await validateGasPrice(transaction, unsignedTransaction))) {
+        if (!transaction.ignoreMaxGasPrice && !(await validateGasPrice(transaction, unsignedTransaction))) {
           return
         }
 

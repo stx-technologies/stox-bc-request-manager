@@ -64,12 +64,12 @@ const cancelTransaction = async (transaction, dbTransaction) => {
   }
 }
 
-const resendTransaction = async (transaction, ignoreMaxGasPrice) => {
-  ignoreMaxGasPrice = ignoreMaxGasPrice === true
+const resendTransaction = async (transaction, gasPrice) => {
+  const ignoreMaxGasPrice = Boolean(gasPrice)
   validateTransactionForResend(transaction)
   const dbTransaction = await db.sequelize.transaction()
   const {requestId, type, subRequestIndex, subRequestData, subRequestType,
-    transactionData, network, from, to, nonce, gasPrice, originalTransactionId, id} = transaction
+    transactionData, network, from, to, nonce, originalTransactionId, id} = transaction
   if (!transaction.sentAt) {
     throw new InvalidStateError('transactionNotSentYet')
   }
@@ -102,11 +102,11 @@ const resendTransaction = async (transaction, ignoreMaxGasPrice) => {
 }
 
 const resendTransactions = async (body) => {
-  const query = pick(body, ['account', 'nonce', 'gasPrice', 'transactionHash'])
-  const transactions = await db.transactions.findAll({where: {...query, resentAt: null}})
+  const query = pick(body.where, ['nonce', 'gasPrice', 'transactionHash', 'from', 'requestId'])
+  const transactions = await db.transactions.findAll({where: {...query, resentAt: null, completedAt: null}})
   return Promise.all(transactions.map(async (transaction) => {
     try {
-      return await resendTransaction(transaction, body.ignoreMaxGasPrice)
+      return await resendTransaction(transaction, body.gasPrice)
     } catch (e) {
       return e
     }
