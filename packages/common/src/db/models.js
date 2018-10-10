@@ -55,7 +55,7 @@ module.exports = (sequelize) => {
       network: {type: NETWORK, allowNull: false},
       from: {type: ADDRESS},
       to: {type: ADDRESS},
-      value: {type: BIGINT},
+      value: {type: STRING(256)},
       currentBlockTime: {type: DATE},
       blockNumber: {type: BIGINT},
       nonce: {type: BIGINT}, // ?

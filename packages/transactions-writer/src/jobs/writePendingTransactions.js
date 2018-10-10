@@ -85,7 +85,7 @@ const createUnsignedTransaction = async (nonce, transaction) => {
   const unsignedTransaction = {
     nonce: Number(nonce),
     to: transaction.to,
-    value: Number(transaction.value),
+    value: blockchain.web3.utils.toWei(transaction.value, 'Ether'),
     data: transaction.transactionData,
     gasPrice: await getGasPrice(transaction),
     chainId: await blockchain.web3.eth.net.getId(),

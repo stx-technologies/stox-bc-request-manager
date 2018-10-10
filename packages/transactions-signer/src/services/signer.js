@@ -1,5 +1,6 @@
 const {decrypt} = require('./kms')
 const EthereumTx = require('ethereumjs-tx')
+const converter = require('hex2dec')
 const {context} = require('stox-bc-request-manager-common')
 const {exceptions: {UnexpectedError}} = require('@welldone-software/node-toolbelt')
 const {transactionSignerKeys} = require('config')
@@ -23,6 +24,7 @@ const getPrivateKey = async (from) => {
 }
 
 const sign = (privateKey, from, unsignedTransaction, transactionId) => {
+  unsignedTransaction.value = converter.decToHex(unsignedTransaction.value)
   const transaction = new EthereumTx(unsignedTransaction)
   transaction.sign(privateKey)
   const signedTransaction = `0x${transaction.serialize().toString('hex')}`
