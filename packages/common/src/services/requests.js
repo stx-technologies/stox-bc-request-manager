@@ -1,11 +1,11 @@
 const {db, mq, config} = require('../context')
-const {getTransaction, updateTransactionError} = require('./transactions')
+const {getTransaction, updateTransactionError, cancelTransaction} = require('./transactions')
 const {Op} = require('sequelize')
 const {loggers: {logger}, exceptions: {NotFoundError, InvalidStateError}} = require('@welldone-software/node-toolbelt')
 const {camelCase, kebabCase} = require('lodash')
 const {errors: {errSerializer}} = require('stox-common')
 
-const getRequestById = async (id, options) => {
+const getRequestById = async (id, options = {}) => {
   const request = options.withPriority ?
     await db.requests.findOne({where: {id}, include: {model: db.gasPercentiles}}) :
     await db.requests.findOne({where: {id}})
@@ -25,7 +25,7 @@ const getRequestByTransactionHash = async (transactionHash) => {
 }
 
 const updateRequest = (propsToUpdate, id, transaction) =>
-  db.requests.update(propsToUpdate, {where: {id}}, {...(transaction ? {transaction} : {})})
+  db.requests.update(propsToUpdate, {where: {id}, ...(transaction ? {transaction} : {})})
 
 
 const createRequest = async ({id, type, priority, data}) => {
@@ -69,8 +69,25 @@ const increasePriority = async ({id, priority}) => {
   }
 }
 
-const updateRequestCompleted = async (id, error = null) =>
-  updateRequest({error: errSerializer(error), completedAt: Date.now()}, id)
+const publishCompletedRequest = async (request) => {
+  const type = kebabCase(request.type)
+  const allTransactions = request.transactions &&
+    request.transactions.map(transaction => ({...transaction.dataValues, transactionData: undefined}))
+
+  const transactions = request.error
+    ? allTransactions
+    : allTransactions.filter(transaction => !transaction.error)
+
+  mq.publish(`completed-${type}-requests`, {...request, type, transactions})
+}
+
+const updateRequestCompleted = async (id, error, dbTransaction) => {
+  const request = await getRequestById(id, {withTransactions: true})
+  if (!request.completedAt) {
+    await updateRequest({error: errSerializer(error), completedAt: Date.now()}, id, dbTransaction)
+    publishCompletedRequest(request)
+  }
+}
 
 const countRequestByType = async type => ({
   count: await db.requests.count({where: {type}}),
@@ -94,18 +111,53 @@ const getCorrespondingRequests = async transactions =>
     },
   })
 
-const publishCompletedRequest = async (request) => {
-  const type = kebabCase(request.type)
-  const transactions = request.transactions &&
-  request.transactions.map(transaction => ({...transaction.dataValues, transactionData: undefined}))
-
-  mq.publish(`completed-${type}-requests`, {...request, type, transactions})
-}
 
 const failRequestTransaction = async ({id, requestId}, error) => {
-  await updateRequestCompleted(requestId, error)
-  await updateTransactionError(id, error)
-  await publishCompletedRequest(await getRequestById(requestId, {withTransactions: true}))
+  const dbTransaction = await db.sequelize.transaction()
+  try {
+    await updateTransactionError(id, error, dbTransaction)
+    await updateRequestCompleted(requestId, error, dbTransaction)
+    await dbTransaction.commit()
+  } catch (e) {
+    await dbTransaction.rollback
+    throw e
+  }
+}
+
+const validateRequestBeforeCanceled = (request) => {
+  const throwError = (msg) => {
+    throw new InvalidStateError(msg)
+  }
+  return request.error ? throwError('requestError')
+    : request.completedAt ? throwError('requestCompleted')
+      : request.canceledAt ? throwError('requestCanceled') : true
+}
+
+
+const cancelRequest = async (requestId, transactionHash) => {
+  const id = requestId || (await getTransaction({transactionHash})).requestId
+  const request = await getRequestById(id)
+  validateRequestBeforeCanceled(request)
+  const dbTransaction = await db.sequelize.transaction()
+  try {
+    request.update({canceledAt: new Date()}, {transaction: dbTransaction})
+    const transactions = await request.getTransactions({where: {resentAt: null}})
+    await Promise.all(transactions.map(transaction => cancelTransaction(transaction, dbTransaction)))
+    if (!request.sentAt) {
+      const isUpdated = await db.requests.update(
+        {error: errSerializer('requestCanceled'), completedAt: Date.now()},
+        {where: {id, sentAt: null}, transaction: dbTransaction}
+      )
+      if (!isUpdated[0]) {
+        throw new InvalidStateError('transaction already sent')
+      }
+      await publishCompletedRequest(request)
+    }
+    await dbTransaction.commit()
+  } catch (e) {
+    await dbTransaction.rollback
+    throw e
+  }
 }
 
 module.exports = {
@@ -122,4 +174,5 @@ module.exports = {
   publishCompletedRequest,
   countPendingRequestByType,
   failRequestTransaction,
+  cancelRequest,
 }

@@ -12,6 +12,9 @@ services:
             POSTGRES_PASSWORD: secret
             POSTGRES_USER: postgres
             POSTGRES_DB: stoxbcrm
+            PGDATA: /var/lib/postgresql/data/pgdata
+        volumes:
+            - "/srv/request-postgres/:/var/lib/postgresql/data/pgdata:consistent"
 
     activemq:
         image: rmohr/activemq:5.14.5
@@ -19,3 +22,11 @@ services:
         ports:
             - 61613:61613
             - 8161:8161
+
+    dev-blockchain:
+        image: arielstox/stox-dev-blockchain:1.0.1
+        container_name: dev-blockchain
+        ports:
+            - 8545:8545
+        volumes:
+            - "/srv/bc-node/:/src/data:consistent"

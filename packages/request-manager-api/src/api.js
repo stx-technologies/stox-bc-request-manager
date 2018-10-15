@@ -17,11 +17,13 @@ module.exports = {
     router.get('/requests/:id', _(({params: {id}}) => requests.getRequestById(id)))
     router.get('/requests/:id/transactions', _(({params: {id}}) =>
       requests.getRequestById(id, {withTransactions: true})))
+    router.post('/requests/cancelRequest', _(({body: {requestId, transactionHash}}) =>
+      requests.cancelRequest(requestId, transactionHash)))
     router.get('/requests/transactions/:id', _(({params: {id}}) => requests.getRequestByTransactionId(id)))
     router.get('/requests/:type/count', _(({params: {type}}) => requests.countRequestByType(type)))
     router.get('/requests/:type/count/pending', _(({params: {type}}) => requests.countPendingRequestByType(type)))
-    router.post('/transactions/resend', _(async ({body: {transactionHash}}) =>
-      transactions.resendTransaction(transactionHash)))
+    router.post('/transactions/resend', _(({body}) =>
+      transactions.resendTransactions(body)))
     router.get('/requestsByTransactionHash/:transactionHash', _(({params: {transactionHash}}) =>
       requests.getRequestByTransactionHash(transactionHash)))
     router.get('/blockchain/transactions/:transactionHash', _(({params: {transactionHash}}) =>

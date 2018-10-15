@@ -18,12 +18,13 @@ const gasPriceByPriority = async (priority = config.defaultGasPriority) => {
   return {price: gasPercentile.price}
 }
 
-const getGasPriceForResend = async (sentGasPrice) => {
-  const gasPricePlusTenPercent = Big(sentGasPrice).times(1.2).round(0, 3).toString()
+const getGasPriceForResend = async ({nonce, from}) => {
+  const sentGasPrice = await db.transactions.max('gasPrice', {where: {nonce, from}})
+  const allowedGasPrice = Big(sentGasPrice).times(1.125).round(0, 3).toString()
   const nextGasPrice = await db.gasPercentiles.findOne({where:
-      {price: {$gt: gasPricePlusTenPercent}},
+      {price: {$gt: allowedGasPrice}},
   order: [['price']]})
-  return nextGasPrice ? nextGasPrice.price : gasPricePlusTenPercent
+  return nextGasPrice ? nextGasPrice.price : allowedGasPrice
 }
 
 const fetchLowestGasPrice = async () => (await db.gasPercentiles.findOne({order: [['price']]})).price
@@ -67,9 +68,9 @@ const calculateGasPrices = async (gasPercentiles) => {
   return gasPrices
 }
 
-const isMaximumGasPriceGreaterThanLowest = async () => {
+const isGasPriceGreaterThanLowest = async (gasPrice) => {
   const lowestGasPrice = await fetchLowestGasPrice()
-  return Big(config.maximumGasPrice).gte(lowestGasPrice)
+  return Big(gasPrice).gte(lowestGasPrice)
 }
 
 module.exports = {
@@ -77,6 +78,6 @@ module.exports = {
   getGasPercentilesInGwei,
   calculateGasPrices,
   getGasPriceForResend,
-  isMaximumGasPriceGreaterThanLowest,
+  isGasPriceGreaterThanLowest,
   gasPriceByPriority,
 }

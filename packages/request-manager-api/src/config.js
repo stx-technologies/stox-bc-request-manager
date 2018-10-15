@@ -5,4 +5,5 @@ module.exports = mapEnv({
   databaseUrl: '',
   web3Url: '',
   defaultGasPriority: '',
+  mqConnectionUrl: '',
 })
