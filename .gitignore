@@ -66,7 +66,3 @@ typings/
 .DS_Store
 
 id_rsa
-
-# ignore pipeline and deployment scripts
-/bitbucket-pipelines.yml
-/scripts

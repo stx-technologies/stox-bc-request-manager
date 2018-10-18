@@ -1,0 +1,52 @@
+{
+  "family": "dev-request-handler",
+  "volumes": [],
+  "networkMode": "awsvpc",
+  "memory": "512",
+  "cpu": "256",
+  "placementConstraints": [],
+  "taskRoleArn": "arn:aws:iam::213027447169:role/ECS_DEV_Allow_SSM_Access",
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "containerDefinitions": [
+    {
+      "name": "dev-request-handler",
+      "image": "",
+      "memoryReservation": 512,
+      "cpu": 256,
+      "essential": true,
+      "portMappings": [],
+      "command": [
+        "npm",
+        "run",
+        "serve",
+        "--prefix",
+        "packages/request-handler"
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "dev"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "dev-request-manager",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "request-handler"
+        }
+      },
+      "dockerLabels": {
+        "SUB-SYSTEM": "request-manager",
+        "Environment": "dev",
+        "SERVICE": "request-handler-dev"
+      }
+    }
+  ]
+}

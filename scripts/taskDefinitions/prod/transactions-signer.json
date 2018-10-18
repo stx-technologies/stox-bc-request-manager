@@ -1,0 +1,58 @@
+{
+  "family": "prod-transactions-signer",
+  "volumes": [],
+  "networkMode": "awsvpc",
+  "memory": "512",
+  "cpu": "256",
+  "placementConstraints": [],
+  "taskRoleArn": "arn:aws:iam::572502612946:role/ECS_PROD_Allow_KMS",
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "containerDefinitions": [
+    {
+      "name": "prod-transactions-signer",
+      "image": "",
+      "memoryReservation": 512,
+      "cpu": 256,
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 3011,
+          "protocol": "tcp",
+          "containerPort": 3011
+        }
+      ],
+      "command": [
+        "npm",
+        "run",
+        "serve",
+        "--prefix",
+        "packages/transactions-signer"
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "prod"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "prod-request-manager-logs",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "transactions-signer"
+        }
+      },
+      "dockerLabels": {
+        "SUB-SYSTEM": "request-manager",
+        "Environment": "prod",
+        "SERVICE": "transactions-signer"
+      }
+    }
+  ]
+}

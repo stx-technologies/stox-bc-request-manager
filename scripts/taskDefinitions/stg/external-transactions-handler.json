@@ -1,0 +1,51 @@
+{
+  "family": "stg-external-transactions-handler",
+  "volumes": [],
+  "networkMode": "awsvpc",
+  "memory": "512",
+  "cpu": "256",
+  "placementConstraints": [],
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "containerDefinitions": [
+    {
+      "name": "stg-external-transactions-handler",
+      "image": "",
+      "memoryReservation": 512,
+      "cpu": 256,
+      "essential": true,
+      "portMappings": [],
+      "command": [
+        "npm",
+        "run",
+        "serve",
+        "--prefix",
+        "packages/external-transactions-handler"
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "stg"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "stg-request-manager-logs",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "external-transactions-handler"
+        }
+      },
+      "dockerLabels": {
+        "SUB-SYSTEM": "request-manager",
+        "Environment": "stg",
+        "SERVICE": "external-transactions-handler"
+      }
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "family": "prod-transactions-monitor",
+  "volumes": [],
+  "networkMode": "awsvpc",
+  "memory": "512",
+  "cpu": "256",
+  "placementConstraints": [],
+  "taskRoleArn": "arn:aws:iam::572502612946:role/ECS_PROD_Allow_SSM_Access",
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "containerDefinitions": [
+    {
+      "name": "prod-transactions-monitor",
+      "image": "",
+      "memoryReservation": 512,
+      "cpu": 256,
+      "essential": true,
+      "portMappings": [],
+      "command": [
+        "npm",
+        "run",
+        "serve",
+        "--prefix",
+        "packages/transactions-monitor"
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "prod"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "prod-request-manager-logs",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "transactions-monitor"
+        }
+      },
+      "dockerLabels": {
+        "SUB-SYSTEM": "request-manager",
+        "Environmet": "prod",
+        "SERVICE": "transaction-monitor"
+      }
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+image: docker:18.05.0-ce
+
+options:
+    max-time: 15
+    docker: true
+
+pipelines:
+    custom:
+        test:
+            - step:
+                deployment: test
+                caches:
+                    - node
+                script:
+                    # setup
+                    - apk update && apk add bash
+                    - apk add --no-cache nodejs openssh py-pip alpine-sdk
+                    - set -eu
+                    - pip install --no-cache-dir docker-compose
+                    - npm config set unsafe-perm true
+                    - npm install lerna rimraf cross-env env-cmd -g
+                    - npm run setup
+#                    - npm run lint
+
+                    # build
+                    - export IMAGE_NAME=$DOCKER_REGISTRY_DEV:dev-$BITBUCKET_COMMIT-$BITBUCKET_BUILD_NUMBER
+                    - echo $IMAGE_NAME
+                    - docker build --no-cache -f ./docker/Dockerfile -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" .
+
+                    # test
+#                    - npm run test
+
+                    # push
+                    - curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+                    - unzip awscli-bundle.zip
+                    - ./awscli-bundle/install -b ~/bin/aws
+                    - export PATH=~/bin:$PATH#
+                    - export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
+                    - export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
+                    - LOGIN=$(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+                    - echo $LOGIN
+                    - $LOGIN
+                    - docker push $IMAGE_NAME
+
+                    # register ecs tasks
+                    - node scripts/createTaskDefinition.js $IMAGE_NAME dev
+
+        staging:
+            - step:
+                deployment: staging
+                caches:
+                    - node
+                script:
+                    # setup
+                    - apk update && apk add bash
+                    - apk add --no-cache nodejs openssh py-pip alpine-sdk
+                    - set -eu
+                    - pip install --no-cache-dir docker-compose
+                    - npm config set unsafe-perm true
+                    - npm install lerna rimraf cross-env env-cmd -g
+                    - npm run setup
+
+                    # build
+                    - export IMAGE_NAME=$DOCKER_REGISTRY:stg-$BITBUCKET_COMMIT-$BITBUCKET_BUILD_NUMBER
+                    - echo $IMAGE_NAME
+                    - docker build --no-cache -f ./docker/Dockerfile -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" .
+
+                    # push
+                    - curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+                    - unzip awscli-bundle.zip
+                    - ./awscli-bundle/install -b ~/bin/aws
+                    - export PATH=~/bin:$PATH#
+                    - LOGIN=$(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+                    - echo $LOGIN
+                    - $LOGIN
+                    - docker push $IMAGE_NAME
+
+                    # register ecs tasks
+                    - node scripts/createTaskDefinition.js $IMAGE_NAME stg
+
+        production:
+            - step:
+                deployment: production
+                caches:
+                    - node
+                script:
+                    # setup
+                    - apk update && apk add bash
+                    - apk add --no-cache nodejs openssh py-pip alpine-sdk
+                    - set -eu
+                    - pip install --no-cache-dir docker-compose
+                    - npm config set unsafe-perm true
+                    - npm install lerna rimraf cross-env env-cmd -g
+                    - npm run setup
+
+                    # build
+                    - export IMAGE_NAME=$DOCKER_REGISTRY:prod-$BITBUCKET_COMMIT-$BITBUCKET_BUILD_NUMBER
+                    - echo $IMAGE_NAME
+                    - docker build --no-cache -f ./docker/Dockerfile -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$(cat /opt/atlassian/pipelines/agent/data/id_rsa)" .
+
+                    # push
+                    - curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+                    - unzip awscli-bundle.zip
+                    - ./awscli-bundle/install -b ~/bin/aws
+                    - export PATH=~/bin:$PATH#
+                    - LOGIN=$(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+                    - echo $LOGIN
+                    - $LOGIN
+                    - docker push $IMAGE_NAME
+
+                    # register ecs tasks
+                    - node scripts/createTaskDefinition.js $IMAGE_NAME prod

@@ -1,7 +1,7 @@
 const path = require('path')
 const URI = require('urijs')
 const {Pact} = require('@pact-foundation/pact')
-const {network, walletsApiBaseUrl, prizeDistributionAccountAddress} = require('../../config')
+const {network, walletsApiBaseUrl} = require('../../config')
 
 const port = new URI(walletsApiBaseUrl).port()
 
@@ -39,7 +39,6 @@ const interactions = [
       prizeReceiverAddress: '0xfe9e8709d3215310075d67e3ed32a380ccf451c8',
       tokenAddress: '0x006bea43baa3f7a6f765f14f10a1a1b08334ef45',
       amount: '5',
-      prizeDistributorAddress: prizeDistributionAccountAddress,
     },
   },
   {

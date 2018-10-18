@@ -1,0 +1,57 @@
+{
+  "family": "stg-request-manager-api",
+  "volumes": [],
+  "networkMode": "awsvpc",
+  "memory": "512",
+  "cpu": "256",
+  "placementConstraints": [],
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "containerDefinitions": [
+    {
+      "name": "stg-request-manager-api",
+      "image": "",
+      "memoryReservation": 512,
+      "cpu": 256,
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 3009,
+          "protocol": "tcp",
+          "containerPort": 3009
+        }
+      ],
+      "command": [
+        "npm",
+        "run",
+        "serve",
+        "--prefix",
+        "packages/request-manager-api"
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "stg"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "stg-request-manager-logs",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "request-manager-api"
+        }
+      },
+      "dockerLabels": {
+        "SUB-SYSTEM": "request-manager",
+        "Environment": "stg",
+        "SERVICE": "request-manager-api"
+      }
+    }
+  ]
+}

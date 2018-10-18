@@ -3,7 +3,6 @@ const {
   writePendingTransactionsCron,
   transactionsSignerBaseUrl,
   limitTransactions,
-  maximumGasPrice,
 } = require('../config')
 const {http, errors: {logError}} = require('stox-common')
 const promiseSerial = require('promise-serial')
@@ -12,8 +11,8 @@ const {
     accounts: {fetchBestNonce, incrementAccountNonce},
     requests,
     transactions: {getPendingTransactions, isResendTransaction, isSentWithGasPriceHigherThan, isAlreadyMined,
-      isMinedTransactionInDb, updateTransactionError, getPendingTransactionsGasPrice},
-    gasPrices: {isMaximumGasPriceGreaterThanLowest, getGasPriceForResend},
+      getInsufficientAccounts, isMinedTransactionInDb, updateTransactionError, getPendingTransactionsGasPrice},
+    gasPrices: {isGasPriceGreaterThanLowest, getGasPriceForResend},
   },
   utils: {calculateGasCost},
   context,
@@ -61,8 +60,20 @@ const updateTransaction = async (transaction, unsignedTransaction, transactionHa
 }
 
 const getGasPrice = async (transaction) => {
+  if (!transaction.request.gasPercentile) {
+    context.logger.error(
+      {
+        id: transaction.id,
+        requestId: transaction.requestId,
+        priority: transaction.request.priority,
+      },
+      'PRIORITY_DOES_NOT_EXIST'
+    )
+    return 0
+  }
+
   const gasPrice = isResendTransaction(transaction) ?
-    await getGasPriceForResend(transaction.gasPrice) :
+    (transaction.ignoreMaxGasPrice ? transaction.gasPrice : await getGasPriceForResend(transaction)) :
     transaction.request.gasPercentile.price
   return parseInt(gasPrice, 10)
 }
@@ -74,18 +85,20 @@ const createUnsignedTransaction = async (nonce, transaction) => {
   const unsignedTransaction = {
     nonce: Number(nonce),
     to: transaction.to,
-    data: transaction.transactionData.toString(),
+    value: blockchain.web3.utils.toWei(transaction.value, 'Ether'),
+    data: transaction.transactionData,
     gasPrice: await getGasPrice(transaction),
     chainId: await blockchain.web3.eth.net.getId(),
   }
 
-  unsignedTransaction.gasLimit = await blockchain.web3.eth.estimateGas({
+  unsignedTransaction.gasLimit = Math.round((await blockchain.web3.eth.estimateGas({
     from: transaction.from,
     to: unsignedTransaction.to,
+    value: unsignedTransaction.value,
     gasPrice: unsignedTransaction.gasPrice,
     nonce: unsignedTransaction.nonce,
     data: unsignedTransaction.data,
-  })
+  })) * 1.1)
 
   return unsignedTransaction
 }
@@ -126,6 +139,7 @@ const validateSufficientBalance = async (transaction, unsignedTransaction) => {
         requestId: transaction.requestId,
         transactionId: transaction.id,
         fromAccount: transaction.from,
+        pendingTransactionsGasPrice,
         fromAccountBalance,
         requiredBalance,
       },
@@ -136,15 +150,25 @@ const validateSufficientBalance = async (transaction, unsignedTransaction) => {
   return true
 }
 
-const validateGasPrice = async ({originalTransactionId, from, nonce}, unsignedTransaction) => {
-  if (Big(unsignedTransaction.gasPrice).gt(maximumGasPrice)) {
-    if (await isMaximumGasPriceGreaterThanLowest()) {
-      unsignedTransaction.gasPrice = parseInt(maximumGasPrice, 10)
+const validateGasPrice = async (transaction, unsignedTransaction) => {
+  const {request, originalTransactionId, from, nonce} = transaction
+  if (!unsignedTransaction.gasPrice) {
+    return false
+  }
+
+  const {maxGasPrice} = request.gasPercentile
+  if (Big(unsignedTransaction.gasPrice).gt(maxGasPrice)) {
+    if (await isGasPriceGreaterThanLowest(maxGasPrice)) {
+      unsignedTransaction.gasPrice = parseInt(maxGasPrice, 10)
     } else {
       context.logger.warn(
         {
+          from,
+          nonce,
+          originalTransactionId,
+          unsignedTransaction,
           gasPrice: unsignedTransaction.gasPrice,
-          maximumGasPrice,
+          maxGasPrice,
         },
         'MAXIMUM_GAS_PRICE_EXCEEDED'
       )
@@ -152,13 +176,18 @@ const validateGasPrice = async ({originalTransactionId, from, nonce}, unsignedTr
     }
   }
 
+  const minimumAllowedGasPrice = Big(unsignedTransaction.gasPrice).div(1.125).round(0, 1).toString()
   if (isResendTransaction({originalTransactionId}) &&
-   await isSentWithGasPriceHigherThan(from, nonce, Big(unsignedTransaction.gasPrice).div(1.1).round(0, 1).toString())) {
+   await isSentWithGasPriceHigherThan(from, nonce, minimumAllowedGasPrice)) {
     context.logger.warn(
       {
+        from,
+        nonce,
+        originalTransactionId,
+        unsignedTransaction,
         gasPrice: unsignedTransaction.gasPrice,
       },
-      'ALREADY_SENT_WITH_THIS_GAS_PRICE'
+      'ALREADY_SENT_WITH_HIGHER_GAS_PRICE'
     )
     return false
   }
@@ -176,34 +205,26 @@ const failMinedTransaction = async ({id, requestId, from, nonce}) => {
   }
 }
 
-const validateBeforeSend = async (transaction, unsignedTransaction) => {
-  if (!(await validateGasPrice(transaction, unsignedTransaction))) {
-    return false
-  }
-
-  if (!(await validateSufficientBalance(transaction, unsignedTransaction))) {
-    return false
-  }
-
-  if (isResendTransaction(transaction) && await isAlreadyMined(transaction)) {
-    await failMinedTransaction(transaction)
-    return false
-  }
-  return true
-}
-
 
 module.exports = {
   cron: writePendingTransactionsCron,
   job: async () => {
-    const pendingTransactions = await getPendingTransactions(limitTransactions)
+    const insufficientAccounts = await getInsufficientAccounts()
+    if (insufficientAccounts.length) {
+      context.logger.warn('insufficientFundsForAccounts', insufficientAccounts)
+    }
+    const pendingTransactions = await getPendingTransactions(insufficientAccounts, limitTransactions)
     const promises = pendingTransactions.map(transaction => async () => {
       try {
         const nonce = isResendTransaction(transaction) ? transaction.nonce : await fetchBestNonce(transaction)
 
-        const unsignedTransaction = await createUnsignedTransaction(nonce, transaction)
+        if (isResendTransaction(transaction) && await isAlreadyMined(transaction)) {
+          await failMinedTransaction(transaction)
+          return
+        }
 
-        if (!(await validateBeforeSend(transaction, unsignedTransaction))) {
+        const unsignedTransaction = await createUnsignedTransaction(nonce, transaction)
+        if (!transaction.ignoreMaxGasPrice && !(await validateGasPrice(transaction, unsignedTransaction))) {
           return
         }
 
@@ -212,6 +233,9 @@ module.exports = {
           unsignedTransaction,
           transaction.id
         )
+        if (!(await validateSufficientBalance(transaction, unsignedTransaction))) {
+          return
+        }
 
         const transactionHash = await sendTransactionToBlockchain(signedTransaction)
         await commitTransaction(transaction, unsignedTransaction, transactionHash, nonce)

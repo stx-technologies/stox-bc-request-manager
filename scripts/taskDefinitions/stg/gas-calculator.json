@@ -1,0 +1,51 @@
+{
+  "family": "stg-gas-calculator",
+  "volumes": [],
+  "networkMode": "awsvpc",
+  "memory": "512",
+  "cpu": "256",
+  "placementConstraints": [],
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "containerDefinitions": [
+    {
+      "name": "stg-gas-calculator",
+      "image": "",
+      "memoryReservation": 512,
+      "cpu": 256,
+      "essential": true,
+      "portMappings": [],
+      "command": [
+        "npm",
+        "run",
+        "serve",
+        "--prefix",
+        "packages/gas-calculator"
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "stg"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "stg-request-manager-logs",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "gas-calculator"
+        }
+      },
+      "dockerLabels": {
+        "SUB-SYSTEM": "request-manager",
+        "Environment": "stg",
+        "SERVICE": "gas-calculator"
+      }
+    }
+  ]
+}

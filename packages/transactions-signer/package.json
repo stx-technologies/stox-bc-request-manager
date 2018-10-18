@@ -4,7 +4,7 @@
   "description": "Signs blockchain transactions with the appropriate private key",
   "main": "src/index.js",
   "scripts": {
-    "start": "nodemon -e js . | pino",
+    "start": "nodemon $NODE_DEBUG_OPTION -e js . | pino",
     "serve:trace": "node --stack_trace_limit=25 -r trace -r clarify .",
     "serve": "node .",
     "lint": "eslint -c ../../.eslintrc.yml .",
@@ -18,6 +18,7 @@
     "aws-sdk": "^2.222.1",
     "clarify": "^2.1.0",
     "env-cmd": "^7.0.0",
+    "hex2dec": "^1.1.0",
     "ethereumjs-tx": "^1.3.4",
     "require-all": "^2.2.0",
     "stox-bc-request-manager-common": "1.0.0",
